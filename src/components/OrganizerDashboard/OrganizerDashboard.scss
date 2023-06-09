@@ -1,0 +1,43 @@
+/* OrganizerDashboard.scss */
+
+.custom-tab {
+    .ui.tabular.menu {
+        border: none;
+
+        a.item {
+            color: #333;
+            border-radius: 0;
+            border: none;
+            margin: 0;
+            padding: 1rem;
+            transition: color 0.3s ease;
+
+            &:hover {
+                color: #007bff;
+            }
+
+            &.active {
+                color: #007bff;
+                border-radius: 0;
+                box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+                border: 1px solid gray;
+                border-radius: 0px 0px 10px 10px !important;
+                -webkit-border-radius: 0px 0px 10px 10px !important;
+                -moz-border-radius: 0px 0px 10px 10px !important;
+                -ms-border-radius: 0px 0px 10px 10px !important;
+                -o-border-radius: 0px 0px 10px 10px !important;
+}
+        }
+    }
+
+    .ui.tab.segment {
+        border: none;
+        box-shadow: none;
+    }
+
+    .ui.tab.segment.active {
+        border-top: none;
+        padding: 2rem;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    }
+}

@@ -5,7 +5,8 @@ import { getAddress, isConnected } from '@gemwallet/api';
 import { Button } from 'semantic-ui-react';
 import { XummPkce } from 'xumm-oauth2-pkce';
 
-const xumm = new XummPkce(import.meta.env.XRPL_XUMM_API_KEY);
+// eslint-disable-next-line no-undef
+const xumm = new XummPkce(process.env.XRPL_XUMM_API_KEY);
 
 export default function Login() {
     const xummSignInHandler = (state) => {

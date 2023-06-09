@@ -1,0 +1,71 @@
+.mint-nft-form {
+    width: 60%;
+    margin: auto;
+    padding: 3em;
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+    font-family: 'Arial', sans-serif;
+    transition: all 0.3s ease-in-out;
+
+    &:hover {
+        transform: scale(1.01);
+    }
+
+    .response-container{
+        .response-details {
+            background: #eee;
+            padding: 20px;
+            border-radius: 20px;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 10px;
+        }
+    }
+
+    h2 {
+        color: black;
+        text-align: center;
+        margin-bottom: 2em;
+        font-size: 2.5em;
+        border-bottom: 2px solid #0088f7;
+        padding-bottom: 0.5em;
+    }
+
+    .ui.form .field > label {
+        color: black;
+        font-size: 1.2em;
+        margin-bottom: 0.5em;
+    }
+
+    .ui.form .field input {
+        border-radius: 0 20px 0 20px;
+        padding: 0.8em;
+        font-size: 1em;
+        transition: all 0.3s ease-in-out;
+
+        &:focus {
+            outline: none;
+            border-color: #0088f7;
+            box-shadow: 0 0 5px #0088f7;
+        }
+    }
+
+    .ui.button {
+        border-radius: 20px;
+        font-size: 1.2em;
+        margin-top: 2em;
+        width: 100%;
+        padding: 1em;
+        background: #0088f7;
+        color: #fff;
+        transition: all 0.3s ease-in-out;
+
+        &:hover {
+            background: rgb(52, 120, 220);
+            color: #fff;
+        }
+    }
+}
