@@ -3,7 +3,15 @@
 The web app for Proof of Attendance Protocol
 
 ## Requirements
+- Node.js `v18.16.0+`
+- Yarn `v1.22.19+`
 - Running POAP API server (backend), for details see [here](https://github.com/rikublock/POAP-API)
+
+## Getting Started
+- install dependencies with `yarn`
+- rename `.env.example` to `.env` (change values as needed)
+- run the backend
+- run the app with `yarn start`
 
 ## Available Scripts
 
@@ -35,3 +43,7 @@ The build is minified and the filenames include the hashes.\
 Your app is ready to be deployed!
 
 See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+
+## Supported Wallets
+- Xumm (installation details [here](https://xumm.app/))
+- GemWallet (installation details [here](https://gemwallet.app/))
