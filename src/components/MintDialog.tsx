@@ -1,8 +1,10 @@
 import React from "react";
-import type { ReactNode, Dispatch } from "react";
+import { useAtom } from "jotai";
+import type { ReactNode } from "react";
 import { useSnackbar } from "notistack";
 
 import Button from "@mui/material/Button";
+import LoadingButton from "@mui/lab/LoadingButton";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
@@ -15,6 +17,8 @@ import CircularProgress from "@mui/material/CircularProgress";
 
 import API from "apis";
 import { useWeb3 } from "connectors/context";
+import { activeDialogAtom } from "states/atoms";
+import { DialogIdentifier } from "types";
 
 type MintDialogContent = {
   title: string;
@@ -34,28 +38,31 @@ const DEFAULT_CONTENT = {
 
 type MintDialogProps = {
   children?: ReactNode;
-  open: boolean;
-  setOpen: Dispatch<boolean>;
 };
 
 function MintDialog(props: MintDialogProps) {
-  const { open, setOpen } = props;
   const { account } = useWeb3();
+  const [open, setOpen] = React.useState<boolean>(false);
   const [loading, setLoading] = React.useState<boolean>(false);
   const [content, setContent] =
     React.useState<MintDialogContent>(DEFAULT_CONTENT);
+  const [activeDialog, setActiveDialog] = useAtom(activeDialogAtom);
   const { enqueueSnackbar } = useSnackbar();
+
+  React.useEffect(() => {
+    setOpen(activeDialog === DialogIdentifier.DIALOG_MINT);
+  }, [activeDialog]);
 
   const handleClose = (event: {}, reason?: string) => {
     if (reason === "backdropClick") {
       return;
     }
-    setOpen(false);
+    setActiveDialog(undefined);
   };
 
   const handleCancel = (event: React.MouseEvent<HTMLButtonElement>) => {
     setContent(DEFAULT_CONTENT);
-    setOpen(false);
+    setActiveDialog(undefined);
   };
 
   const handleConfirm = async (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -84,7 +91,7 @@ function MintDialog(props: MintDialogProps) {
       setLoading(false);
     }
     setContent(DEFAULT_CONTENT);
-    setOpen(false);
+    setActiveDialog(undefined);
   };
 
   const validateChange = (text: string, name: string): boolean => {
@@ -189,6 +196,8 @@ function MintDialog(props: MintDialogProps) {
             onChange={handleChange}
             disabled={loading}
             required
+            multiline
+            rows={2}
           />
           <TextField
             name="url"

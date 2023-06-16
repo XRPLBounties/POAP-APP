@@ -1,5 +1,6 @@
 import axios from "axios";
 import config from "config";
+import type { Event } from "types";
 
 export type mintParams = {
   walletAddress: string;
@@ -8,7 +9,7 @@ export type mintParams = {
   title: string;
   desc: string;
   loc: string;
-}
+};
 
 export type mintResult = {
   eventId: number;
@@ -17,7 +18,7 @@ export type mintResult = {
   URI: string;
   title: string;
   claimable: number;
-}
+};
 
 export const mint = async (params: mintParams): Promise<mintResult> => {
   const response = await axios.get(
@@ -26,7 +27,7 @@ export const mint = async (params: mintParams): Promise<mintResult> => {
       responseType: "json",
       timeout: config.timeout,
       params: params,
-    },
+    }
   );
 
   if (response.status === 200) {
@@ -41,14 +42,14 @@ export type claimParams = {
   type: number;
   minter: string;
   eventId: string | number;
-}
+};
 
 export type claimResult = {
   status: string;
   result?: any;
   offer?: any;
   // TODO
-}
+};
 
 export const claim = async (params: claimParams): Promise<claimResult> => {
   const response = await axios.get(
@@ -57,7 +58,7 @@ export const claim = async (params: claimParams): Promise<claimResult> => {
       responseType: "json",
       timeout: config.timeout,
       params: params,
-    },
+    }
   );
 
   if (response.status === 200) {
@@ -69,18 +70,20 @@ export const claim = async (params: claimParams): Promise<claimResult> => {
 
 export type startVerificationParams = {
   walletAddress: string;
-}
+};
 
 export type startVerificationResult = string;
 
-export const startVerification = async (params: startVerificationParams): Promise<startVerificationResult> => {
+export const startVerification = async (
+  params: startVerificationParams
+): Promise<startVerificationResult> => {
   const response = await axios.get(
     new URL("/api/startVerification", config.apiURL).toString(),
     {
       responseType: "json",
       timeout: config.timeout,
       params: params,
-    },
+    }
   );
 
   if (response.status === 200) {
@@ -95,20 +98,22 @@ export type verifyOwnershipParams = {
   signature: string;
   minter: string;
   eventId: string | number;
-}
+};
 
 export type verifyOwnershipResult = {
   // TODO
-}
+};
 
-export const verifyOwnership = async (params: verifyOwnershipParams): Promise<verifyOwnershipResult> => {
+export const verifyOwnership = async (
+  params: verifyOwnershipParams
+): Promise<verifyOwnershipResult> => {
   const response = await axios.get(
     new URL("/api/verifyOwnership", config.apiURL).toString(),
     {
       responseType: "json",
       timeout: config.timeout,
       params: params,
-    },
+    }
   );
 
   if (response.status === 200) {
@@ -118,32 +123,50 @@ export const verifyOwnership = async (params: verifyOwnershipParams): Promise<ve
   throw new Error(response.status.toString());
 };
 
-export type attendeesParams = {
-  minter: string;
-  eventId: string | number;
-}
+export type eventsParams = {
+  limit: string | number;
+  includeAttendees: boolean | string | number;
+};
 
-type User = {
-  user: string;
-}
+export type eventsResult = Event[];
 
-export type attendeesResult = {
-  [index: number]: User;
-  // TODO
-}
-
-export const attendees = async (params: attendeesParams): Promise<attendeesResult> => {
+export const events = async (params: eventsParams): Promise<eventsResult> => {
   const response = await axios.get(
-    new URL("/api/attendees", config.apiURL).toString(),
+    new URL("/api/events", config.apiURL).toString(),
     {
       responseType: "json",
       timeout: config.timeout,
       params: params,
-    },
+    }
   );
 
   if (response.status === 200) {
-    return response.data.result as attendeesResult;
+    return response.data.result as eventsResult;
+  }
+
+  throw new Error(response.status.toString());
+};
+
+export type eventParams = {
+  id: string | number;
+  includeAttendees: boolean | string | number;
+};
+
+export type eventResult = Event | undefined;
+
+export const event = async (params: eventParams): Promise<eventResult> => {
+  const { id, includeAttendees } = params;
+  const response = await axios.get(
+    new URL(`/api/event/${id}`, config.apiURL).toString(),
+    {
+      responseType: "json",
+      timeout: config.timeout,
+      params: { includeAttendees },
+    }
+  );
+
+  if (response.status === 200) {
+    return response.data.result as eventResult;
   }
 
   throw new Error(response.status.toString());

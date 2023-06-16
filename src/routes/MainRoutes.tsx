@@ -6,6 +6,7 @@ import MainLayout from "layouts/MainLayout";
 
 // const ClaimPage = Loadable(React.lazy(() => import("pages/ClaimPage")));
 const ErrorPage = Loadable(React.lazy(() => import("pages/ErrorPage")));
+const EventPage = Loadable(React.lazy(() => import("pages/EventPage")));
 const HomePage = Loadable(React.lazy(() => import("pages/HomePage")));
 // const OverviewPage = Loadable(React.lazy(() => import("pages/OverviewPage")));
 // const VerifyPage = Loadable(React.lazy(() => import("pages/VerifyPage")));
@@ -24,13 +25,17 @@ const MainRoutes = {
     //   element: <ClaimPage />,
     // },
     // {
-    //     path: "/verify",
-    //     element: <VerifyPage />,
+    //   path: "/verify",
+    //   element: <VerifyPage />,
     // },
     // {
-    //     path: "/overview",
-    //     element: <OverviewPage />,
+    //   path: "/overview",
+    //   element: <OverviewPage />,
     // },
+    {
+      path: "/event/:id",
+      element: <EventPage />,
+    },
   ],
 };
 

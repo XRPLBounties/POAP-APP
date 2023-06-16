@@ -1,37 +1,148 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useSnackbar } from "notistack";
+import { useAtom } from "jotai";
 
 import Box from "@mui/material/Box";
+import Stack from "@mui/material/Stack";
 import Button from "@mui/material/Button";
+import Chip from "@mui/material/Chip";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
-import MintDialog from "components/MintDialog";
+import type { GridColDef } from "@mui/x-data-grid";
 
+import API from "apis";
 import { useWeb3 } from "connectors/context";
+import { DialogIdentifier, Event } from "types";
+import MintDialog from "components/MintDialog";
+import Loader from "components/Loader";
+import DataTable from "components/DataTable";
+import { activeDialogAtom } from "states/atoms";
 
 function HomePage() {
-  const { isActive } = useWeb3();
-  const [open, setOpen] = React.useState<boolean>(false);
+  const { account, isActive } = useWeb3();
+  const [data, setData] = React.useState<Event[] | undefined>(undefined);
+  const [activeDialog, setActiveDialog] = useAtom(activeDialogAtom);
+  const { enqueueSnackbar } = useSnackbar();
+  const navigate = useNavigate();
+
+  React.useEffect(() => {
+    let mounted = true;
+
+    const load = async () => {
+      try {
+        const events = await API.events({ limit: 50, includeAttendees: false });
+
+        if (mounted) {
+          setData(events);
+        }
+      } catch (err) {
+        console.debug(err);
+        if (mounted) {
+          setData(undefined);
+        }
+        if (axios.isAxiosError(err)) {
+          enqueueSnackbar(`Failed to load events data: ${err.message}`, {
+            variant: "error",
+          });
+        } else {
+          enqueueSnackbar("Failed to load events data", {
+            variant: "error",
+          });
+        }
+      }
+    };
+
+    // only update data, if no dialog is open
+    if (!activeDialog) {
+      load();
+    }
+
+    return () => {
+      mounted = false;
+    };
+  }, [activeDialog]);
+
+  // TODO
+  const handleJoin = async (id: number) => {
+    console.warn(`Joining event ${id}`);
+  };
+
+  const columns: GridColDef[] = React.useMemo(
+    () => [
+      { field: "id", headerName: "ID", width: 45, minWidth: 45 },
+      { field: "title", headerName: "Title", flex: 1 },
+      { field: "address", headerName: "Owner Address", width: 180 },
+      { field: "count", headerName: "Slots", width: 60 },
+      {
+        field: "actions",
+        headerName: "Actions",
+        sortable: false,
+        filterable: false,
+        width: 130,
+        renderCell: (params) => {
+          return (
+            <Stack direction="row" spacing={1}>
+              <Chip
+                label="Join"
+                variant="filled"
+                color="primary"
+                size="small"
+                onClick={() => handleJoin(params.row.id)}
+                disabled={!isActive || params.row.address === account}
+              />
+              <Chip
+                label="Details"
+                variant="filled"
+                color="primary"
+                size="small"
+                onClick={() => navigate(`/event/${params.row.id}`)}
+              />
+            </Stack>
+          );
+        },
+      },
+    ],
+    [account, isActive]
+  );
+
+  const rows = React.useMemo(() => {
+    if (data) {
+      return data.map((event) => ({
+        id: event.id,
+        title: event.title,
+        address: event.ownerWalletAddress,
+        count: event.count,
+      }));
+    } else {
+      return [];
+    }
+  }, [data]);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setOpen(true);
+    setActiveDialog(DialogIdentifier.DIALOG_MINT);
   };
 
   return (
     <React.Fragment>
       <Box sx={{ width: "48rem" }}>
-        <Paper
-          sx={{ position: "relative", padding: "1.5rem" }}
-          elevation={1}
-          square
-        >
-          <Typography sx={{ marginBottom: "20px" }} variant="h5">
-            Dashboard
+        <Paper sx={{ position: "relative", padding: "1.5rem" }} elevation={1}>
+          <Typography sx={{ marginBottom: "0.75rem" }} variant="h5">
+            Overview
           </Typography>
           {!isActive && (
-            <Typography variant="body1">
-              Connect a wallet to continue!
+            <Typography variant="body2">
+              Connect a wallet to continue! (join an existing event or create a
+              new one)
             </Typography>
           )}
+
+          <Typography sx={{ margin: "0.75rem 0" }} variant="h6">
+            Available Events
+          </Typography>
+          {data ? <DataTable columns={columns} rows={rows} /> : <Loader />}
+
           <Button
             sx={{ position: "absolute", top: "1rem", right: "1rem" }}
             title="Create a new event"
@@ -44,7 +155,7 @@ function HomePage() {
           </Button>
         </Paper>
       </Box>
-      <MintDialog open={open} setOpen={setOpen} />
+      <MintDialog />
     </React.Fragment>
   );
 }
