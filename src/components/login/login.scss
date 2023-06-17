@@ -1,0 +1,62 @@
+.login-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+    background-size: 400% 400%;
+    animation: gradient 40s ease infinite;
+
+    h1 {
+        font-size: 2.5em;
+        color: white;
+        text-shadow: 2px 2px 4px #000000;
+    }
+}
+
+@keyframes gradient {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.styled-heading{
+    font-style: italic;
+}
+
+.button-container {
+    display: flex;
+    gap: 10px;
+
+    .custom-button {
+        background: #23d5ab;
+        color: white;
+        font-size: 1.2em;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1) !important;
+        transition: all 0.8s ease 0s;
+        cursor: pointer;
+        outline: 1px solid white !important;
+        -webkit-transition: all 0.8s ease 0s;
+        -moz-transition: all 0.8s ease 0s;
+        -ms-transition: all 0.8s ease 0s;
+        -o-transition: all 0.8s ease 0s;
+
+        &:hover {
+            background: #2ee6b4;
+            box-shadow: 10px 15px 20px rgba(46, 229, 157, 0.4) !important;
+            color: #fff;
+        }
+    }
+}
