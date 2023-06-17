@@ -45,6 +45,8 @@ export default function Login() {
                         }
                         console.log(`Your address: ${address}`);
                     });
+                } else {
+                    throw new Error('Login failed! Rejected by the user.');
                 }
             });
         } catch (error) {
