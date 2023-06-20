@@ -1,4 +1,9 @@
-import { isConnected, getAddress, getNetwork } from "@gemwallet/api";
+import {
+  getAddress,
+  getNetwork,
+  isConnected,
+  signMessage,
+} from "@gemwallet/api";
 
 import { Connector } from "connectors/connector";
 import { Provider } from "connectors/provider";
@@ -12,8 +17,34 @@ export class NoGemWalletError extends Error {
   }
 }
 
-// TODO
-type GemWalletProvider = Provider;
+export class GemWalletProvider extends Provider {
+  public async signMessage(message: string): Promise<string> {
+    try {
+      const connected = await isConnected();
+      if (!connected) {
+        throw new NoGemWalletError();
+      }
+
+      const signed = await signMessage(message);
+      if (signed === null) {
+        throw Error("User refused to sign message");
+      }
+      if (!signed) {
+        throw Error("Failed to sign message");
+      }
+      return signed;
+    } catch (error) {
+      // TODO
+      throw error;
+    }
+  }
+
+  public async acceptOffer(id: string): Promise<boolean> {
+    // TODO not yet supported
+    return false;
+  }
+}
+
 type GemWalletOptions = any;
 
 export type GemWalletConstructorArgs = {
@@ -49,8 +80,7 @@ export class GemWallet extends Connector {
   public async activate(): Promise<void> {
     const cancelActivation = this.state.startActivation();
 
-    // TODO create provider
-    this.provider = undefined;
+    this.provider = new GemWalletProvider();
 
     try {
       const connected = await isConnected();

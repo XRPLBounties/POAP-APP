@@ -1,3 +1,4 @@
+import { XummSdkJwt, SdkTypes } from "xumm-sdk";
 import { XummPkce } from "xumm-oauth2-pkce";
 
 import { Connector } from "connectors/connector";
@@ -5,8 +6,45 @@ import { Provider } from "connectors/provider";
 import config from "config";
 import { ChainIdentifier } from "./chain";
 
-// TODO
-type XummWalletProvider = Provider;
+export class XummWalletProvider extends Provider {
+  private sdk: XummSdkJwt;
+  private pendingPayloads: string[];
+
+  constructor(sdk: XummSdkJwt) {
+    super();
+    this.sdk = sdk;
+    this.pendingPayloads = []; // TODO make this session persistent (re-subscribe in case user refreshes page)
+  }
+
+  private async submitPayload(tx: SdkTypes.XummJsonTransaction): Promise<any> {
+    const callback = async (event: SdkTypes.SubscriptionCallbackParams) => {
+      console.debug("callback", event);
+      if (event.data?.payload_uuidv4) {
+        // set the deferred promise value and close the subscription
+        return event.data?.signed;
+      }
+    };
+
+    const payload = await this.sdk.payload.createAndSubscribe(tx, callback);
+    this.pendingPayloads.push(payload.created.uuid);
+    return payload.resolved;
+  }
+
+  public async signMessage(message: string): Promise<string> {
+    // TODO not yet supported
+    return "";
+  }
+
+  public async acceptOffer(id: string): Promise<boolean> {
+    const result = await this.submitPayload({
+      TransactionType: "NFTokenAcceptOffer",
+      NFTokenSellOffer: id,
+    });
+
+    return Boolean(result);
+  }
+}
+
 type XummWalletOptions = ConstructorParameters<typeof XummPkce>[1];
 
 export type XummWalletConstructorArgs = {
@@ -43,8 +81,6 @@ export class XummWallet extends Connector {
 
   private async init(): Promise<void> {
     this.wallet = new XummPkce(this.apiKey, this.options);
-
-    // TODO create provider
     this.provider = undefined;
 
     this.wallet.on("error", (error) => {
@@ -57,8 +93,9 @@ export class XummWallet extends Connector {
         throw Error("Missing Xumm state");
       }
 
-      const { me } = state;
+      const { sdk, me } = state;
       const network = (me as any).networkType as string;
+      this.provider = new XummWalletProvider(sdk);
       this.state.update({
         chainId: this.mapChainId(network),
         account: me.account,
@@ -71,8 +108,9 @@ export class XummWallet extends Connector {
         return;
       }
 
-      const { me } = state;
+      const { sdk, me } = state;
       const network = (me as any).networkType as string;
+      this.provider = new XummWalletProvider(sdk);
       this.state.update({
         chainId: this.mapChainId(network),
         account: me.account,

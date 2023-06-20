@@ -1,12 +1,4 @@
-// TODO
 export abstract class Provider {
-
-  public async sendTransaction(): Promise<string> {
-    return "";
-  }
-
-  public async signMessage(message: string): Promise<string> {
-    return "";
-  }
-
+  public abstract signMessage(message: string): Promise<string> | string;
+  public abstract acceptOffer(offerIndex: string): Promise<boolean> | boolean;
 }
