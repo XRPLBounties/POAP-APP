@@ -41,9 +41,7 @@ const StyledList = styled(MuiList)<{ component?: React.ElementType }>(
 function Header() {
   const entries: Array<[string, string, boolean]> = [
     ["Home", "/", false],
-    ["Claim", "/claim", true],
     ["Verify", "/verify", true],
-    ["Overview", "/overview", true],
   ];
 
   return (

@@ -4,11 +4,9 @@ import { Navigate } from "react-router-dom";
 import Loadable from "components/Loadable";
 import MainLayout from "layouts/MainLayout";
 
-// const ClaimPage = Loadable(React.lazy(() => import("pages/ClaimPage")));
 const ErrorPage = Loadable(React.lazy(() => import("pages/ErrorPage")));
 const EventPage = Loadable(React.lazy(() => import("pages/EventPage")));
 const HomePage = Loadable(React.lazy(() => import("pages/HomePage")));
-// const OverviewPage = Loadable(React.lazy(() => import("pages/OverviewPage")));
 // const VerifyPage = Loadable(React.lazy(() => import("pages/VerifyPage")));
 
 const MainRoutes = {
@@ -21,16 +19,8 @@ const MainRoutes = {
       element: <HomePage />,
     },
     // {
-    //   path: "/claim",
-    //   element: <ClaimPage />,
-    // },
-    // {
     //   path: "/verify",
     //   element: <VerifyPage />,
-    // },
-    // {
-    //   path: "/overview",
-    //   element: <OverviewPage />,
     // },
     {
       path: "/event/:id",
