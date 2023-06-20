@@ -50,19 +50,19 @@ function MintDialog(props: MintDialogProps) {
   const { enqueueSnackbar } = useSnackbar();
 
   React.useEffect(() => {
-    setOpen(activeDialog === DialogIdentifier.DIALOG_MINT);
+    setOpen(activeDialog.type === DialogIdentifier.DIALOG_MINT);
   }, [activeDialog]);
 
   const handleClose = (event: {}, reason?: string) => {
     if (reason === "backdropClick") {
       return;
     }
-    setActiveDialog(undefined);
+    setActiveDialog({});
   };
 
   const handleCancel = (event: React.MouseEvent<HTMLButtonElement>) => {
     setContent(DEFAULT_CONTENT);
-    setActiveDialog(undefined);
+    setActiveDialog({});
   };
 
   const handleConfirm = async (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -77,7 +77,7 @@ function MintDialog(props: MintDialogProps) {
           url: content.url,
           tokenCount: parseInt(content.tokenCount),
         });
-        console.debug("mintResult", result);
+        console.debug("MintResult", result);
         enqueueSnackbar(`Mint successful: Event ID #${result.eventId}`, {
           variant: "success",
         });
@@ -91,7 +91,7 @@ function MintDialog(props: MintDialogProps) {
       setLoading(false);
     }
     setContent(DEFAULT_CONTENT);
-    setActiveDialog(undefined);
+    setActiveDialog({});
   };
 
   const validateChange = (text: string, name: string): boolean => {

@@ -11,4 +11,9 @@ export const selectedWalletAtom = atomWithStorage(
   storage
 );
 
-export const activeDialogAtom = atom<DialogIdentifier | undefined>(undefined);
+type ActiveDialogAtom = {
+  type?: DialogIdentifier;
+  data?: Record<string, any>;
+};
+
+export const activeDialogAtom = atom<ActiveDialogAtom>({});

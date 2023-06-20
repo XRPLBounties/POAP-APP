@@ -1,5 +1,6 @@
 export enum DialogIdentifier {
   DIALOG_MINT,
+  DIALOG_JOIN,
 }
 
 export type User = {

@@ -19,6 +19,7 @@ import MintDialog from "components/MintDialog";
 import Loader from "components/Loader";
 import DataTable from "components/DataTable";
 import { activeDialogAtom } from "states/atoms";
+import JoinDialog from "components/JoinDialog";
 
 function HomePage() {
   const { account, isActive } = useWeb3();
@@ -55,7 +56,7 @@ function HomePage() {
     };
 
     // only update data, if no dialog is open
-    if (!activeDialog) {
+    if (!activeDialog.type) {
       load();
     }
 
@@ -64,9 +65,11 @@ function HomePage() {
     };
   }, [activeDialog]);
 
-  // TODO
-  const handleJoin = async (id: number) => {
-    console.warn(`Joining event ${id}`);
+  const handleJoin = async (id: number, title: string) => {
+    setActiveDialog({
+      type: DialogIdentifier.DIALOG_JOIN,
+      data: { eventId: id, title: title },
+    });
   };
 
   const columns: GridColDef[] = React.useMemo(
@@ -89,8 +92,8 @@ function HomePage() {
                 variant="filled"
                 color="primary"
                 size="small"
-                onClick={() => handleJoin(params.row.id)}
-                disabled={!isActive || params.row.address === account}
+                onClick={() => handleJoin(params.row.id, params.row.title)}
+                disabled={!isActive}
               />
               <Chip
                 label="Details"
@@ -121,7 +124,7 @@ function HomePage() {
   }, [data]);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setActiveDialog(DialogIdentifier.DIALOG_MINT);
+    setActiveDialog({ type: DialogIdentifier.DIALOG_MINT });
   };
 
   return (
@@ -156,6 +159,7 @@ function HomePage() {
         </Paper>
       </Box>
       <MintDialog />
+      <JoinDialog />
     </React.Fragment>
   );
 }

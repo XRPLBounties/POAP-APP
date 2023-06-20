@@ -1,5 +1,7 @@
 import axios from "axios";
 import config from "config";
+import type { NFTOffer } from "xrpl/dist/npm/models/common";
+
 import type { Event } from "types";
 
 export type mintParams = {
@@ -39,16 +41,14 @@ export const mint = async (params: mintParams): Promise<mintResult> => {
 
 export type claimParams = {
   walletAddress: string;
-  type: number;
-  minter: string;
+  type: string | number;
   eventId: string | number;
 };
 
 export type claimResult = {
   status: string;
-  result?: any;
-  offer?: any;
-  // TODO
+  result?: string;
+  offer?: NFTOffer;
 };
 
 export const claim = async (params: claimParams): Promise<claimResult> => {
