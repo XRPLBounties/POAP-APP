@@ -1,6 +1,7 @@
 export enum DialogIdentifier {
   DIALOG_MINT,
   DIALOG_JOIN,
+  DIALOG_PROFILE,
 }
 
 export type User = {
@@ -32,3 +33,4 @@ export type Metadata = {
   uri: string,
   account: string,
 };
+

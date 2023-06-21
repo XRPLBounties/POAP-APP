@@ -2,7 +2,7 @@ import axios from "axios";
 import config from "config";
 import type { NFTOffer } from "xrpl/dist/npm/models/common";
 
-import type { Event } from "types";
+import type { Event, User } from "types";
 
 export type mintParams = {
   walletAddress: string;
@@ -27,7 +27,7 @@ export const mint = async (params: mintParams): Promise<mintResult> => {
     new URL("/api/mint", config.apiURL).toString(),
     {
       responseType: "json",
-      timeout: config.timeout,
+      timeout: 600000,
       params: params,
     }
   );
@@ -56,7 +56,7 @@ export const claim = async (params: claimParams): Promise<claimResult> => {
     new URL("/api/claim", config.apiURL).toString(),
     {
       responseType: "json",
-      timeout: config.timeout,
+      timeout: 60000,
       params: params,
     }
   );
@@ -123,14 +123,16 @@ export const verifyOwnership = async (
   throw new Error(response.status.toString());
 };
 
-export type eventsParams = {
+export type getEventsParams = {
   limit: string | number;
   includeAttendees: boolean | string | number;
 };
 
-export type eventsResult = Event[];
+export type getEventsResult = Event[];
 
-export const events = async (params: eventsParams): Promise<eventsResult> => {
+export const getEvents = async (
+  params: getEventsParams
+): Promise<getEventsResult> => {
   const response = await axios.get(
     new URL("/api/events", config.apiURL).toString(),
     {
@@ -141,20 +143,20 @@ export const events = async (params: eventsParams): Promise<eventsResult> => {
   );
 
   if (response.status === 200) {
-    return response.data.result as eventsResult;
+    return response.data.result as getEventsResult;
   }
 
   throw new Error(response.status.toString());
 };
 
-export type eventParams = {
+export type getEventParams = {
   id: string | number;
   includeAttendees: boolean | string | number;
 };
 
-export type eventResult = Event | undefined;
+export type getEventResult = Event | undefined;
 
-export const event = async (params: eventParams): Promise<eventResult> => {
+export const getEvent = async (params: getEventParams): Promise<getEventResult> => {
   const { id, includeAttendees } = params;
   const response = await axios.get(
     new URL(`/api/event/${id}`, config.apiURL).toString(),
@@ -166,7 +168,60 @@ export const event = async (params: eventParams): Promise<eventResult> => {
   );
 
   if (response.status === 200) {
-    return response.data.result as eventResult;
+    return response.data.result as getEventResult;
+  }
+
+  throw new Error(response.status.toString());
+};
+
+export type getUserParams = {
+  walletAddress: string | number;
+  includeEvents: boolean | string | number;
+};
+
+export type getUserResult = User | undefined;
+
+export const getUser = async (params: getUserParams): Promise<getUserResult> => {
+  const { walletAddress, includeEvents } = params;
+  const response = await axios.get(
+    new URL(`/api/user/${walletAddress}`, config.apiURL).toString(),
+    {
+      responseType: "json",
+      timeout: config.timeout,
+      params: { includeEvents },
+    }
+  );
+
+  if (response.status === 200) {
+    return response.data.result as getUserResult;
+  }
+
+  throw new Error(response.status.toString());
+};
+
+export type updateUserData = {
+  walletAddress: string | number;
+  firstName: string | null;
+  lastName: string | null;
+  email: string | null;
+};
+
+export type updateUserResult = boolean;
+
+export const updateUser = async (
+  data: updateUserData
+): Promise<updateUserResult> => {
+  const response = await axios.post(
+    new URL("/api/updateUser", config.apiURL).toString(),
+    data,
+    {
+      responseType: "json",
+      timeout: config.timeout,
+    }
+  );
+
+  if (response.status === 200) {
+    return response.data.result as updateUserResult;
   }
 
   throw new Error(response.status.toString());

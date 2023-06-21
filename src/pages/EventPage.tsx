@@ -4,13 +4,11 @@ import axios from "axios";
 import { useSnackbar } from "notistack";
 
 import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import Link from "@mui/material/Link";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
-import ArrowBackIosRoundedIcon from "@mui/icons-material/ArrowBackIosRounded";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import type { GridColDef } from "@mui/x-data-grid";
 
@@ -18,7 +16,6 @@ import API from "apis";
 import type { Event, Metadata } from "types";
 import Loader from "components/Loader";
 import DataTable from "components/DataTable";
-import { UnfoldLess } from "@mui/icons-material";
 
 function EventPage() {
   const [data, setData] = React.useState<Event | null | undefined>();
@@ -33,8 +30,8 @@ function EventPage() {
 
     const load = async () => {
       try {
-        const event = await API.event({
-          id: id as string,
+        const event = await API.getEvent({
+          id: id!,
           includeAttendees: true,
         });
 

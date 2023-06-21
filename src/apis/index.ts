@@ -3,8 +3,10 @@ import {
   claim,
   startVerification,
   verifyOwnership,
-  event,
-  events,
+  getEvent,
+  getEvents,
+  getUser,
+  updateUser
 } from "apis/poap";
 
 const API = {
@@ -12,8 +14,10 @@ const API = {
   claim,
   startVerification,
   verifyOwnership,
-  event,
-  events,
+  getEvent,
+  getEvents,
+  getUser,
+  updateUser,
 };
 
 export default API;

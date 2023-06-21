@@ -15,11 +15,9 @@ import type { GridColDef } from "@mui/x-data-grid";
 import API from "apis";
 import { useWeb3 } from "connectors/context";
 import { DialogIdentifier, Event } from "types";
-import MintDialog from "components/MintDialog";
 import Loader from "components/Loader";
 import DataTable from "components/DataTable";
 import { activeDialogAtom } from "states/atoms";
-import JoinDialog from "components/JoinDialog";
 
 function HomePage() {
   const { account, isActive } = useWeb3();
@@ -33,7 +31,10 @@ function HomePage() {
 
     const load = async () => {
       try {
-        const events = await API.events({ limit: 50, includeAttendees: false });
+        const events = await API.getEvents({
+          limit: 50,
+          includeAttendees: false,
+        });
 
         if (mounted) {
           setData(events);
@@ -158,8 +159,6 @@ function HomePage() {
           </Button>
         </Paper>
       </Box>
-      <MintDialog />
-      <JoinDialog />
     </React.Fragment>
   );
 }

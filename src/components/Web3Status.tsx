@@ -1,5 +1,5 @@
 import React from "react";
-import { useAtom } from "jotai";
+import { useAtom, useSetAtom } from "jotai";
 import { useSnackbar } from "notistack";
 
 import { styled } from "@mui/material/styles";
@@ -9,12 +9,13 @@ import Menu, { MenuProps } from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 
 import { gem } from "connectors/gem";
-import { selectedWalletAtom } from "states/atoms";
+import { activeDialogAtom, selectedWalletAtom } from "states/atoms";
 import { shortenAddress } from "utils/strings";
 import { useWeb3 } from "connectors/context";
 import { xumm } from "connectors/xumm";
 import { ConnectorType, getConnector } from "connectors";
 import type { Connector } from "connectors/connector";
+import { DialogIdentifier } from "types";
 
 const StyledMenu = styled((props: MenuProps) => (
   <Menu
@@ -45,6 +46,7 @@ const DEFAULT_STATUS = "CONNECT WALLET";
 function Web3Status() {
   const { connector, account, isActive } = useWeb3();
   const [selectedWallet, setSelectedWallet] = useAtom(selectedWalletAtom);
+  const setActiveDialog = useSetAtom(activeDialogAtom);
   const [status, setStatus] = React.useState<string>(DEFAULT_STATUS);
   const [menuAnchor, setMenuAnchor] = React.useState<null | HTMLElement>(null);
   const { enqueueSnackbar } = useSnackbar();
@@ -61,7 +63,7 @@ function Web3Status() {
 
   React.useEffect(() => {
     if (selectedConnector && !selectedConnector.state.isActive()) {
-      // Note: Don't eagerly connect to the GemWallet as it currently prompts 
+      // Note: Don't eagerly connect to the GemWallet as it currently prompts
       // the user for a password every time the page is refreshed.
       if (selectedConnector !== gem) {
         selectedConnector.activate();
@@ -105,6 +107,8 @@ function Web3Status() {
             { variant: "error" }
           );
         }
+      } else if (action === "profile") {
+        setActiveDialog({ type: DialogIdentifier.DIALOG_PROFILE });
       } else if (action === "xumm") {
         try {
           await xumm.activate();
@@ -127,7 +131,7 @@ function Web3Status() {
         }
       }
     },
-    [connector, enqueueSnackbar, setSelectedWallet]
+    [connector, enqueueSnackbar, setSelectedWallet, setActiveDialog]
   );
 
   return (
@@ -154,6 +158,7 @@ function Web3Status() {
         open={Boolean(menuAnchor) && isActive}
         onClose={handleMenuClose}
       >
+        <MenuItem onClick={() => handleAction("profile")}>Profile</MenuItem>
         <MenuItem onClick={() => handleAction("disconnect")}>
           Disconnect
         </MenuItem>
