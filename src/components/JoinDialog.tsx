@@ -112,8 +112,6 @@ function JoinDialog(props: JoinDialogProps) {
         Sign up for Event #{data?.eventId}
       </DialogTitle>
       <IconButton
-        aria-label="close"
-        onClick={handleClose}
         sx={{
           position: "absolute",
           right: 8,
@@ -121,6 +119,8 @@ function JoinDialog(props: JoinDialogProps) {
           color: (theme) => theme.palette.grey[500],
         }}
         size="small"
+        onClick={handleClose}
+        disabled={loading}
       >
         <CloseIcon fontSize="small" />
       </IconButton>
