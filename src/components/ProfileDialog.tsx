@@ -4,7 +4,7 @@ import { useAtom } from "jotai";
 import type { ReactNode } from "react";
 import { useSnackbar } from "notistack";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { literal, object, string, TypeOf } from "zod";
+import { object, string, literal, TypeOf } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import Button from "@mui/material/Button";
@@ -24,9 +24,13 @@ import { activeDialogAtom } from "states/atoms";
 import { DialogIdentifier } from "types";
 
 const schema = object({
-  firstName: string().max(64, "First Name must be less than 64 characters"),
-  lastName: string().max(64, "Last name must be less than 64 characters"),
-  email: string().email("Email is invalid").optional().or(literal("")),
+  firstName: string()
+    .max(64, "First Name must be less than 64 characters")
+    .trim(),
+  lastName: string()
+    .max(64, "Last name must be less than 64 characters")
+    .trim(),
+  email: string().email("Email is invalid").trim().optional().or(literal("")),
 });
 
 type ProfileFormValues = TypeOf<typeof schema>;
@@ -56,16 +60,11 @@ function ProfileDialog(props: ProfileDialogProps) {
           walletAddress: account!,
           includeEvents: false,
         });
-        if (!result) {
-          throw Error("User not found");
-        }
 
         return {
-          firstName: result.firstName
-            ? result.firstName
-            : defaultValues.firstName,
-          lastName: result.lastName ? result.lastName : defaultValues.lastName,
-          email: result.email ? result.email : defaultValues.email,
+          firstName: result?.firstName ?? defaultValues.firstName,
+          lastName: result?.lastName ?? defaultValues.lastName,
+          email: result?.email ?? defaultValues.email,
         };
       } catch (error) {
         console.debug(error);
@@ -217,7 +216,9 @@ function ProfileDialog(props: ProfileDialogProps) {
           onClick={handleSubmit(onSubmit)}
           type="submit"
           startIcon={loading && <CircularProgress size={20} />}
-          disabled={loading || !Boolean(account) || isLoading || !isDirty || !isValid}
+          disabled={
+            loading || !Boolean(account) || isLoading || !isDirty || !isValid
+          }
         >
           Update
         </Button>
