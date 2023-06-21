@@ -220,7 +220,10 @@ function EventPage() {
                       Information:
                     </Typography>
                     <Typography variant="body1">
-                      <strong>Date:</strong> {metadata.date}
+                      <strong>Date Start:</strong> {metadata.dateStart}
+                    </Typography>
+                    <Typography variant="body1">
+                      <strong>Date End:</strong> {metadata.dateEnd}
                     </Typography>
                     <Typography variant="body1">
                       <strong>Location:</strong> {metadata.location}

@@ -4,13 +4,15 @@ import type { NFTOffer } from "xrpl/dist/npm/models/common";
 
 import type { Event, User } from "types";
 
-export type mintParams = {
+export type mintData = {
   walletAddress: string;
   tokenCount: number;
   url: string;
   title: string;
   desc: string;
   loc: string;
+  dateStart: Date,
+  dateEnd: Date,
 };
 
 export type mintResult = {
@@ -22,13 +24,13 @@ export type mintResult = {
   claimable: number;
 };
 
-export const mint = async (params: mintParams): Promise<mintResult> => {
-  const response = await axios.get(
+export const mint = async (data: mintData): Promise<mintResult> => {
+  const response = await axios.post(
     new URL("/api/mint", config.apiURL).toString(),
+    data,
     {
       responseType: "json",
       timeout: 600000,
-      params: params,
     }
   );
 

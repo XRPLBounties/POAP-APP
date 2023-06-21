@@ -17,7 +17,8 @@ export type Event = {
   title: string;
   uri: string;
   count: number;
-  date: string;
+  dateStart: string;
+  dateEnd: string;
   networkId: number;
   ownerWalletAddress: string;
   owner?: User;
@@ -29,7 +30,8 @@ export type Metadata = {
   description: string,
   collectionSize: number,
   location: string,
-  date: string,
+  dateStart: string,
+  dateEnd: string,
   uri: string,
   account: string,
 };

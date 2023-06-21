@@ -2,9 +2,16 @@ import React from "react";
 import { useAtom } from "jotai";
 import type { ReactNode } from "react";
 import { useSnackbar } from "notistack";
+import {
+  useForm,
+  SubmitHandler,
+  Controller,
+  DefaultValues,
+} from "react-hook-form";
+import { object, string, number, date, intersection, TypeOf } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import Button from "@mui/material/Button";
-import LoadingButton from "@mui/lab/LoadingButton";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
@@ -14,26 +21,81 @@ import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import Stack from "@mui/material/Stack";
 import CircularProgress from "@mui/material/CircularProgress";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 
 import API from "apis";
 import { useWeb3 } from "connectors/context";
 import { activeDialogAtom } from "states/atoms";
 import { DialogIdentifier } from "types";
 
-type MintDialogContent = {
-  title: string;
-  description: string;
-  location: string;
-  url: string;
-  tokenCount: string;
-};
+const schemaCommon = object({
+  title: string()
+    .nonempty("Title is required")
+    .max(256, "Title must be less than 256 characters")
+    .trim(),
+  description: string()
+    .nonempty("Description is required")
+    .max(10000, "Description must be less than 10000 characters"),
+  location: string()
+    .nonempty("Location is required")
+    .max(256, "Location must be less than 256 characters"),
+  url: string().nonempty("URL is required").url("URL is invalid").trim(),
+  tokenCount: number()
+    .int()
+    .positive()
+    .max(200, "Token count must be less than or equal to 200"),
+});
 
-const DEFAULT_CONTENT = {
+// Note: We allow nullable for the DatePicker component to work.
+//       The final value will always be a valid Date.
+const schemaDates = object({
+  dateStart: date()
+    .min(new Date("1900-01-01"), "Date is too far back")
+    .nullable()
+    .transform((value, ctx) => {
+      if (value == null)
+        ctx.addIssue({
+          code: "custom",
+          message: "Start Date is required",
+        });
+      return value;
+    }),
+  dateEnd: date()
+    .min(new Date("1900-01-01"), "Date is too far back")
+    .nullable()
+    .transform((value, ctx) => {
+      if (value == null)
+        ctx.addIssue({
+          code: "custom",
+          message: "End Date is required",
+        });
+      return value;
+    }),
+}).refine(
+  (data) => {
+    if (data.dateEnd && data.dateStart) {
+      return data.dateEnd >= data.dateStart;
+    }
+    return false;
+  },
+  {
+    path: ["dateEnd"],
+    message: "End Date must be later than Start Date",
+  }
+);
+
+const schema = intersection(schemaCommon, schemaDates);
+
+type MintFormValues = TypeOf<typeof schema>;
+
+const defaultValues: DefaultValues<MintFormValues> = {
   title: "",
   description: "",
   location: "",
   url: "",
-  tokenCount: "",
+  dateStart: null,
+  dateEnd: null,
+  tokenCount: undefined,
 };
 
 type MintDialogProps = {
@@ -44,10 +106,22 @@ function MintDialog(props: MintDialogProps) {
   const { account } = useWeb3();
   const [open, setOpen] = React.useState<boolean>(false);
   const [loading, setLoading] = React.useState<boolean>(false);
-  const [content, setContent] =
-    React.useState<MintDialogContent>(DEFAULT_CONTENT);
+  // const [content, setContent] =
+  //   React.useState<MintDialogContent>(DEFAULT_CONTENT);
   const [activeDialog, setActiveDialog] = useAtom(activeDialogAtom);
   const { enqueueSnackbar } = useSnackbar();
+
+  const {
+    control,
+    register,
+    formState: { errors, isLoading, isDirty, isValid },
+    reset,
+    handleSubmit,
+  } = useForm<MintFormValues>({
+    mode: "all",
+    defaultValues: defaultValues,
+    resolver: zodResolver(schema),
+  });
 
   React.useEffect(() => {
     setOpen(activeDialog.type === DialogIdentifier.DIALOG_MINT);
@@ -61,21 +135,25 @@ function MintDialog(props: MintDialogProps) {
   };
 
   const handleCancel = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setContent(DEFAULT_CONTENT);
+    reset();
     setActiveDialog({});
   };
 
-  const handleConfirm = async (event: React.MouseEvent<HTMLButtonElement>) => {
+  const onSubmit: SubmitHandler<MintFormValues> = async (values) => {
+    console.log("submit", values);
+
     setLoading(true);
     try {
       if (account) {
         const result = await API.mint({
           walletAddress: account,
-          title: content.title,
-          desc: content.description,
-          loc: content.location,
-          url: content.url,
-          tokenCount: parseInt(content.tokenCount),
+          tokenCount: values.tokenCount,
+          title: values.title,
+          desc: values.description,
+          loc: values.location,
+          url: values.url,
+          dateStart: values.dateStart!,
+          dateEnd: values.dateEnd!,
         });
         console.debug("MintResult", result);
         enqueueSnackbar(`Mint successful: Event ID #${result.eventId}`, {
@@ -90,52 +168,10 @@ function MintDialog(props: MintDialogProps) {
     } finally {
       setLoading(false);
     }
-    setContent(DEFAULT_CONTENT);
+
+    reset();
     setActiveDialog({});
   };
-
-  const validateChange = (text: string, name: string): boolean => {
-    if (text === "") {
-      return true;
-    }
-
-    if (name === "tokenCount") {
-      return parseInt(text) > 0;
-    } else {
-      return true;
-    }
-  };
-
-  const handleChange = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const value = event.target.value;
-    const name = event.target.name;
-    if (validateChange(value, name)) {
-      setContent({ ...content, [name]: value });
-    }
-  };
-
-  // TODO better validation, for each input separately
-  const validateContent = React.useCallback(() => {
-    if (content.title.length === 0) {
-      return false;
-    }
-    if (content.description.length === 0) {
-      return false;
-    }
-    if (content.location.length === 0) {
-      return false;
-    }
-    if (content.url.length === 0) {
-      // TODO regexp match
-      return false;
-    }
-    if (!(parseInt(content.tokenCount) > 0)) {
-      return false;
-    }
-    return true;
-  }, [content]);
 
   return (
     <Dialog
@@ -167,55 +203,113 @@ function MintDialog(props: MintDialogProps) {
         <CloseIcon fontSize="small" />
       </IconButton>
       <DialogContent>
-        <Stack direction="column" spacing={2}>
+        <Stack
+          component="form"
+          noValidate
+          autoComplete="off"
+          onSubmit={handleSubmit(onSubmit)}
+          direction="column"
+          spacing={2}
+        >
           <TextField
-            name="title"
             label="Title"
             type="string"
-            value={content.title}
-            onChange={handleChange}
             disabled={loading}
             required
+            error={!!errors["title"]}
+            helperText={errors["title"]?.message}
+            {...register("title")}
           />
           <TextField
-            name="description"
             label="Description"
             type="string"
-            value={content.description}
-            onChange={handleChange}
             disabled={loading}
             required
             multiline
             rows={4}
+            error={!!errors["description"]}
+            helperText={errors["description"]?.message}
+            {...register("description")}
           />
           <TextField
-            name="location"
             label="Location"
             type="string"
-            value={content.location}
-            onChange={handleChange}
             disabled={loading}
             required
             multiline
             rows={2}
+            error={!!errors["location"]}
+            helperText={errors["location"]?.message}
+            {...register("location")}
           />
           <TextField
-            name="url"
             label="Image URL"
             type="url"
-            value={content.url}
-            onChange={handleChange}
             disabled={loading}
             required
+            error={!!errors["url"]}
+            helperText={errors["url"]?.message}
+            {...register("url")}
           />
+          <Stack direction="row" spacing={2}>
+            <Controller
+              control={control}
+              name="dateStart"
+              rules={{ required: true }}
+              render={({
+                field: { ref, onBlur, name, ...field },
+                fieldState,
+              }) => (
+                <DatePicker
+                  {...field}
+                  inputRef={ref}
+                  label="Start Date"
+                  disabled={loading}
+                  slotProps={{
+                    textField: {
+                      name: name,
+                      required: true,
+                      onBlur: onBlur,
+                      error: !!fieldState.error,
+                      helperText: fieldState.error?.message,
+                    },
+                  }}
+                />
+              )}
+            />
+            <Controller
+              control={control}
+              name="dateEnd"
+              render={({
+                field: { ref, onBlur, name, ...field },
+                fieldState,
+              }) => (
+                <DatePicker
+                  {...field}
+                  inputRef={ref}
+                  label="End Date"
+                  disabled={loading}
+                  slotProps={{
+                    textField: {
+                      name: name,
+                      required: true,
+                      onBlur: onBlur,
+                      error: !!fieldState.error,
+                      helperText: fieldState.error?.message,
+                    },
+                  }}
+                />
+              )}
+            />
+          </Stack>
           <TextField
-            name="tokenCount"
             label="Token Count"
             type="number"
-            value={content.tokenCount}
-            onChange={handleChange}
             disabled={loading}
             required
+            error={!!errors["tokenCount"]}
+            helperText={errors["tokenCount"]?.message}
+            {...register("tokenCount", { valueAsNumber: true })}
           />
         </Stack>
       </DialogContent>
@@ -225,9 +319,9 @@ function MintDialog(props: MintDialogProps) {
         </Button>
         <Button
           color="primary"
-          onClick={handleConfirm}
+          onClick={handleSubmit(onSubmit)}
           startIcon={loading && <CircularProgress size={20} />}
-          disabled={loading || !Boolean(account) || !validateContent()}
+          disabled={loading || !Boolean(account) || !isValid}
         >
           Create
         </Button>
