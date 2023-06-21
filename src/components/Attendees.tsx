@@ -38,13 +38,14 @@ const Attendees = () => {
       let responseToJson = await response.json();
       // console.log(responseToJson.status);
       console.log(responseToJson.result);
+      console.log(responseToJson.result.length);
 
-      if (responseToJson.result.length == 0) {
-        setAlertText("Error: Event attendee list is empty");
-        setAttendees([]);
-      } else {
+      if (responseToJson.result.length != 0 && responseToJson.result.length) {
         setAlertText("List of attendees for this event has been fetched");
         setAttendees(responseToJson.result);
+      } else {
+        setAlertText("Error: Event attendee list is empty");
+        setAttendees([]);
       }
 
       // setAlertText(

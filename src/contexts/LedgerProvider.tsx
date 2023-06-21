@@ -184,8 +184,8 @@ const LedgerProvider = ({ children }) => {
 
   useEffect(() => {
     (async () => {
-      console.log(import.meta.env.VITE_XUMM_ID);
-      const xumm = new Xumm(import.meta.env.VITE_XUMM_ID);
+      console.log(import.meta.env.VITE_XUMM_API_KEY);
+      const xumm = new Xumm(import.meta.env.VITE_XUMM_API_KEY);
       await xumm.on("ready", async () => {
         // console.log(xummInstance);
         await setXummInstance(xumm);
