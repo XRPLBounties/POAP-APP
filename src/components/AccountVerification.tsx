@@ -18,8 +18,8 @@ const AccountVerification = () => {
     getData,
   } = useContext(LedgerContext);
   const [formValues, setFormValues] = useState({
-    minter: "",
-    eventId: "",
+    minter: import.meta.env.VITE_BACKEND_MINTER_ADDRESS,
+    eventId: 0,
   });
 
   const handleChange = (event) => {
@@ -75,6 +75,7 @@ const AccountVerification = () => {
             Minter
           </label>
           <input
+            defaultValue={formValues.minter}
             className="bg-base-100 shadow appearance-none rounded w-full py-2 px-3 text-gray-300 leading-tight focus:outline-none focus:shadow-outline"
             id="minter"
             type="text"
@@ -92,6 +93,7 @@ const AccountVerification = () => {
             Event ID
           </label>
           <input
+            defaultValue={formValues.eventId}
             className="bg-base-100 shadow appearance-none rounded w-full py-2 px-3 text-gray-300 leading-tight focus:outline-none focus:shadow-outline"
             id="eventId"
             type="number"

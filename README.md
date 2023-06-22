@@ -22,5 +22,5 @@ That setup assumes user have already installed the [server](https://github.com/J
 
 - install dependences using `npm i`.
 - open [xumm developer console](https://apps.xumm.dev) in order to create new app, then set its `Origin/Redirect URI` to `http://localhost:3000`.
-- copy content of file `.env.example` to `.env` file and set `VITE_XUMM_API_KEY` to your XUMM project API Key taken from XUMM developer platform.
+- copy content of file `.env.example` to `.env` file and set `VITE_XUMM_API_KEY` to your XUMM project API Key taken from XUMM developer platform. Then set `VITE_BACKEND_MINTER_ADDRESS` to wallet address of minter address set on your backend POAP server.
 - run the dApp using `npm run dev`.
