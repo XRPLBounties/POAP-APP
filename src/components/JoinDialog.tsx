@@ -52,6 +52,10 @@ function JoinDialog(props: JoinDialogProps) {
     setLoading(true);
     try {
       if (provider && account && data?.eventId) {
+        enqueueSnackbar("Creating NFT claim request: Confirm the transaction in your wallet", {
+          variant: "warning",
+          autoHideDuration: 30000,
+        });
         const result = await API.claim({
           walletAddress: account,
           type: 2,
@@ -75,7 +79,7 @@ function JoinDialog(props: JoinDialogProps) {
           }
         } else if (result.status === "claimed") {
           enqueueSnackbar(`Sign-up successful: Already claimed NFT`, {
-            variant: "warning",
+            variant: "success",
           });
         } else if (result.status === "empty") {
           enqueueSnackbar(`Sign-up failed: Event is already full`, {
