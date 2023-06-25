@@ -106,15 +106,13 @@ function MintDialog(props: MintDialogProps) {
   const { account } = useWeb3();
   const [open, setOpen] = React.useState<boolean>(false);
   const [loading, setLoading] = React.useState<boolean>(false);
-  // const [content, setContent] =
-  //   React.useState<MintDialogContent>(DEFAULT_CONTENT);
   const [activeDialog, setActiveDialog] = useAtom(activeDialogAtom);
   const { enqueueSnackbar } = useSnackbar();
 
   const {
     control,
     register,
-    formState: { errors, isLoading, isDirty, isValid },
+    formState: { errors, isValid },
     reset,
     handleSubmit,
   } = useForm<MintFormValues>({
@@ -140,8 +138,6 @@ function MintDialog(props: MintDialogProps) {
   };
 
   const onSubmit: SubmitHandler<MintFormValues> = async (values) => {
-    console.log("submit", values);
-
     setLoading(true);
     try {
       if (account) {
@@ -190,8 +186,6 @@ function MintDialog(props: MintDialogProps) {
         Create new Event
       </DialogTitle>
       <IconButton
-        aria-label="close"
-        onClick={handleClose}
         sx={{
           position: "absolute",
           right: 8,
@@ -199,6 +193,8 @@ function MintDialog(props: MintDialogProps) {
           color: (theme) => theme.palette.grey[500],
         }}
         size="small"
+        onClick={handleClose}
+        disabled={loading}
       >
         <CloseIcon fontSize="small" />
       </IconButton>
