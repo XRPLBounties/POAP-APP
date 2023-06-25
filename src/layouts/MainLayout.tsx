@@ -20,7 +20,7 @@ function MainLayout(props: any) {
       <Box component="main" sx={{ position: "relative", minHeight: "100vh" }}>
         <Container
           sx={{
-            paddingTop: "6rem",
+            paddingTop: "8.5rem",
             display: "flex",
             justifyContent: "center",
           }}

@@ -14,6 +14,7 @@ import Stack from "@mui/material/Stack";
 
 import Web3Status from "components/Web3Status";
 import NetworkStatus from "components/NetworkStatus";
+import ConnectivityStatus from "./ConnectivityStatus";
 
 const StyledList = styled(MuiList)<{ component?: React.ElementType }>(
   ({ theme }) => ({
@@ -54,6 +55,7 @@ function Header() {
       color="inherit"
       position="fixed"
     >
+      <ConnectivityStatus />
       <Container maxWidth="lg">
         <Toolbar component="div" disableGutters>
           <Box sx={{ marginRight: "auto" }}>

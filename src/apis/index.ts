@@ -1,3 +1,4 @@
+import { heartbeat } from "./auth";
 import {
   mint,
   claim,
@@ -6,10 +7,11 @@ import {
   getEvent,
   getEvents,
   getUser,
-  updateUser
+  updateUser,
 } from "apis/poap";
 
 const API = {
+  heartbeat,
   mint,
   claim,
   startVerification,

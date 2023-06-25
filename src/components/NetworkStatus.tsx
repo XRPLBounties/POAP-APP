@@ -25,9 +25,9 @@ function NetworkStatus() {
     <React.Fragment>
       <Button
         variant="contained"
-        onClick={undefined}
         color="primary"
         disabled={!Boolean(chainId)}
+        disableRipple
         title="Network status"
       >
         {networkName}
