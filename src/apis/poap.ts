@@ -3,25 +3,24 @@ import config from "config";
 import type { NFTOffer } from "xrpl/dist/npm/models/common";
 
 import type { Event, User } from "types";
+import { NetworkIdentifier } from "types";
 
 export type mintData = {
+  networkId: NetworkIdentifier,
   walletAddress: string;
-  tokenCount: number;
-  url: string;
   title: string;
-  desc: string;
-  loc: string;
+  description: string;
+  location: string;
+  imageUrl: string;
+  tokenCount: number;
   dateStart: Date,
   dateEnd: Date,
+  isManaged: boolean,
 };
 
 export type mintResult = {
   eventId: number;
-  account: string;
-  owner: string;
-  URI: string;
-  title: string;
-  claimable: number;
+  metadataUri: string;
 };
 
 export const mint = async (data: mintData): Promise<mintResult> => {
@@ -65,61 +64,6 @@ export const claim = async (params: claimParams): Promise<claimResult> => {
 
   if (response.status === 200) {
     return response.data as claimResult;
-  }
-
-  throw new Error(response.status.toString());
-};
-
-export type startVerificationParams = {
-  walletAddress: string;
-};
-
-export type startVerificationResult = string;
-
-export const startVerification = async (
-  params: startVerificationParams
-): Promise<startVerificationResult> => {
-  const response = await axios.get(
-    new URL("/api/startVerification", config.apiURL).toString(),
-    {
-      responseType: "json",
-      timeout: config.timeout,
-      params: params,
-    }
-  );
-
-  if (response.status === 200) {
-    return response.data.result as startVerificationResult;
-  }
-
-  throw new Error(response.status.toString());
-};
-
-export type verifyOwnershipParams = {
-  walletAddress: string;
-  signature: string;
-  minter: string;
-  eventId: string | number;
-};
-
-export type verifyOwnershipResult = {
-  // TODO
-};
-
-export const verifyOwnership = async (
-  params: verifyOwnershipParams
-): Promise<verifyOwnershipResult> => {
-  const response = await axios.get(
-    new URL("/api/verifyOwnership", config.apiURL).toString(),
-    {
-      responseType: "json",
-      timeout: config.timeout,
-      params: params,
-    }
-  );
-
-  if (response.status === 200) {
-    return response.data as verifyOwnershipResult;
   }
 
   throw new Error(response.status.toString());
@@ -202,7 +146,7 @@ export const getUser = async (params: getUserParams): Promise<getUserResult> => 
 };
 
 export type updateUserData = {
-  walletAddress: string | number;
+  walletAddress: string;
   firstName: string | null;
   lastName: string | null;
   email: string | null;

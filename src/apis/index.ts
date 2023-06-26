@@ -1,9 +1,7 @@
-import { heartbeat } from "./auth";
+import { heartbeat, prelogin, login, refresh, logout } from "./auth";
 import {
   mint,
   claim,
-  startVerification,
-  verifyOwnership,
   getEvent,
   getEvents,
   getUser,
@@ -11,11 +9,15 @@ import {
 } from "apis/poap";
 
 const API = {
-  heartbeat,
+  auth: {
+    heartbeat,
+    prelogin,
+    login,
+    refresh,
+    logout,
+  },
   mint,
   claim,
-  startVerification,
-  verifyOwnership,
   getEvent,
   getEvents,
   getUser,

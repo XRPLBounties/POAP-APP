@@ -13,9 +13,10 @@ function ConnectivityStatus() {
   React.useEffect(() => {
     let mounted = true;
 
+    // TODO does the mounted value actually change ?
     const check = async () => {
       try {
-        await API.heartbeat();
+        await API.auth.heartbeat();
         if (mounted) {
           setOpen(false);
         }

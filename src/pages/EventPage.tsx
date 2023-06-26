@@ -148,7 +148,6 @@ function EventPage() {
   };
 
   const rows = React.useMemo(() => {
-    console.log(data);
     if (data && data.attendees) {
       return data.attendees.map((a, i) => ({
         id: i,
@@ -230,7 +229,7 @@ function EventPage() {
                     </Typography>
                     <Typography variant="body1">
                       <strong>Reserved slots:</strong> {data.attendees?.length}/
-                      {metadata.collectionSize}
+                      {metadata.tokenCount}
                     </Typography>
                   </Box>
 

@@ -13,9 +13,9 @@ import { activeDialogAtom, selectedWalletAtom } from "states/atoms";
 import { shortenAddress } from "utils/strings";
 import { useWeb3 } from "connectors/context";
 import { xumm } from "connectors/xumm";
-import { ConnectorType, getConnector } from "connectors";
+import { getConnector } from "connectors";
 import type { Connector } from "connectors/connector";
-import { DialogIdentifier } from "types";
+import { ConnectorType, DialogIdentifier } from "types";
 
 const StyledMenu = styled((props: MenuProps) => (
   <Menu

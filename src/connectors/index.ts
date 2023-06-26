@@ -2,12 +2,7 @@ import { Connector } from "./connector";
 import { empty } from "./empty";
 import { gem } from "./gem";
 import { xumm } from "./xumm";
-
-export enum ConnectorType {
-  EMPTY = "EMPTY",
-  XUMM = "XUMM",
-  GEM = "GEM",
-}
+import { ConnectorType } from "types";
 
 export const CONNECTORS = [empty, xumm, gem];
 

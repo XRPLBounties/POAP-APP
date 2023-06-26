@@ -1,13 +1,14 @@
 import {
+  Network,
   getAddress,
   getNetwork,
-  isConnected,
+  isInstalled,
   signMessage,
 } from "@gemwallet/api";
 
 import { Connector } from "connectors/connector";
 import { Provider } from "connectors/provider";
-import { ChainIdentifier } from "./chain";
+import { ConnectorType, NetworkIdentifier } from "types";
 
 export class NoGemWalletError extends Error {
   public constructor() {
@@ -20,19 +21,17 @@ export class NoGemWalletError extends Error {
 export class GemWalletProvider extends Provider {
   public async signMessage(message: string): Promise<string> {
     try {
-      const connected = await isConnected();
-      if (!connected) {
-        throw new NoGemWalletError();
-      }
-
       const signed = await signMessage(message);
-      if (signed === null) {
+      if (signed.type === "reject" || !signed.result) {
         throw Error("User refused to sign message");
       }
-      if (!signed) {
-        throw Error("Failed to sign message");
-      }
-      return signed;
+
+      // TODO is that even a case anymore?
+      // if (!signed.result) {
+      //   throw Error("Failed to sign message");
+      // }
+
+      return signed.result.signedMessage;
     } catch (error) {
       // TODO
       throw error;
@@ -62,42 +61,50 @@ export class GemWallet extends Connector {
     this.options = options;
   }
 
-  private mapChainId(network: string): ChainIdentifier {
-    switch (network.toLowerCase()) {
+  private mapNetworkId(network: Network): NetworkIdentifier {
+    switch (network.toString().toLowerCase()) {
       case "mainnet":
-        return ChainIdentifier.MAINNET;
+        return NetworkIdentifier.MAINNET;
       case "testnet":
-        return ChainIdentifier.TESTNET;
+        return NetworkIdentifier.TESTNET;
       case "devnet":
-        return ChainIdentifier.DEVNET;
+        return NetworkIdentifier.DEVNET;
       case "amm-devnet":
-        return ChainIdentifier.AMM_DEVNET;
+        return NetworkIdentifier.AMM_DEVNET;
       default:
-        return ChainIdentifier.UNKNOWN;
+        return NetworkIdentifier.UNKNOWN;
     }
+  }
+
+  public getType(): ConnectorType {
+    return ConnectorType.GEM;
   }
 
   public async activate(): Promise<void> {
     const cancelActivation = this.state.startActivation();
-
-    this.provider = new GemWalletProvider();
+    this.provider = undefined;
 
     try {
-      const connected = await isConnected();
-      if (!connected) {
+      const installed = await isInstalled();
+      if (!installed.result.isInstalled) {
         throw new NoGemWalletError();
       }
 
+      this.provider = new GemWalletProvider();
+
       const address = await getAddress();
-      if (address === null) {
+      if (address.type === "reject" || !address.result) {
         throw Error("User refused to share GemWallet address");
       }
 
-      const network: string = await getNetwork();
+      const network = await getNetwork();
+      if (network.type === "reject" || !network.result) {
+        throw Error("User refused to share network");
+      }
 
       this.state.update({
-        chainId: this.mapChainId(network),
-        account: address,
+        networkId: this.mapNetworkId(network.result.network),
+        account: address.result.address,
       });
     } catch (error) {
       cancelActivation();

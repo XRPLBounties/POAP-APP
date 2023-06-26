@@ -1,10 +1,10 @@
 import type { StoreApi } from "zustand";
 import { createStore, useStore } from "zustand";
 
-import { ChainIdentifier } from "connectors/chain";
+import { NetworkIdentifier } from "types";
 
 type ConnectorState = {
-  chainId?: ChainIdentifier;
+  networkId?: NetworkIdentifier;
   account?: string;
   activating: boolean;
 };
@@ -13,20 +13,20 @@ type ConnectorStore = StoreApi<ConnectorState>;
 
 type ConnectorStateUpdate =
   | {
-      chainId: ChainIdentifier;
+      networkId: NetworkIdentifier;
       account: string;
     }
   | {
-      chainId: ChainIdentifier;
+      networkId: NetworkIdentifier;
       account?: never;
     }
   | {
-      chainId?: never;
+      networkId?: never;
       account: string;
     };
 
 const DEFAULT_STATE = {
-  chainId: undefined,
+  networkId: undefined,
   account: undefined,
   activating: false,
 };
@@ -56,16 +56,16 @@ export class State {
   public update(stateUpdate: ConnectorStateUpdate): void {
     this.nullifier++;
     this.store.setState((existingState): ConnectorState => {
-      const chainId = stateUpdate.chainId ?? existingState.chainId;
+      const networkId = stateUpdate.networkId ?? existingState.networkId;
       const account = stateUpdate.account ?? existingState.account;
 
       // ensure that the activating flag is cleared when appropriate
       let activating = existingState.activating;
-      if (activating && chainId && account) {
+      if (activating && networkId && account) {
         activating = false;
       }
 
-      return { chainId, account, activating };
+      return { networkId, account, activating };
     });
   }
 
@@ -74,8 +74,8 @@ export class State {
     this.store.setState(DEFAULT_STATE);
   }
 
-  public getChainId(): ConnectorState["chainId"] {
-    return this.store.getState().chainId;
+  public getNetworkId(): ConnectorState["networkId"] {
+    return this.store.getState().networkId;
   }
 
   public getAccount(): ConnectorState["account"] {
@@ -87,18 +87,18 @@ export class State {
   }
 
   public isActive(): boolean {
-    const chainId = this.getChainId();
+    const networkId = this.getNetworkId();
     const accounts = this.getAccount();
     const activating = this.isActivating();
 
-    return Boolean(chainId && accounts && !activating);
+    return Boolean(networkId && accounts && !activating);
   }
 
   public getHooks() {
     const store = this.store;
 
-    function useChainId(): ConnectorState["chainId"] {
-      return useStore(store, (s) => s.chainId);
+    function useNetworkId(): ConnectorState["networkId"] {
+      return useStore(store, (s) => s.networkId);
     }
 
     function useAccount(): ConnectorState["account"] {
@@ -110,13 +110,13 @@ export class State {
     }
 
     function useIsActive(): boolean {
-      const chainId = useChainId();
+      const networkId = useNetworkId();
       const accounts = useAccount();
       const activating = useIsActivating();
 
-      return Boolean(chainId && accounts && !activating);
+      return Boolean(networkId && accounts && !activating);
     }
 
-    return { useChainId, useAccount, useIsActivating, useIsActive };
+    return { useNetworkId, useAccount, useIsActivating, useIsActive };
   }
 }

@@ -1,32 +1,32 @@
 import React from "react";
 import Button from "@mui/material/Button";
 import { useWeb3 } from "connectors/context";
-import { ChainIdentifier } from "connectors/chain";
+import { NetworkIdentifier } from "types";
 
 function NetworkStatus() {
-  const { chainId } = useWeb3();
+  const { networkId } = useWeb3();
 
   const networkName = React.useMemo(() => {
-    switch (chainId) {
-      case ChainIdentifier.MAINNET:
+    switch (networkId) {
+      case NetworkIdentifier.MAINNET:
         return "Mainnet";
-      case ChainIdentifier.TESTNET:
+      case NetworkIdentifier.TESTNET:
         return "Testnet";
-      case ChainIdentifier.DEVNET:
+      case NetworkIdentifier.DEVNET:
         return "Devnet";
-      case ChainIdentifier.AMM_DEVNET:
+      case NetworkIdentifier.AMM_DEVNET:
         return "AMM-Devnet";
       default:
         return "Unknown";
     }
-  }, [chainId]);
+  }, [networkId]);
 
   return (
     <React.Fragment>
       <Button
         variant="contained"
         color="primary"
-        disabled={!Boolean(chainId)}
+        disabled={!Boolean(networkId)}
         disableRipple
         title="Network status"
       >

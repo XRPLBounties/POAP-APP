@@ -8,18 +8,30 @@ import {
   Controller,
   DefaultValues,
 } from "react-hook-form";
-import { object, string, number, date, intersection, TypeOf } from "zod";
+import {
+  object,
+  boolean,
+  string,
+  number,
+  date,
+  intersection,
+  TypeOf,
+} from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import Button from "@mui/material/Button";
+import Checkbox from "@mui/material/Checkbox";
+import CloseIcon from "@mui/icons-material/Close";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
-import TextField from "@mui/material/TextField";
 import DialogTitle from "@mui/material/DialogTitle";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import FormGroup from "@mui/material/FormGroup";
 import IconButton from "@mui/material/IconButton";
-import CloseIcon from "@mui/icons-material/Close";
 import Stack from "@mui/material/Stack";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 
@@ -44,6 +56,7 @@ const schemaCommon = object({
     .int()
     .positive()
     .max(200, "Token count must be less than or equal to 200"),
+  isPublic: boolean(),
 });
 
 // Note: We allow nullable for the DatePicker component to work.
@@ -96,6 +109,7 @@ const defaultValues: DefaultValues<MintFormValues> = {
   dateStart: null,
   dateEnd: null,
   tokenCount: undefined,
+  isPublic: false,
 };
 
 type MintDialogProps = {
@@ -103,7 +117,7 @@ type MintDialogProps = {
 };
 
 function MintDialog(props: MintDialogProps) {
-  const { account } = useWeb3();
+  const { account, networkId } = useWeb3();
   const [open, setOpen] = React.useState<boolean>(false);
   const [loading, setLoading] = React.useState<boolean>(false);
   const [activeDialog, setActiveDialog] = useAtom(activeDialogAtom);
@@ -140,16 +154,18 @@ function MintDialog(props: MintDialogProps) {
   const onSubmit: SubmitHandler<MintFormValues> = async (values) => {
     setLoading(true);
     try {
-      if (account) {
+      if (account && networkId) {
         const result = await API.mint({
+          networkId: networkId,
           walletAddress: account,
           tokenCount: values.tokenCount,
           title: values.title,
-          desc: values.description,
-          loc: values.location,
-          url: values.url,
+          description: values.description,
+          location: values.location,
+          imageUrl: values.url,
           dateStart: values.dateStart!,
           dateEnd: values.dateEnd!,
+          isManaged: !values.isPublic,
         });
         console.debug("MintResult", result);
         enqueueSnackbar(`Mint successful: Event ID #${result.eventId}`, {
@@ -306,6 +322,37 @@ function MintDialog(props: MintDialogProps) {
             error={!!errors["tokenCount"]}
             helperText={errors["tokenCount"]?.message}
             {...register("tokenCount", { valueAsNumber: true })}
+          />
+          <Controller
+            control={control}
+            name="isPublic"
+            render={({ field: { ref, value, ...field }, fieldState }) => (
+              <FormGroup>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      {...field}
+                      inputRef={ref}
+                      checked={value}
+                      color={!!fieldState.error ? "error" : "primary"}
+                    />
+                  }
+                  label={
+                    <Typography
+                      color={
+                        !!fieldState.error
+                          ? "error"
+                          : value
+                          ? "inherit"
+                          : "text.secondary"
+                      }
+                    >
+                      Allow any platform user to join the event (public)
+                    </Typography>
+                  }
+                />
+              </FormGroup>
+            )}
           />
         </Stack>
       </DialogContent>

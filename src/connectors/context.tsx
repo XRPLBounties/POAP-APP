@@ -9,7 +9,7 @@ import { CONNECTORS } from "connectors";
 export type Web3ContextType = {
   connector?: Connector;
   provider?: Provider;
-  chainId: ReturnType<State["getChainId"]>;
+  networkId: ReturnType<State["getNetworkId"]>;
   account: ReturnType<State["getAccount"]>;
   isActivating: ReturnType<State["isActivating"]>;
   isActive: ReturnType<State["isActive"]>;
@@ -35,7 +35,7 @@ export function Web3Provider({ children }: Web3ProviderProps) {
   const connector = CONNECTORS[index === -1 ? 0 : index];
 
   const provider = connector.provider;
-  const chainId = connector.state.getChainId();
+  const networkId = connector.state.getNetworkId();
   const account = connector.state.getAccount();
   const isActivating = connector.state.isActivating();
   const isActive = connector.state.isActive();
@@ -45,7 +45,7 @@ export function Web3Provider({ children }: Web3ProviderProps) {
       value={{
         connector,
         provider,
-        chainId,
+        networkId,
         account,
         isActivating,
         isActive,

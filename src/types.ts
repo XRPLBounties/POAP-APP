@@ -4,6 +4,25 @@ export enum DialogIdentifier {
   DIALOG_PROFILE,
 }
 
+export enum NetworkIdentifier {
+  UNKNOWN,
+  MAINNET,
+  TESTNET,
+  DEVNET,
+  AMM_DEVNET,
+}
+
+export enum WalletType {
+  XUMM_WALLET,
+  GEM_WALLET,
+}
+
+export enum ConnectorType {
+  EMPTY = "EMPTY",
+  XUMM = "XUMM",
+  GEM = "GEM",
+}
+
 export type User = {
   walletAddress: string;
   firstName?: string;
@@ -14,25 +33,26 @@ export type User = {
 
 export type Event = {
   id: number;
+  networkId: number;
   title: string;
+  description: string;
+  location: string,
   uri: string;
-  count: number;
+  tokenCount: number;
   dateStart: string;
   dateEnd: string;
-  networkId: number;
+  isManaged: boolean,
   ownerWalletAddress: string;
   owner?: User;
   attendees?: User[];
 };
 
 export type Metadata = {
-  title: string,
-  description: string,
-  collectionSize: number,
-  location: string,
-  dateStart: string,
-  dateEnd: string,
-  uri: string,
-  account: string,
+  title: string;
+  description: string;
+  location: string;
+  imageUrl: string;
+  tokenCount: number;
+  dateStart: string;
+  dateEnd: string;
 };
-

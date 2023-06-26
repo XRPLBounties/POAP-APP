@@ -1,5 +1,6 @@
 import { Provider } from "connectors/provider";
 import { State } from "connectors/state";
+import { ConnectorType } from "types";
 
 export abstract class Connector {
   public provider?: Provider;
@@ -11,6 +12,8 @@ export abstract class Connector {
     this.state = new State();
     this.onError = onError;
   }
+
+  public abstract getType(): ConnectorType;
 
   public reset(): Promise<void> | void {
     this.state.reset();
