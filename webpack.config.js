@@ -11,6 +11,7 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, "build"),
     clean: true,
+    publicPath: "/",
   },
   devServer: {
     compress: true,
