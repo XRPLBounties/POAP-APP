@@ -4,6 +4,7 @@ import {
   getNetwork,
   isInstalled,
   signMessage,
+  acceptNFTOffer,
 } from "@gemwallet/api";
 
 import { Connector } from "connectors/connector";
@@ -20,27 +21,27 @@ export class NoGemWalletError extends Error {
 
 export class GemWalletProvider extends Provider {
   public async signMessage(message: string): Promise<string> {
-    try {
-      const signed = await signMessage(message);
-      if (signed.type === "reject" || !signed.result) {
-        throw Error("User refused to sign message");
-      }
-
-      // TODO is that even a case anymore?
-      // if (!signed.result) {
-      //   throw Error("Failed to sign message");
-      // }
-
-      return signed.result.signedMessage;
-    } catch (error) {
-      // TODO
-      throw error;
+    const signed = await signMessage(message);
+    if (signed.type === "reject") {
+      throw Error("User refused to sign message");
     }
+
+    if (!signed.result) {
+      throw Error("Failed to sign message");
+    }
+
+    return signed.result.signedMessage;
   }
 
   public async acceptOffer(id: string): Promise<boolean> {
-    // TODO not yet supported
-    return false;
+    const response = await acceptNFTOffer({
+      NFTokenSellOffer: id,
+    });
+    if (response.type === "reject") {
+      throw Error("User refused to sign transaction");
+    }
+
+    return Boolean(response.result?.hash);
   }
 }
 
