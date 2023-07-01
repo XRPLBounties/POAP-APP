@@ -4,10 +4,12 @@ import { Navigate } from "react-router-dom";
 import Loadable from "components/Loadable";
 import MainLayout from "layouts/MainLayout";
 
+const DebugPage = Loadable(React.lazy(() => import("pages/DebugPage")));
 const ErrorPage = Loadable(React.lazy(() => import("pages/ErrorPage")));
-const EventPage = Loadable(React.lazy(() => import("pages/EventPage")));
+const EventInfoPage = Loadable(React.lazy(() => import("pages/EventInfoPage")));
+const EventsPage = Loadable(React.lazy(() => import("pages/EventsPage")));
 const HomePage = Loadable(React.lazy(() => import("pages/HomePage")));
-// const VerifyPage = Loadable(React.lazy(() => import("pages/VerifyPage")));
+const OffersPage = Loadable(React.lazy(() => import("pages/OffersPage")));
 
 const MainRoutes = {
   path: "/",
@@ -18,13 +20,21 @@ const MainRoutes = {
       path: "/",
       element: <HomePage />,
     },
-    // {
-    //   path: "/verify",
-    //   element: <VerifyPage />,
-    // },
     {
       path: "/event/:id",
-      element: <EventPage />,
+      element: <EventInfoPage />,
+    },
+    {
+      path: "/events",
+      element: <EventsPage />,
+    },
+    {
+      path: "/offers",
+      element: <OffersPage />,
+    },
+    {
+      path: "/debug",
+      element: <DebugPage />,
     },
   ],
 };

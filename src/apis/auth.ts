@@ -7,7 +7,7 @@ export type heartbeatResult = boolean;
 
 export const heartbeat = async (): Promise<heartbeatResult> => {
   const response = await axios.get(
-    new URL("/heartbeat", config.apiURL).toString(),
+    new URL("/auth/heartbeat", config.apiURL).toString(),
     {
       responseType: "json",
       timeout: config.timeout,
@@ -21,15 +21,15 @@ export const heartbeat = async (): Promise<heartbeatResult> => {
   throw new Error(response.status.toString());
 };
 
-export type preloginData = {
-  walletAddress: string;
+export type nonceData = {
+  pubkey: string;
 };
 
-export type preloginResult = string;
+export type nonceResult = string;
 
-export const prelogin = async (data: preloginData): Promise<preloginResult> => {
+export const nonce = async (data: nonceData): Promise<nonceResult> => {
   const response = await axios.post(
-    new URL("/auth/prelogin", config.apiURL).toString(),
+    new URL("/auth/nonce", config.apiURL).toString(),
     data,
     {
       responseType: "json",
@@ -38,7 +38,7 @@ export const prelogin = async (data: preloginData): Promise<preloginResult> => {
   );
 
   if (response.status === 200) {
-    return response.data.result as preloginResult;
+    return response.data.result as nonceResult;
   }
 
   throw new Error(response.status.toString());
@@ -48,11 +48,10 @@ export type loginData = {
   walletAddress: string;
   walletType: WalletType;
   data: string;
+  signature?: string;
 };
 
-export type loginResult = string;
-
-export const login = async (data: loginData): Promise<loginResult> => {
+export const login = async (data: loginData): Promise<string> => {
   const response = await axios.post(
     new URL("/auth/login", config.apiURL).toString(),
     data,
@@ -63,19 +62,22 @@ export const login = async (data: loginData): Promise<loginResult> => {
   );
 
   if (response.status === 200) {
-    return response.data.result as loginResult;
+    return response.data.result as string;
   }
 
   throw new Error(response.status.toString());
 };
 
-export type refreshResult = boolean;
+export type refreshResult = string | null;
 
-export const refresh = async (): Promise<refreshResult> => {
+export const refresh = async (jwt: string): Promise<refreshResult> => {
   const response = await axios.post(
     new URL("/auth/refresh", config.apiURL).toString(),
     {},
     {
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+      },
       responseType: "json",
       timeout: config.timeout,
     }
@@ -85,24 +87,5 @@ export const refresh = async (): Promise<refreshResult> => {
     return response.data.result as refreshResult;
   }
 
-  throw new Error(response.status.toString());
-};
-
-export type logoutResult = boolean;
-
-export const logout = async (): Promise<logoutResult> => {
-  const response = await axios.post(
-    new URL("/auth/logout", config.apiURL).toString(),
-    {},
-    {
-      responseType: "json",
-      timeout: config.timeout,
-    }
-  );
-
-  if (response.status === 200) {
-    return response.data.result as logoutResult;
-  }
-
-  throw new Error(response.status.toString());
+  throw new Error(`${response.status} ${response.data.error}`); // TODO want the actual message
 };

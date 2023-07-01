@@ -171,6 +171,7 @@ function MintDialog(props: MintDialogProps) {
         enqueueSnackbar(`Mint successful: Event ID #${result.eventId}`, {
           variant: "success",
         });
+        reset();
       }
     } catch (error) {
       console.debug(error);
@@ -179,10 +180,8 @@ function MintDialog(props: MintDialogProps) {
       });
     } finally {
       setLoading(false);
+      setActiveDialog({});
     }
-
-    reset();
-    setActiveDialog({});
   };
 
   return (

@@ -3,7 +3,7 @@ import { XummPkce } from "xumm-oauth2-pkce";
 
 import config from "config";
 import { Connector } from "connectors/connector";
-import { Provider } from "connectors/provider";
+import { AuthData, Provider } from "connectors/provider";
 import { ConnectorType, NetworkIdentifier } from "types";
 
 export class XummWalletProvider extends Provider {
@@ -46,8 +46,10 @@ export class XummWalletProvider extends Provider {
     return Boolean(result);
   }
 
-  public getJwt() {
-    return this.jwt;
+  public getAuthData(): AuthData {
+    return {
+      tempJwt: this.jwt,
+    };
   }
 }
 

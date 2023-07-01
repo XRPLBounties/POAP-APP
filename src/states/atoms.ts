@@ -1,9 +1,11 @@
 import { atom } from "jotai";
 import { atomWithStorage, createJSONStorage } from "jotai/utils";
 
+import config from "config";
 import { ConnectorType, DialogIdentifier } from "types";
 
-const storage = createJSONStorage(() => sessionStorage);
+const storage = createJSONStorage(() => config.storage);
+
 export const selectedWalletAtom = atomWithStorage(
   "selected-wallet",
   ConnectorType.EMPTY,

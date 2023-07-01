@@ -17,7 +17,7 @@ import type { Event, Metadata } from "types";
 import Loader from "components/Loader";
 import DataTable from "components/DataTable";
 
-function EventPage() {
+function EventInfoPage() {
   const [data, setData] = React.useState<Event | null | undefined>();
   const [metadata, setMetadata] = React.useState<Metadata>();
   const { enqueueSnackbar } = useSnackbar();
@@ -31,7 +31,7 @@ function EventPage() {
     const load = async () => {
       try {
         const event = await API.getEvent({
-          id: id!,
+          id: parseInt(id!),
           includeAttendees: true,
         });
 
@@ -203,7 +203,7 @@ function EventPage() {
                         marginBottom: "0.75rem",
                       }}
                       alt="event banner"
-                      src={metadata.uri}
+                      src={metadata.imageUrl}
                     />
                     <Typography variant="body1">
                       {metadata.description}
@@ -269,4 +269,4 @@ function EventPage() {
   );
 }
 
-export default EventPage;
+export default EventInfoPage;

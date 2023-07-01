@@ -1,6 +1,8 @@
 export enum DialogIdentifier {
-  DIALOG_MINT,
+  DIALOG_ADD,
+  DIALOG_CLAIM,
   DIALOG_JOIN,
+  DIALOG_MINT,
   DIALOG_PROFILE,
 }
 
@@ -36,15 +38,23 @@ export type Event = {
   networkId: number;
   title: string;
   description: string;
-  location: string,
+  location: string;
   uri: string;
   tokenCount: number;
   dateStart: string;
   dateEnd: string;
-  isManaged: boolean,
+  isManaged: boolean;
   ownerWalletAddress: string;
   owner?: User;
   attendees?: User[];
+};
+
+export type Offer = {
+  id: number;
+  ownerWalletAddress: string;
+  tokenId: number;
+  offerIndex: string;
+  claimed: boolean;
 };
 
 export type Metadata = {
@@ -55,4 +65,11 @@ export type Metadata = {
   tokenCount: number;
   dateStart: string;
   dateEnd: string;
+};
+
+export type JwtPayload = {
+  exp: number;
+  walletAddress: string;
+  permissions: string[];
+  refreshable: boolean;
 };

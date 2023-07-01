@@ -10,6 +10,7 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 
 import Routes from "routes";
 import { Web3Provider } from "connectors/context";
+import { AuthProvider } from "components/AuthContext";
 
 function App() {
   const theme = createTheme();
@@ -17,21 +18,23 @@ function App() {
   return (
     <JotaiProvider>
       <Web3Provider>
-        <BrowserRouter>
-          <ThemeProvider theme={theme}>
-            <SnackbarProvider
-              autoHideDuration={10000}
-              anchorOrigin={{ vertical: "top", horizontal: "right" }}
-              TransitionComponent={Slide}
-              maxSnack={3}
-            >
-              <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <CssBaseline />
-                <Routes />
-              </LocalizationProvider>
-            </SnackbarProvider>
-          </ThemeProvider>
-        </BrowserRouter>
+        <AuthProvider>
+          <BrowserRouter>
+            <ThemeProvider theme={theme}>
+              <SnackbarProvider
+                autoHideDuration={10000}
+                anchorOrigin={{ vertical: "top", horizontal: "right" }}
+                TransitionComponent={Slide}
+                maxSnack={3}
+              >
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                  <CssBaseline />
+                  <Routes />
+                </LocalizationProvider>
+              </SnackbarProvider>
+            </ThemeProvider>
+          </BrowserRouter>
+        </AuthProvider>
       </Web3Provider>
     </JotaiProvider>
   );

@@ -14,7 +14,9 @@ import Stack from "@mui/material/Stack";
 
 import Web3Status from "components/Web3Status";
 import NetworkStatus from "components/NetworkStatus";
-import ConnectivityStatus from "./ConnectivityStatus";
+import ConnectivityStatus from "components/ConnectivityStatus";
+import AuthStatus from "components/AuthStatus";
+import { useWeb3 } from "connectors/context";
 
 const StyledList = styled(MuiList)<{ component?: React.ElementType }>(
   ({ theme }) => ({
@@ -40,10 +42,17 @@ const StyledList = styled(MuiList)<{ component?: React.ElementType }>(
 ) as typeof MuiList;
 
 function Header() {
-  const entries: Array<[string, string, boolean]> = [
-    ["Home", "/", false],
-    ["Verify", "/verify", true],
-  ];
+  const { isActive } = useWeb3();
+
+  const entries: Array<[string, string, boolean]> = React.useMemo(
+    () => [
+      ["Home", "/", false],
+      ["Events", "/events", !isActive],
+      ["Signups", "/offers", !isActive],
+      ["Debug", "/debug", false],
+    ],
+    [isActive]
+  );
 
   return (
     <AppBar
@@ -67,7 +76,10 @@ function Header() {
                     component={NavLink}
                     to={to}
                   >
-                    <ListItemText primary={name} />
+                    <ListItemText
+                      sx={{ whiteSpace: "nowrap" }}
+                      primary={name}
+                    />
                   </ListItemButton>
                 </ListItem>
               ))}
@@ -76,6 +88,7 @@ function Header() {
           <Stack direction="row" spacing={2}>
             <NetworkStatus />
             <Web3Status />
+            <AuthStatus />
           </Stack>
         </Toolbar>
       </Container>

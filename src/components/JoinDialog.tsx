@@ -4,12 +4,16 @@ import type { ReactNode } from "react";
 import { useSnackbar } from "notistack";
 
 import Button from "@mui/material/Button";
+import Checkbox from "@mui/material/Checkbox";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import FormGroup from "@mui/material/FormGroup";
 import IconButton from "@mui/material/IconButton";
+import Typography from "@mui/material/Typography";
 import CloseIcon from "@mui/icons-material/Close";
 import CircularProgress from "@mui/material/CircularProgress";
 
@@ -27,6 +31,7 @@ type JoinDialogData = Record<string, any>;
 function JoinDialog(props: JoinDialogProps) {
   const { provider, account } = useWeb3();
   const [open, setOpen] = React.useState<boolean>(false);
+  const [checked, setChecked] = React.useState<boolean>(true);
   const [data, setData] = React.useState<JoinDialogData | undefined>();
   const [loading, setLoading] = React.useState<boolean>(false);
   const [activeDialog, setActiveDialog] = useAtom(activeDialogAtom);
@@ -52,38 +57,37 @@ function JoinDialog(props: JoinDialogProps) {
     setLoading(true);
     try {
       if (provider && account && data?.eventId) {
-        enqueueSnackbar("Creating NFT claim request: Confirm the transaction in your wallet", {
-          variant: "warning",
-          autoHideDuration: 30000,
-        });
-        const result = await API.claim({
+        const result = await API.event.claim({
           walletAddress: account,
-          type: 2,
           eventId: data.eventId,
         });
         console.debug("ClaimResult", result);
 
-        if (result.status === "transferred" && result.offer) {
-          const success = await provider.acceptOffer(
-            result.offer.nft_offer_index
-          );
+        // TODO give user better feedback when already joined an event
+        if (!result.claimed) {
+          if (checked) {
+            enqueueSnackbar(
+              "Creating NFT claim request: Confirm the transaction in your wallet",
+              {
+                variant: "warning",
+                autoHideDuration: 30000,
+              }
+            );
+            const success = await provider.acceptOffer(result.offerIndex);
 
-          if (success) {
-            enqueueSnackbar(`Sign-up successful: Event #${data.eventId}`, {
-              variant: "success",
-            });
-          } else {
-            enqueueSnackbar(`Sign-up failed: Unable to claim NFT`, {
-              variant: "error",
-            });
+            if (success) {
+              enqueueSnackbar(`Sign-up successful: Event #${data.eventId}`, {
+                variant: "success",
+              });
+            } else {
+              enqueueSnackbar(`Sign-up failed: Unable to claim NFT`, {
+                variant: "error",
+              });
+            }
           }
-        } else if (result.status === "claimed") {
+        } else {
           enqueueSnackbar(`Sign-up successful: Already claimed NFT`, {
             variant: "success",
-          });
-        } else if (result.status === "empty") {
-          enqueueSnackbar(`Sign-up failed: Event is already full`, {
-            variant: "error",
           });
         }
       }
@@ -97,6 +101,10 @@ function JoinDialog(props: JoinDialogProps) {
     }
 
     setActiveDialog({});
+  };
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setChecked(event.target.checked);
   };
 
   return (
@@ -136,7 +144,18 @@ function JoinDialog(props: JoinDialogProps) {
           "{data?.title}"
         </DialogContentText>
       </DialogContent>
+
       <DialogActions>
+        <FormGroup sx={{ marginLeft: "9px", marginRight: "auto" }}>
+          <FormControlLabel
+            control={<Checkbox checked={checked} onChange={handleChange} />}
+            label={
+              <Typography color={checked ? "inherit" : "text.secondary"}>
+                Immediately claim NFT
+              </Typography>
+            }
+          />
+        </FormGroup>
         <Button color="primary" onClick={handleCancel} disabled={loading}>
           Cancel
         </Button>

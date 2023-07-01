@@ -22,6 +22,7 @@ import API from "apis";
 import { useWeb3 } from "connectors/context";
 import { activeDialogAtom } from "states/atoms";
 import { DialogIdentifier } from "types";
+import { useAuth } from "components/AuthContext";
 
 const schema = object({
   firstName: string()
@@ -47,6 +48,7 @@ type ProfileDialogProps = {
 
 function ProfileDialog(props: ProfileDialogProps) {
   const { account } = useWeb3();
+  const { isAuthenticated, jwt } = useAuth();
   const [open, setOpen] = React.useState<boolean>(false);
   const [loading, setLoading] = React.useState<boolean>(false);
   const [activeDialog, setActiveDialog] = useAtom(activeDialogAtom);
@@ -54,10 +56,13 @@ function ProfileDialog(props: ProfileDialogProps) {
 
   // Note: These values are only loaded ONCE when the component is first mounted!
   const loadedValues = async () => {
-    if (activeDialog.type === DialogIdentifier.DIALOG_PROFILE && account) {
+    if (
+      activeDialog.type === DialogIdentifier.DIALOG_PROFILE &&
+      account &&
+      jwt
+    ) {
       try {
-        const result = await API.getUser({
-          walletAddress: account!,
+        const result = await API.user.getInfo(jwt, {
           includeEvents: false,
         });
 
@@ -113,17 +118,17 @@ function ProfileDialog(props: ProfileDialogProps) {
   const onSubmit: SubmitHandler<ProfileFormValues> = async (values) => {
     setLoading(true);
     try {
-      // convert empty strings to null
-      const result = await API.updateUser({
-        walletAddress: account!,
-        firstName: values.firstName ? values.firstName : null,
-        lastName: values.lastName ? values.lastName : null,
-        email: values.email ? values.email : null,
-      });
-
-      enqueueSnackbar("Profile update successful", {
-        variant: "success",
-      });
+      if (jwt) {
+        // convert empty strings to null
+        await API.user.update(jwt, {
+          firstName: values.firstName ? values.firstName : null,
+          lastName: values.lastName ? values.lastName : null,
+          email: values.email ? values.email : null,
+        });
+        enqueueSnackbar("Profile update successful", {
+          variant: "success",
+        });
+      }
     } catch (error) {
       console.debug(error);
       if (axios.isAxiosError(error)) {
@@ -217,7 +222,12 @@ function ProfileDialog(props: ProfileDialogProps) {
           type="submit"
           startIcon={loading && <CircularProgress size={20} />}
           disabled={
-            loading || !Boolean(account) || isLoading || !isDirty || !isValid
+            loading ||
+            !Boolean(account) ||
+            isLoading ||
+            !isDirty ||
+            !isValid ||
+            !isAuthenticated
           }
         >
           Update

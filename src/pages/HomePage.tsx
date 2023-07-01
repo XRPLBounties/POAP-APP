@@ -14,13 +14,13 @@ import type { GridColDef } from "@mui/x-data-grid";
 
 import API from "apis";
 import { useWeb3 } from "connectors/context";
-import { DialogIdentifier, Event } from "types";
+import { DialogIdentifier, Event, NetworkIdentifier } from "types";
 import Loader from "components/Loader";
 import DataTable from "components/DataTable";
 import { activeDialogAtom } from "states/atoms";
 
 function HomePage() {
-  const { account, isActive } = useWeb3();
+  const { account, isActive, networkId } = useWeb3();
   const [data, setData] = React.useState<Event[] | undefined>(undefined);
   const [activeDialog, setActiveDialog] = useAtom(activeDialogAtom);
   const { enqueueSnackbar } = useSnackbar();
@@ -32,8 +32,8 @@ function HomePage() {
     const load = async () => {
       try {
         const events = await API.getEvents({
+          networkId: networkId?? NetworkIdentifier.UNKNOWN,
           limit: 50,
-          includeAttendees: false,
         });
 
         if (mounted) {
@@ -64,7 +64,7 @@ function HomePage() {
     return () => {
       mounted = false;
     };
-  }, [activeDialog]);
+  }, [activeDialog, isActive]);
 
   const handleJoin = async (id: number, title: string) => {
     setActiveDialog({
@@ -117,7 +117,7 @@ function HomePage() {
         id: event.id,
         title: event.title,
         address: event.ownerWalletAddress,
-        count: event.count,
+        count: event.tokenCount,
       }));
     } else {
       return [];
@@ -143,7 +143,7 @@ function HomePage() {
           )}
 
           <Typography sx={{ margin: "0.75rem 0" }} variant="h6">
-            Available Events
+            Public Events
           </Typography>
           {data ? <DataTable columns={columns} rows={rows} /> : <Loader />}
 

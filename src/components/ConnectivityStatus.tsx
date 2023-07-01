@@ -5,38 +5,15 @@ import CloseIcon from "@mui/icons-material/Close";
 import Collapse from "@mui/material/Collapse";
 import IconButton from "@mui/material/IconButton";
 
-import API from "apis";
+import { useAuth } from "components/AuthContext";
 
 function ConnectivityStatus() {
+  const { isAvailable } = useAuth();
   const [open, setOpen] = React.useState(false);
 
   React.useEffect(() => {
-    let mounted = true;
-
-    // TODO does the mounted value actually change ?
-    const check = async () => {
-      try {
-        await API.auth.heartbeat();
-        if (mounted) {
-          setOpen(false);
-        }
-      } catch (error) {
-        if (mounted) {
-          setOpen(true);
-        }
-      }
-    };
-
-    const interval = setInterval(check, 30 * 1000);
-
-    check();
-
-    // clear interval to prevent memory leaks when unmounting
-    return () => {
-      clearInterval(interval);
-      mounted = false;
-    };
-  }, []);
+    setOpen(!isAvailable);
+  }, [isAvailable]);
 
   return (
     <Collapse in={open}>

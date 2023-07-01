@@ -1,14 +1,16 @@
 import {
-  Network,
+  acceptNFTOffer,
   getAddress,
   getNetwork,
+  getPublicKey,
   isInstalled,
+  Network,
   signMessage,
-  acceptNFTOffer,
 } from "@gemwallet/api";
+import API from "apis";
 
 import { Connector } from "connectors/connector";
-import { Provider } from "connectors/provider";
+import { AuthData, Provider } from "connectors/provider";
 import { ConnectorType, NetworkIdentifier } from "types";
 
 export class NoGemWalletError extends Error {
@@ -19,7 +21,18 @@ export class NoGemWalletError extends Error {
   }
 }
 
+export type GemAuthData = AuthData & {
+  signature: string;
+};
+
 export class GemWalletProvider extends Provider {
+  private authData: GemAuthData;
+
+  constructor(authData: GemAuthData) {
+    super();
+    this.authData = authData;
+  }
+
   public async signMessage(message: string): Promise<string> {
     const signed = await signMessage(message);
     if (signed.type === "reject") {
@@ -42,6 +55,10 @@ export class GemWalletProvider extends Provider {
     }
 
     return Boolean(response.result?.hash);
+  }
+
+  public getAuthData(): GemAuthData {
+    return this.authData;
   }
 }
 
@@ -91,8 +108,6 @@ export class GemWallet extends Connector {
         throw new NoGemWalletError();
       }
 
-      this.provider = new GemWalletProvider();
-
       const address = await getAddress();
       if (address.type === "reject" || !address.result) {
         throw Error("User refused to share GemWallet address");
@@ -102,6 +117,25 @@ export class GemWallet extends Connector {
       if (network.type === "reject" || !network.result) {
         throw Error("User refused to share network");
       }
+
+      const pubkey = await getPublicKey();
+      if (pubkey.type === "reject" || !pubkey.result) {
+        throw Error("User refused to share public key");
+      }
+
+      const tempJwt = await API.auth.nonce({
+        pubkey: pubkey.result.publicKey,
+      });
+
+      const signed = await signMessage(`backend authentication: ${tempJwt}`);
+      if (signed.type === "reject" || !signed.result) {
+        throw Error("User refused to sign auth message");
+      }
+
+      this.provider = new GemWalletProvider({
+        tempJwt: tempJwt,
+        signature: signed.result.signedMessage,
+      });
 
       this.state.update({
         networkId: this.mapNetworkId(network.result.network),

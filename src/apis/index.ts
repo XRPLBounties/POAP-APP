@@ -1,27 +1,16 @@
-import { heartbeat, prelogin, login, refresh, logout } from "./auth";
-import {
-  mint,
-  claim,
-  getEvent,
-  getEvents,
-  getUser,
-  updateUser,
-} from "apis/poap";
+import * as auth from "./auth";
+import { mint, claim, getEvent, getEvents } from "./poap";
+import * as user from "./user";
 
 const API = {
-  auth: {
-    heartbeat,
-    prelogin,
-    login,
-    refresh,
-    logout,
+  auth,
+  event: {
+    claim,
   },
+  user,
   mint,
-  claim,
   getEvent,
   getEvents,
-  getUser,
-  updateUser,
 };
 
 export default API;
