@@ -30,8 +30,10 @@ import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import { activeDialogAtom } from "states/atoms";
 import { DialogIdentifier } from "types";
 import { useAuth } from "components/AuthContext";
+import { useWeb3 } from "connectors/context";
 
 function AuthStatus() {
+  const { isActive } = useWeb3();
   const { isAuthenticated, isAuto, login, logout, toggleAuto } = useAuth();
   const setActiveDialog = useSetAtom(activeDialogAtom);
   const anchorRef = React.useRef<HTMLButtonElement>(null);
@@ -175,6 +177,7 @@ function AuthStatus() {
                       </ListItemButton>
                     ) : (
                       <ListItemButton
+                        disabled={!isActive}
                         onClick={() => {
                           setOpen(false);
                           handleLogin();

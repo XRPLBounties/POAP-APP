@@ -1,30 +1,25 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useSnackbar } from "notistack";
 import { useAtom } from "jotai";
 
 import Box from "@mui/material/Box";
-import Stack from "@mui/material/Stack";
 import Button from "@mui/material/Button";
-import Chip from "@mui/material/Chip";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
-import type { GridColDef } from "@mui/x-data-grid";
 
 import API from "apis";
 import { useWeb3 } from "connectors/context";
 import { DialogIdentifier, Event, NetworkIdentifier } from "types";
 import Loader from "components/Loader";
-import DataTable from "components/DataTable";
 import { activeDialogAtom } from "states/atoms";
+import EventTable, { type EventTableRow } from "components/EventTable";
 
 function HomePage() {
-  const { account, isActive, networkId } = useWeb3();
-  const [data, setData] = React.useState<Event[] | undefined>(undefined);
+  const { isActive, networkId } = useWeb3();
+  const [data, setData] = React.useState<Event[]>();
   const [activeDialog, setActiveDialog] = useAtom(activeDialogAtom);
   const { enqueueSnackbar } = useSnackbar();
-  const navigate = useNavigate();
 
   React.useEffect(() => {
     let mounted = true;
@@ -32,8 +27,8 @@ function HomePage() {
     const load = async () => {
       try {
         const events = await API.getEvents({
-          networkId: networkId?? NetworkIdentifier.UNKNOWN,
-          limit: 50,
+          networkId: networkId ?? NetworkIdentifier.UNKNOWN,
+          limit: 100,
         });
 
         if (mounted) {
@@ -64,54 +59,9 @@ function HomePage() {
     return () => {
       mounted = false;
     };
-  }, [activeDialog, isActive]);
+  }, [activeDialog, isActive, networkId]);
 
-  const handleJoin = async (id: number, title: string) => {
-    setActiveDialog({
-      type: DialogIdentifier.DIALOG_JOIN,
-      data: { eventId: id, title: title },
-    });
-  };
-
-  const columns: GridColDef[] = React.useMemo(
-    () => [
-      { field: "id", headerName: "ID", width: 45, minWidth: 45 },
-      { field: "title", headerName: "Title", flex: 1 },
-      { field: "address", headerName: "Owner Address", width: 180 },
-      { field: "count", headerName: "Slots", width: 60 },
-      {
-        field: "actions",
-        headerName: "Actions",
-        sortable: false,
-        filterable: false,
-        width: 130,
-        renderCell: (params) => {
-          return (
-            <Stack direction="row" spacing={1}>
-              <Chip
-                label="Join"
-                variant="filled"
-                color="primary"
-                size="small"
-                onClick={() => handleJoin(params.row.id, params.row.title)}
-                disabled={!isActive}
-              />
-              <Chip
-                label="Details"
-                variant="filled"
-                color="primary"
-                size="small"
-                onClick={() => navigate(`/event/${params.row.id}`)}
-              />
-            </Stack>
-          );
-        },
-      },
-    ],
-    [account, isActive]
-  );
-
-  const rows = React.useMemo(() => {
+  const rows = React.useMemo<EventTableRow[]>(() => {
     if (data) {
       return data.map((event) => ({
         id: event.id,
@@ -145,7 +95,7 @@ function HomePage() {
           <Typography sx={{ margin: "0.75rem 0" }} variant="h6">
             Public Events
           </Typography>
-          {data ? <DataTable columns={columns} rows={rows} /> : <Loader />}
+          {data ? <EventTable rows={rows} /> : <Loader />}
 
           <Button
             sx={{ position: "absolute", top: "1rem", right: "1rem" }}

@@ -118,6 +118,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // try to load from cache first
       let token = checkStore();
       if (token) {
+        console.debug("Using cached jwt");
         setJwt(token);
         setIsAuthenticated(true);
         return;
@@ -173,17 +174,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
   React.useEffect(() => {
     let mounted = true;
 
-    console.log("Updating auth");
-
-    if (isAuto && isAvailable) {
-      if (account) {
-        try {
-          login();
-        } catch (err) {
-          console.debug(err);
+    const load = async () => {
+      try {
+        // FIX: setting states without checking for mounted in login
+        await login();
+      } catch (err) {
+        console.debug(err);
+        if (mounted) {
           setIsAuthenticated(false);
           setJwt(undefined);
         }
+      }
+    };
+
+    if (isAuto && isAvailable) {
+      if (account) {
+        load();
       } else {
         setIsAuthenticated(false);
         setJwt(undefined);
