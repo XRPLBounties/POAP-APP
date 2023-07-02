@@ -26,7 +26,7 @@ function HomePage() {
 
     const load = async () => {
       try {
-        const events = await API.getEvents({
+        const events = await API.events.getPublic({
           networkId: networkId ?? NetworkIdentifier.UNKNOWN,
           limit: 100,
         });

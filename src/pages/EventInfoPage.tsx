@@ -16,8 +16,10 @@ import API from "apis";
 import type { Event, Metadata } from "types";
 import Loader from "components/Loader";
 import DataTable from "components/DataTable";
+import { useAuth } from "components/AuthContext";
 
 function EventInfoPage() {
+  const { jwt } = useAuth();
   const [data, setData] = React.useState<Event | null | undefined>();
   const [metadata, setMetadata] = React.useState<Metadata>();
   const { enqueueSnackbar } = useSnackbar();
@@ -30,11 +32,7 @@ function EventInfoPage() {
 
     const load = async () => {
       try {
-        const event = await API.getEvent({
-          id: parseInt(id!),
-          includeAttendees: true,
-        });
-
+        const event = await API.event.getInfo(id!, jwt);
         if (mounted) {
           setData(event ? event : null);
         }

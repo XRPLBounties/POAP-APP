@@ -4,17 +4,15 @@ import config from "config";
 import type { User } from "types";
 
 export type getInfoParams = {
-  includeEvents: boolean;
+  includeEvents?: boolean;
 };
-
-export type getInfoResult = User | undefined;
 
 export const getInfo = async (
   jwt: string,
   params: getInfoParams
-): Promise<getInfoResult> => {
+): Promise<User> => {
   const response = await axios.get(
-    new URL(`/user/info`, config.apiURL).toString(),
+    new URL("/user/info", config.apiURL).toString(),
     {
       headers: {
         Authorization: `Bearer ${jwt}`,
@@ -26,7 +24,7 @@ export const getInfo = async (
   );
 
   if (response.status === 200) {
-    return response.data.result as getInfoResult;
+    return response.data.result as User;
   }
 
   throw new Error(response.status.toString());
@@ -38,12 +36,10 @@ export type updateData = {
   email: string | null;
 };
 
-export type updateResult = boolean;
-
 export const update = async (
   jwt: string,
   data: updateData
-): Promise<updateResult> => {
+): Promise<boolean> => {
   const response = await axios.post(
     new URL("/user/update", config.apiURL).toString(),
     data,
@@ -57,7 +53,7 @@ export const update = async (
   );
 
   if (response.status === 200) {
-    return response.data.result as updateResult;
+    return response.data.result as boolean;
   }
 
   throw new Error(response.status.toString());

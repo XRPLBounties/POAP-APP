@@ -21,6 +21,7 @@ import API from "apis";
 import { useWeb3 } from "connectors/context";
 import { activeDialogAtom } from "states/atoms";
 import { DialogIdentifier } from "types";
+import { useAuth } from "components/AuthContext";
 
 type JoinDialogProps = {
   children?: ReactNode;
@@ -30,6 +31,7 @@ type JoinDialogData = Record<string, any>;
 
 function JoinDialog(props: JoinDialogProps) {
   const { provider, account } = useWeb3();
+  const { isAuthenticated, jwt} = useAuth();
   const [open, setOpen] = React.useState<boolean>(false);
   const [checked, setChecked] = React.useState<boolean>(true);
   const [data, setData] = React.useState<JoinDialogData | undefined>();
@@ -56,9 +58,8 @@ function JoinDialog(props: JoinDialogProps) {
   const handleConfirm = async (event: React.MouseEvent<HTMLButtonElement>) => {
     setLoading(true);
     try {
-      if (provider && account && data?.eventId) {
-        const result = await API.event.claim({
-          walletAddress: account,
+      if (provider && account && data?.eventId && jwt) {
+        const result = await API.event.claim(jwt, {
           eventId: data.eventId,
         });
         console.debug("ClaimResult", result);
@@ -163,7 +164,7 @@ function JoinDialog(props: JoinDialogProps) {
           color="primary"
           onClick={handleConfirm}
           startIcon={loading && <CircularProgress size={20} />}
-          disabled={loading || !Boolean(account)}
+          disabled={loading || !Boolean(account) || !isAuthenticated}
         >
           Join
         </Button>

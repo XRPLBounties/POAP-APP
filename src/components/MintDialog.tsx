@@ -39,6 +39,7 @@ import API from "apis";
 import { useWeb3 } from "connectors/context";
 import { activeDialogAtom } from "states/atoms";
 import { DialogIdentifier } from "types";
+import { useAuth } from "components/AuthContext";
 
 const schemaCommon = object({
   title: string()
@@ -118,6 +119,7 @@ type MintDialogProps = {
 
 function MintDialog(props: MintDialogProps) {
   const { account, networkId } = useWeb3();
+  const { isAuthenticated, jwt } = useAuth();
   const [open, setOpen] = React.useState<boolean>(false);
   const [loading, setLoading] = React.useState<boolean>(false);
   const [activeDialog, setActiveDialog] = useAtom(activeDialogAtom);
@@ -154,10 +156,9 @@ function MintDialog(props: MintDialogProps) {
   const onSubmit: SubmitHandler<MintFormValues> = async (values) => {
     setLoading(true);
     try {
-      if (account && networkId) {
-        const result = await API.mint({
+      if (account && networkId && jwt) {
+        const result = await API.event.create(jwt, {
           networkId: networkId,
-          walletAddress: account,
           tokenCount: values.tokenCount,
           title: values.title,
           description: values.description,
@@ -363,7 +364,7 @@ function MintDialog(props: MintDialogProps) {
           color="primary"
           onClick={handleSubmit(onSubmit)}
           startIcon={loading && <CircularProgress size={20} />}
-          disabled={loading || !Boolean(account) || !isValid}
+          disabled={loading || !Boolean(account) || !isValid || !isAuthenticated}
         >
           Create
         </Button>

@@ -1,16 +1,13 @@
 import * as auth from "./auth";
-import { mint, claim, getEvent, getEvents } from "./poap";
+import * as event from "./event";
+import * as events from "./events";
 import * as user from "./user";
 
-const API = {
+export const API = {
   auth,
-  event: {
-    claim,
-  },
+  event,
+  events,
   user,
-  mint,
-  getEvent,
-  getEvents,
 };
 
 export default API;

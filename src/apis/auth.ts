@@ -3,9 +3,7 @@ import config from "config";
 
 import { WalletType } from "types";
 
-export type heartbeatResult = boolean;
-
-export const heartbeat = async (): Promise<heartbeatResult> => {
+export const heartbeat = async (): Promise<boolean> => {
   const response = await axios.get(
     new URL("/auth/heartbeat", config.apiURL).toString(),
     {
@@ -15,7 +13,7 @@ export const heartbeat = async (): Promise<heartbeatResult> => {
   );
 
   if (response.status === 200) {
-    return response.data.result as heartbeatResult;
+    return response.data.result as boolean;
   }
 
   throw new Error(response.status.toString());
@@ -25,9 +23,7 @@ export type nonceData = {
   pubkey: string;
 };
 
-export type nonceResult = string;
-
-export const nonce = async (data: nonceData): Promise<nonceResult> => {
+export const nonce = async (data: nonceData): Promise<string> => {
   const response = await axios.post(
     new URL("/auth/nonce", config.apiURL).toString(),
     data,
@@ -38,7 +34,7 @@ export const nonce = async (data: nonceData): Promise<nonceResult> => {
   );
 
   if (response.status === 200) {
-    return response.data.result as nonceResult;
+    return response.data.result as string;
   }
 
   throw new Error(response.status.toString());
