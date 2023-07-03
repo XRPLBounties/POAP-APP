@@ -342,7 +342,7 @@ function MintDialog(props: MintDialogProps) {
                       color={
                         !!fieldState.error
                           ? "error"
-                          : value
+                          : value && !loading
                           ? "inherit"
                           : "text.secondary"
                       }
@@ -350,6 +350,7 @@ function MintDialog(props: MintDialogProps) {
                       Allow any platform user to join the event (public)
                     </Typography>
                   }
+                  disabled={loading}
                 />
               </FormGroup>
             )}
@@ -364,7 +365,9 @@ function MintDialog(props: MintDialogProps) {
           color="primary"
           onClick={handleSubmit(onSubmit)}
           startIcon={loading && <CircularProgress size={20} />}
-          disabled={loading || !Boolean(account) || !isValid || !isAuthenticated}
+          disabled={
+            loading || !Boolean(account) || !isValid || !isAuthenticated
+          }
         >
           Create
         </Button>
