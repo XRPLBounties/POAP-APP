@@ -6,7 +6,12 @@ import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import FileCopyIcon from "@mui/icons-material/FileCopy";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import InfoIcon from "@mui/icons-material/Info";
-import { GridActionsCellItem, GridColDef } from "@mui/x-data-grid";
+import {
+  GridActionsCellItem,
+  GridColDef,
+  GridTreeNodeWithRender,
+  GridValueGetterParams,
+} from "@mui/x-data-grid";
 
 import { useWeb3 } from "connectors/context";
 import { DialogIdentifier } from "types";
@@ -16,8 +21,12 @@ import { activeDialogAtom } from "states/atoms";
 export type EventTableRow = {
   id: number;
   title: string;
-  address: string;
-  count: number;
+  dateStart: Date;
+  dateEnd: Date;
+  slotsTaken?: number;
+  slotsTotal: number;
+  claimed?: boolean;
+  offerIndex?: string;
 };
 
 export type EventTableProps = {
@@ -25,6 +34,12 @@ export type EventTableProps = {
   isOwner?: boolean;
   isAttendee?: boolean;
 };
+
+type GetterParamsType = GridValueGetterParams<
+  EventTableRow,
+  any,
+  GridTreeNodeWithRender
+>;
 
 export function EventTable(props: EventTableProps) {
   const { rows, isOwner, isAttendee } = props;
@@ -73,16 +88,41 @@ export function EventTable(props: EventTableProps) {
       },
       { field: "title", headerName: "Title", type: "string", flex: 1 },
       {
-        field: "address",
-        headerName: "Owner Address",
-        type: "string",
-        width: 180,
+        field: "dateStart",
+        headerName: "Start",
+        type: "date",
+        width: 100,
       },
-      { field: "count", headerName: "Slots", type: "number", width: 60 },
+      { field: "dateEnd", headerName: "End", type: "date", width: 100 },
+      ...(isAttendee
+        ? [
+            {
+              field: "claimed",
+              headerName: "Claimed",
+              type: "boolean",
+              width: 80,
+            },
+          ]
+        : [
+            {
+              field: "slots",
+              headerName: "Slots",
+              type: "number",
+              width: 60,
+              valueGetter: ({ row }: GetterParamsType) => {
+                if (row.slotsTaken !== undefined) {
+                  return `${row.slotsTaken}/${row.slotsTotal}`;
+                } else {
+                  return row.slotsTotal;
+                }
+              },
+            },
+          ]),
       {
         field: "actions",
         type: "actions",
         width: 45,
+        minWidth: 45,
         getActions: (params) => [
           <GridActionsCellItem
             icon={<GroupAddIcon />}
@@ -95,14 +135,14 @@ export function EventTable(props: EventTableProps) {
             icon={<EventAvailableIcon />}
             label="Join Event"
             onClick={() => handleJoin(params.row.id, params.row.title)}
-            disabled={!isActive}
+            disabled={!(isActive && !isAttendee)}
             showInMenu
           />,
           <GridActionsCellItem
             icon={<FileCopyIcon />}
             label="Claim NFT"
             onClick={() => handleClaim(params.row.id)}
-            disabled={!(isActive && isAttendee)}
+            disabled={!(isActive && isAttendee && !params.row.claimed)}
             showInMenu
           />,
           <GridActionsCellItem

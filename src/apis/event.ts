@@ -37,21 +37,34 @@ export const create = async (
     }
   );
 
-  if (response.status === 200) {
-    return response.data.result as createResult;
-  }
+  return response.data.result as createResult;
+};
 
-  throw new Error(response.status.toString());
+export type joinData = {
+  eventId: number;
+};
+
+export const join = async (jwt: string, data: joinData): Promise<Offer> => {
+  const response = await axios.post(
+    new URL("/event/join", config.apiURL).toString(),
+    data,
+    {
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+      },
+      responseType: "json",
+      timeout: 10000,
+    }
+  );
+
+  return response.data.result as Offer;
 };
 
 export type claimData = {
   eventId: number;
 };
 
-export const claim = async (
-  jwt: string,
-  data: claimData
-): Promise<Offer> => {
+export const claim = async (jwt: string, data: claimData): Promise<Offer> => {
   const response = await axios.post(
     new URL("/event/claim", config.apiURL).toString(),
     data,
@@ -60,15 +73,37 @@ export const claim = async (
         Authorization: `Bearer ${jwt}`,
       },
       responseType: "json",
-      timeout: 60000,
+      timeout: 10000,
     }
   );
 
-  if (response.status === 200) {
-    return response.data.result as Offer;
-  }
+  return response.data.result as Offer;
+};
 
-  throw new Error(response.status.toString());
+export type inviteData = {
+  eventId: number;
+  attendeeWalletAddresses: string[];
+};
+
+export type inviteResult = boolean;
+
+export const invite = async (
+  jwt: string,
+  data: inviteData
+): Promise<inviteResult> => {
+  const response = await axios.post(
+    new URL("/event/invite", config.apiURL).toString(),
+    data,
+    {
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+      },
+      responseType: "json",
+      timeout: 600000,
+    }
+  );
+
+  return response.data.result as inviteResult;
 };
 
 export type getInfoResult = Event | undefined;
@@ -92,9 +127,5 @@ export const getInfo = async (
     }
   );
 
-  if (response.status === 200) {
-    return response.data.result as getInfoResult;
-  }
-
-  throw new Error(response.status.toString());
+  return response.data.result as getInfoResult;
 };

@@ -19,11 +19,7 @@ export const getPublic = async (params: getPublicParams): Promise<Event[]> => {
     }
   );
 
-  if (response.status === 200) {
-    return response.data.result as Event[];
-  }
-
-  throw new Error(response.status.toString());
+  return response.data.result as Event[];
 };
 
 export type getOwnedParams = {
@@ -48,9 +44,5 @@ export const getOwned = async (
     }
   );
 
-  if (response.status === 200) {
-    return response.data.result as Event[];
-  }
-
-  throw new Error(response.status.toString());
+  return response.data.result as Event[];
 };

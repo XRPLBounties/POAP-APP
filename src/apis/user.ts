@@ -23,11 +23,7 @@ export const getInfo = async (
     }
   );
 
-  if (response.status === 200) {
-    return response.data.result as User;
-  }
-
-  throw new Error(response.status.toString());
+  return response.data.result as User;
 };
 
 export type updateData = {
@@ -52,9 +48,5 @@ export const update = async (
     }
   );
 
-  if (response.status === 200) {
-    return response.data.result as boolean;
-  }
-
-  throw new Error(response.status.toString());
+  return response.data.result as boolean;
 };

@@ -1,7 +1,6 @@
 import React from "react";
 import axios from "axios";
 import { useAtom } from "jotai";
-import type { ReactNode } from "react";
 import { useSnackbar } from "notistack";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { object, string, literal, TypeOf } from "zod";
@@ -42,11 +41,7 @@ const defaultValues: ProfileFormValues = {
   email: "",
 };
 
-type ProfileDialogProps = {
-  children?: ReactNode;
-};
-
-function ProfileDialog(props: ProfileDialogProps) {
+function ProfileDialog() {
   const { account } = useWeb3();
   const { isAuthenticated, jwt } = useAuth();
   const [open, setOpen] = React.useState<boolean>(false);
@@ -71,16 +66,22 @@ function ProfileDialog(props: ProfileDialogProps) {
           lastName: result?.lastName ?? defaultValues.lastName,
           email: result?.email ?? defaultValues.email,
         };
-      } catch (error) {
-        console.debug(error);
-        if (axios.isAxiosError(error)) {
-          enqueueSnackbar(`Failed to load profile data: ${error.message}`, {
-            variant: "error",
-          });
+      } catch (err) {
+        console.debug(err);
+        if (axios.isAxiosError(err)) {
+          enqueueSnackbar(
+            `Failed to load profile data: ${err.response?.data.error}`,
+            {
+              variant: "error",
+            }
+          );
         } else {
-          enqueueSnackbar("Failed to load profile data", {
-            variant: "error",
-          });
+          enqueueSnackbar(
+            `Failed to load profile data: ${(err as Error).message}`,
+            {
+              variant: "error",
+            }
+          );
         }
       }
     }
@@ -129,23 +130,22 @@ function ProfileDialog(props: ProfileDialogProps) {
           variant: "success",
         });
       }
-    } catch (error) {
-      console.debug(error);
-      if (axios.isAxiosError(error)) {
-        enqueueSnackbar(`Profile update failed: ${error.message}`, {
+    } catch (err) {
+      console.debug(err);
+      if (axios.isAxiosError(err)) {
+        enqueueSnackbar(`Profile update failed: ${err.response?.data.error}`, {
           variant: "error",
         });
       } else {
-        enqueueSnackbar("Profile update failed", {
+        enqueueSnackbar(`Profile update failed: ${(err as Error).message}`, {
           variant: "error",
         });
       }
     } finally {
       setLoading(false);
+      reset();
+      setActiveDialog({});
     }
-
-    reset();
-    setActiveDialog({});
   };
 
   return (

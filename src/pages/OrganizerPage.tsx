@@ -1,48 +1,40 @@
 import React from "react";
 import axios from "axios";
 import { useSnackbar } from "notistack";
-import { useAtomValue } from "jotai";
+import { useAtom } from "jotai";
 
-import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
 
 import API from "apis";
 import { useWeb3 } from "connectors/context";
-import { Event, NetworkIdentifier } from "types";
+import { DialogIdentifier, Event } from "types";
 import { activeDialogAtom } from "states/atoms";
 import EventTable, { type EventTableRow } from "components/EventTable";
 import ContentWrapper from "components/ContentWrapper";
+import { useAuth } from "components/AuthContext";
 
-function HomePage() {
+function OrganizerPage() {
   const { isActive, networkId } = useWeb3();
+  const { isAuthenticated, jwt } = useAuth();
   const [data, setData] = React.useState<Event[]>();
-  const activeDialog = useAtomValue(activeDialogAtom);
+  const [activeDialog, setActiveDialog] = useAtom(activeDialogAtom);
   const { enqueueSnackbar } = useSnackbar();
-
-  const tooltip = React.useMemo(
-    () => (
-      <React.Fragment>
-        <Typography variant="subtitle1">Information</Typography>
-        <Typography variant="body2">
-          Connect a wallet to continue. This will allow you to join public
-          events, create new events and claim NFTs from events you're attending.
-        </Typography>
-      </React.Fragment>
-    ),
-    []
-  );
 
   React.useEffect(() => {
     let mounted = true;
 
     const load = async () => {
       try {
-        const events = await API.events.getPublic({
-          networkId: networkId ?? NetworkIdentifier.UNKNOWN,
-          limit: 100,
-        });
+        if (networkId && jwt) {
+          const events = await API.events.getOwned(jwt, {
+            networkId: networkId,
+            limit: 100,
+            includeAttendees: true,
+          });
 
-        if (mounted) {
-          setData(events);
+          if (mounted) {
+            setData(events);
+          }
         }
       } catch (err) {
         console.debug(err);
@@ -63,13 +55,17 @@ function HomePage() {
 
     // only update data, if no dialog is open
     if (!activeDialog.type) {
-      load();
+      if (isAuthenticated) {
+        load();
+      } else {
+        setData(undefined);
+      }
     }
 
     return () => {
       mounted = false;
     };
-  }, [activeDialog, isActive, networkId]);
+  }, [activeDialog, isActive, networkId, isAuthenticated, jwt]);
 
   const rows = React.useMemo<EventTableRow[]>(() => {
     if (data) {
@@ -86,16 +82,30 @@ function HomePage() {
     }
   }, [data]);
 
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setActiveDialog({ type: DialogIdentifier.DIALOG_MINT });
+  };
+
   return (
     <ContentWrapper
-      title="Public Events Overview"
-      tooltip={tooltip}
+      title="My Events Overview"
       isLoading={!Boolean(data)}
-      isAuthenticated={true}
+      isAuthenticated={isAuthenticated}
+      secondary={
+        <Button
+          title="Create a new event"
+          color="primary"
+          variant="contained"
+          onClick={handleClick}
+          disabled={!(isActive && isAuthenticated)}
+        >
+          New
+        </Button>
+      }
     >
-      <EventTable rows={rows} />
+      <EventTable rows={rows} isOwner={true} />
     </ContentWrapper>
   );
 }
 
-export default HomePage;
+export default OrganizerPage;

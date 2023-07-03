@@ -12,11 +12,7 @@ export const heartbeat = async (): Promise<boolean> => {
     }
   );
 
-  if (response.status === 200) {
-    return response.data.result as boolean;
-  }
-
-  throw new Error(response.status.toString());
+  return response.data.result as boolean;
 };
 
 export type nonceData = {
@@ -33,11 +29,7 @@ export const nonce = async (data: nonceData): Promise<string> => {
     }
   );
 
-  if (response.status === 200) {
-    return response.data.result as string;
-  }
-
-  throw new Error(response.status.toString());
+  return response.data.result as string;
 };
 
 export type loginData = {
@@ -57,11 +49,7 @@ export const login = async (data: loginData): Promise<string> => {
     }
   );
 
-  if (response.status === 200) {
-    return response.data.result as string;
-  }
-
-  throw new Error(response.status.toString());
+  return response.data.result as string;
 };
 
 export type refreshResult = string | null;
@@ -79,9 +67,5 @@ export const refresh = async (jwt: string): Promise<refreshResult> => {
     }
   );
 
-  if (response.status === 200) {
-    return response.data.result as refreshResult;
-  }
-
-  throw new Error(`${response.status} ${response.data.error}`); // TODO want the actual message
+  return response.data.result as refreshResult;
 };

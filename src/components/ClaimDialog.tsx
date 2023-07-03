@@ -4,16 +4,12 @@ import { useAtom } from "jotai";
 import { useSnackbar } from "notistack";
 
 import Button from "@mui/material/Button";
-import Checkbox from "@mui/material/Checkbox";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import FormGroup from "@mui/material/FormGroup";
 import IconButton from "@mui/material/IconButton";
-import Typography from "@mui/material/Typography";
 import CloseIcon from "@mui/icons-material/Close";
 import CircularProgress from "@mui/material/CircularProgress";
 
@@ -23,20 +19,19 @@ import { activeDialogAtom } from "states/atoms";
 import { DialogIdentifier } from "types";
 import { useAuth } from "components/AuthContext";
 
-type JoinDialogData = Record<string, any>;
+type ClaimDialogData = Record<string, any>;
 
-function JoinDialog() {
+function ClaimDialog() {
   const { provider, account } = useWeb3();
   const { isAuthenticated, jwt } = useAuth();
   const [open, setOpen] = React.useState<boolean>(false);
-  const [checked, setChecked] = React.useState<boolean>(true);
-  const [data, setData] = React.useState<JoinDialogData | undefined>();
+  const [data, setData] = React.useState<ClaimDialogData | undefined>();
   const [loading, setLoading] = React.useState<boolean>(false);
   const [activeDialog, setActiveDialog] = useAtom(activeDialogAtom);
   const { enqueueSnackbar } = useSnackbar();
 
   React.useEffect(() => {
-    setOpen(activeDialog.type === DialogIdentifier.DIALOG_JOIN);
+    setOpen(activeDialog.type === DialogIdentifier.DIALOG_CLAIM);
     setData(activeDialog.data);
   }, [activeDialog]);
 
@@ -55,31 +50,29 @@ function JoinDialog() {
     setLoading(true);
     try {
       if (provider && account && data?.eventId && jwt) {
-        const offer = await API.event.join(jwt, {
+        const offer = await API.event.claim(jwt, {
           eventId: data.eventId,
         });
-        console.debug("JoinResult", offer);
+        console.debug("ClaimResult", offer);
 
         if (!offer.claimed) {
-          if (checked) {
-            enqueueSnackbar(
-              "Creating NFT claim request (confirm the transaction in your wallet)",
-              {
-                variant: "warning",
-                autoHideDuration: 30000,
-              }
-            );
-            const success = await provider.acceptOffer(offer.offerIndex);
-
-            if (success) {
-              enqueueSnackbar("Claim successful", { 
-                variant: "success",
-              });
-            } else {
-              enqueueSnackbar(`Claim failed: Unable to claim NFT`, {
-                variant: "error",
-              });
+          enqueueSnackbar(
+            "Creating NFT claim request (confirm the transaction in your wallet)",
+            {
+              variant: "warning",
+              autoHideDuration: 30000,
             }
+          );
+          const success = await provider.acceptOffer(offer.offerIndex);
+
+          if (success) {
+            enqueueSnackbar("Claim successful", {
+              variant: "success",
+            });
+          } else {
+            enqueueSnackbar(`Claim failed: Unable to claim NFT`, {
+              variant: "error",
+            });
           }
         } else {
           enqueueSnackbar(`Claim successful: Already claimed NFT`, {
@@ -90,22 +83,19 @@ function JoinDialog() {
     } catch (err) {
       console.debug(err);
       if (axios.isAxiosError(err)) {
-        enqueueSnackbar(`Sign-up failed: ${err.response?.data.error}`, {
+        enqueueSnackbar(`Claim failed: ${err.response?.data.error}`, {
           variant: "error",
         });
       } else {
-        enqueueSnackbar(`Sign-up failed: ${(err as Error).message}`, {
+        enqueueSnackbar(`Claim failed: ${(err as Error).message}`, {
           variant: "error",
         });
       }
     } finally {
       setLoading(false);
-      setActiveDialog({});
     }
-  };
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setChecked(event.target.checked);
+    setActiveDialog({});
   };
 
   return (
@@ -122,7 +112,7 @@ function JoinDialog() {
         }}
         variant="h5"
       >
-        Sign up for Event #{data?.eventId}
+        Claim NFT for Event #{data?.eventId}
       </DialogTitle>
       <IconButton
         sx={{
@@ -139,24 +129,11 @@ function JoinDialog() {
       </IconButton>
       <DialogContent>
         <DialogContentText sx={{ paddingBottom: "0.5rem" }}>
-          Would you like to join the event?
-        </DialogContentText>
-        <DialogContentText sx={{ fontStyle: "italic", fontWeight: "bold" }}>
-          "{data?.title}"
+          Would you like to claim your NFT now?
         </DialogContentText>
       </DialogContent>
 
       <DialogActions>
-        <FormGroup sx={{ marginLeft: "9px", marginRight: "auto" }}>
-          <FormControlLabel
-            control={<Checkbox checked={checked} onChange={handleChange} />}
-            label={
-              <Typography color={checked ? "inherit" : "text.secondary"}>
-                Immediately claim NFT
-              </Typography>
-            }
-          />
-        </FormGroup>
         <Button color="primary" onClick={handleCancel} disabled={loading}>
           Cancel
         </Button>
@@ -166,11 +143,11 @@ function JoinDialog() {
           startIcon={loading && <CircularProgress size={20} />}
           disabled={loading || !Boolean(account) || !isAuthenticated}
         >
-          Join
+          Claim
         </Button>
       </DialogActions>
     </Dialog>
   );
 }
 
-export default JoinDialog;
+export default ClaimDialog;

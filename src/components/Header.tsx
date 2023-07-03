@@ -12,11 +12,13 @@ import ListItemText from "@mui/material/ListItemText";
 import Toolbar from "@mui/material/Toolbar";
 import Stack from "@mui/material/Stack";
 
+import config from "config";
 import Web3Status from "components/Web3Status";
 import NetworkStatus from "components/NetworkStatus";
 import ConnectivityStatus from "components/ConnectivityStatus";
 import AuthStatus from "components/AuthStatus";
 import { useWeb3 } from "connectors/context";
+import { useAuth } from "components/AuthContext";
 
 const StyledList = styled(MuiList)<{ component?: React.ElementType }>(
   ({ theme }) => ({
@@ -43,15 +45,18 @@ const StyledList = styled(MuiList)<{ component?: React.ElementType }>(
 
 function Header() {
   const { isActive } = useWeb3();
+  const { isAuthenticated } = useAuth();
 
   const entries: Array<[string, string, boolean]> = React.useMemo(
     () => [
       ["Home", "/", false],
-      ["Events", "/events", !isActive],
-      ["Signups", "/offers", !isActive],
-      ["Debug", "/debug", false],
+      ["Organizer", "/organizer", !(isActive && isAuthenticated)],
+      ["Attendee", "/attendee", !(isActive && isAuthenticated)],
+      ...(config.debug
+        ? ([["Debug", "/debug", false]] as Array<[string, string, boolean]>)
+        : []),
     ],
-    [isActive]
+    [isActive, isAuthenticated]
   );
 
   return (

@@ -1,4 +1,5 @@
 import React from "react";
+import axios from "axios";
 import { useAtom } from "jotai";
 import type { ReactNode } from "react";
 import { useSnackbar } from "notistack";
@@ -174,11 +175,17 @@ function MintDialog(props: MintDialogProps) {
         });
         reset();
       }
-    } catch (error) {
-      console.debug(error);
-      enqueueSnackbar(`Mint failed: ${(error as Error).message}`, {
-        variant: "error",
-      });
+    } catch (err) {
+      console.debug(err);
+      if (axios.isAxiosError(err)) {
+        enqueueSnackbar(`Mint failed: ${err.response?.data.error}`, {
+          variant: "error",
+        });
+      } else {
+        enqueueSnackbar(`Mint failed: ${(err as Error).message}`, {
+          variant: "error",
+        });
+      }
     } finally {
       setLoading(false);
       setActiveDialog({});

@@ -141,10 +141,10 @@ export class GemWallet extends Connector {
         networkId: this.mapNetworkId(network.result.network),
         account: address.result.address,
       });
-    } catch (error) {
+    } catch (err) {
       cancelActivation();
-      this.onError?.(error as Error);
-      throw error;
+      this.onError?.(err as Error);
+      throw err;
     }
   }
 

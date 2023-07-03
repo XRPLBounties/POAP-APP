@@ -13,6 +13,8 @@ const DEFAULT = {
       },
     },
   },
+
+  debug: false,
 };
 
 const config = DEFAULT;

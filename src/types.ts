@@ -35,7 +35,7 @@ export type User = {
 
 export type Event = {
   id: number;
-  networkId: number;
+  networkId: NetworkIdentifier;
   title: string;
   description: string;
   location: string;
@@ -44,17 +44,27 @@ export type Event = {
   dateStart: string;
   dateEnd: string;
   isManaged: boolean;
-  ownerWalletAddress: string;
+  ownerWalletAddress: User["walletAddress"];
   owner?: User;
   attendees?: User[];
 };
 
+export type NFT = {
+  id: string;
+  issuerWalletAddress: User["walletAddress"];
+  eventId: Event["id"];
+  issuer?: User;
+  event: Event;
+};
+
 export type Offer = {
   id: number;
-  ownerWalletAddress: string;
-  tokenId: number;
+  ownerWalletAddress: User["walletAddress"];
+  tokenId: NFT["id"];
   offerIndex: string;
   claimed: boolean;
+  owner?: User;
+  token: NFT;
 };
 
 export type Metadata = {

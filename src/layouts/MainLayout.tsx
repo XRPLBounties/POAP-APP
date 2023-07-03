@@ -4,12 +4,14 @@ import { useAtomValue } from "jotai";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 
-import Header from "components/Header";
-import MintDialog from "components/MintDialog";
-import JoinDialog from "components/JoinDialog";
-import ProfileDialog from "components/ProfileDialog";
 import { activeDialogAtom } from "states/atoms";
 import { DialogIdentifier } from "types";
+import AddDialog from "components/AddDialog";
+import ClaimDialog from "components/ClaimDialog";
+import Header from "components/Header";
+import JoinDialog from "components/JoinDialog";
+import MintDialog from "components/MintDialog";
+import ProfileDialog from "components/ProfileDialog";
 
 function MainLayout(props: any) {
   const activeDialog = useAtomValue(activeDialogAtom);
@@ -28,10 +30,12 @@ function MainLayout(props: any) {
         >
           <Outlet />
         </Container>
-        <MintDialog />
+        <AddDialog />
+        <ClaimDialog />
         <JoinDialog />
+        <MintDialog />
         {
-          // mounted component every time the dialog is opened to ensure 
+          // mounted component every time the dialog is opened to ensure
           // the latest values from the database are load
           activeDialog.type === DialogIdentifier.DIALOG_PROFILE && (
             <ProfileDialog />

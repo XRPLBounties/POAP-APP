@@ -74,7 +74,7 @@ export type AuthProviderProps = {
 export function AuthProvider({ children }: AuthProviderProps) {
   const { connector, provider, account, networkId } = useWeb3();
   const { isAuto, tokens, addToken, removeToken, toggleAuto } = useAuthStore();
-  const [isAvailable, setIsAvailable] = React.useState<boolean>(false);
+  const [isAvailable, setIsAvailable] = React.useState<boolean>(true);
   const [isAuthenticated, setIsAuthenticated] = React.useState<boolean>(false);
   const [jwt, setJwt] = React.useState<string>();
 
@@ -153,7 +153,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (mounted) {
           setIsAvailable(true);
         }
-      } catch (error) {
+      } catch (err) {
+        console.log(err);
         if (mounted) {
           setIsAvailable(false);
         }

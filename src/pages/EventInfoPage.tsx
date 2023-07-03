@@ -42,7 +42,7 @@ function EventInfoPage() {
           setData(undefined);
         }
         if (axios.isAxiosError(err)) {
-          enqueueSnackbar(`Failed to load event data: ${err.message}`, {
+          enqueueSnackbar(`Failed to load event data: ${err.response?.data.error}`, {
             variant: "error",
           });
         } else {
@@ -62,7 +62,7 @@ function EventInfoPage() {
     return () => {
       mounted = false;
     };
-  }, [id]);
+  }, [id, jwt]);
 
   React.useEffect(() => {
     let mounted = true;
@@ -83,7 +83,7 @@ function EventInfoPage() {
           setMetadata(undefined);
         }
         if (axios.isAxiosError(err)) {
-          enqueueSnackbar(`Failed to load event metadata: ${err.message}`, {
+          enqueueSnackbar(`Failed to load event metadata: ${err.response?.data.error}`, {
             variant: "error",
           });
         } else {
