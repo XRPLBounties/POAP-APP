@@ -5,19 +5,21 @@ The web app for Proof of Attendance Protocol
 ## Requirements
 - Node.js `v18.16.0+`
 - Yarn `v1.22.19+`
-- Running POAP API server (backend), for details see [here](https://github.com/rikublock/POAP-API)
+- Running POAP API 2.0 server (backend), for details see [here](https://github.com/rikublock/POAP-API2)
 
 ## Getting Started
-- install dependencies with `yarn`
+- install dependencies with `yarn install`
 - rename `.env.example` to `.env` (change values as needed)
-- run the backend
+  - `REACT_APP_URL_POAP_API` (backend server URL)
+  - `REACT_APP_KEY_XUMM_API` (Xumm App API key, needs to match the key configured in the backend)
+- ensure the backend service is running
 - run the app with `yarn start`
 
 ## Available Scripts
 
 In the project directory, you can run:
 
-### `yarn`
+### `yarn install`
 
 Install dependencies.
 
