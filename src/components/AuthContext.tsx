@@ -1,12 +1,12 @@
 import type { ReactNode } from "react";
 import React from "react";
-import { isExpired } from "react-jwt";
+import { decodeToken, isExpired } from "react-jwt";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
 import API from "apis";
 import { useWeb3 } from "connectors/context";
-import { ConnectorType, WalletType } from "types";
+import { ConnectorType, JwtPayload, WalletType } from "types";
 import { XummWalletProvider } from "connectors/xumm";
 import { GemWalletProvider } from "connectors/gem";
 
@@ -58,6 +58,7 @@ export type AuthContextType = {
   isAuthenticated: boolean;
   isAuto: boolean;
   jwt?: string;
+  permissions: string[];
   login: () => Promise<void>;
   logout: () => void;
   toggleAuto: () => void;
@@ -77,6 +78,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isAvailable, setIsAvailable] = React.useState<boolean>(true);
   const [isAuthenticated, setIsAuthenticated] = React.useState<boolean>(false);
   const [jwt, setJwt] = React.useState<string>();
+  const [permissions, setPermissions] = React.useState<string[]>([]);
 
   const checkStore = React.useCallback(() => {
     if (account) {
@@ -113,13 +115,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, [account, connector, provider]);
 
+  const reset = React.useCallback(() => {
+    setIsAuthenticated(false);
+    setJwt(undefined);
+    setPermissions([]);
+  }, []);
+
   const login = React.useCallback(async () => {
     if (account) {
       // try to load from cache first
       let token = checkStore();
       if (token) {
         console.debug("Using cached jwt");
+        const payload = decodeToken(token);
         setJwt(token);
+        setPermissions((payload as JwtPayload)?.permissions ?? [])
         setIsAuthenticated(true);
         return;
       }
@@ -127,7 +137,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // regular authentication
       token = await acquireToken();
       if (token) {
+        const payload = decodeToken(token);
         setJwt(token);
+        setPermissions((payload as JwtPayload)?.permissions ?? [])
         addToken(account, token);
         setIsAuthenticated(true);
         return;
@@ -139,9 +151,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     if (account) {
       removeToken(account);
     }
-    setIsAuthenticated(false);
-    setJwt(undefined);
-  }, [account, removeToken]);
+    reset();
+  }, [account, removeToken, reset]);
 
   // check backend service availability
   React.useEffect(() => {
@@ -182,8 +193,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       } catch (err) {
         console.debug(err);
         if (mounted) {
-          setIsAuthenticated(false);
-          setJwt(undefined);
+          reset();
         }
       }
     };
@@ -192,15 +202,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (account) {
         load();
       } else {
-        setIsAuthenticated(false);
-        setJwt(undefined);
+        reset()
       }
     }
 
     return () => {
       mounted = false;
     };
-  }, [account, networkId, isAuto, isAvailable]);
+  }, [account, networkId, isAuto, isAvailable, login, reset]);
 
   return (
     <AuthContext.Provider
@@ -209,6 +218,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         isAuthenticated,
         isAuto,
         jwt,
+        permissions,
         login,
         logout,
         toggleAuto,
