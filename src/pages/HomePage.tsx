@@ -91,7 +91,7 @@ function HomePage() {
       title="Public Events Overview"
       tooltip={tooltip}
       isLoading={!Boolean(data)}
-      isAuthenticated={true}
+      isAuthorized={true}
     >
       <EventTable rows={rows} />
     </ContentWrapper>

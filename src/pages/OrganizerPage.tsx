@@ -15,10 +15,14 @@ import { useAuth } from "components/AuthContext";
 
 function OrganizerPage() {
   const { isActive, networkId } = useWeb3();
-  const { isAuthenticated, jwt } = useAuth();
+  const { isAuthenticated, jwt, permissions } = useAuth();
   const [data, setData] = React.useState<Event[]>();
   const [activeDialog, setActiveDialog] = useAtom(activeDialogAtom);
   const { enqueueSnackbar } = useSnackbar();
+
+  const isAuthorized = React.useMemo(() => {
+    return isAuthenticated && permissions.includes("organizer");
+  }, [isAuthenticated, permissions]);
 
   React.useEffect(() => {
     let mounted = true;
@@ -42,9 +46,12 @@ function OrganizerPage() {
           setData(undefined);
         }
         if (axios.isAxiosError(err)) {
-          enqueueSnackbar(`Failed to load events data: ${err.response?.data.error}`, {
-            variant: "error",
-          });
+          enqueueSnackbar(
+            `Failed to load events data: ${err.response?.data.error}`,
+            {
+              variant: "error",
+            }
+          );
         } else {
           enqueueSnackbar("Failed to load events data", {
             variant: "error",
@@ -55,7 +62,7 @@ function OrganizerPage() {
 
     // only update data, if no dialog is open
     if (!activeDialog.type) {
-      if (isAuthenticated) {
+      if (isAuthorized) {
         load();
       } else {
         setData(undefined);
@@ -65,7 +72,7 @@ function OrganizerPage() {
     return () => {
       mounted = false;
     };
-  }, [activeDialog, isActive, networkId, isAuthenticated, jwt]);
+  }, [activeDialog, isActive, networkId, isAuthorized, jwt]);
 
   const rows = React.useMemo<EventTableRow[]>(() => {
     if (data) {
@@ -90,14 +97,14 @@ function OrganizerPage() {
     <ContentWrapper
       title="My Events Overview"
       isLoading={!Boolean(data)}
-      isAuthenticated={isAuthenticated}
+      isAuthorized={isAuthorized}
       secondary={
         <Button
           title="Create a new event"
           color="primary"
           variant="contained"
           onClick={handleClick}
-          disabled={!(isActive && isAuthenticated)}
+          disabled={!(isActive && isAuthorized)}
         >
           New
         </Button>

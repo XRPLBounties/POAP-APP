@@ -45,18 +45,22 @@ const StyledList = styled(MuiList)<{ component?: React.ElementType }>(
 
 function Header() {
   const { isActive } = useWeb3();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, permissions } = useAuth();
+
+  const isAuthorized = React.useMemo(() => {
+    return isAuthenticated && permissions.includes("organizer");
+  }, [isAuthenticated, permissions]);
 
   const entries: Array<[string, string, boolean]> = React.useMemo(
     () => [
       ["Home", "/", false],
-      ["Organizer", "/organizer", !(isActive && isAuthenticated)],
+      ["Organizer", "/organizer", !(isActive && isAuthorized)],
       ["Attendee", "/attendee", !(isActive && isAuthenticated)],
       ...(config.debug
         ? ([["Debug", "/debug", false]] as Array<[string, string, boolean]>)
         : []),
     ],
-    [isActive, isAuthenticated]
+    [isActive, isAuthenticated, isAuthorized]
   );
 
   return (

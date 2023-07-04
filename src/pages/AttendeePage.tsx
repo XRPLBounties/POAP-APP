@@ -85,7 +85,7 @@ function AttendeePage() {
     <ContentWrapper
       title="My Offers Overview"
       isLoading={!Boolean(data)}
-      isAuthenticated={isAuthenticated}
+      isAuthorized={isAuthenticated}
     >
       <EventTable rows={rows} isAttendee={true} />;
     </ContentWrapper>

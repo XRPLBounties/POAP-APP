@@ -13,11 +13,11 @@ export type ContentWrapperProps = {
   tooltip?: ReactNode;
   secondary?: ReactNode;
   isLoading?: boolean;
-  isAuthenticated?: boolean;
+  isAuthorized?: boolean;
 };
 
 export function ContentWrapper(props: ContentWrapperProps) {
-  const { children, title, tooltip, secondary, isLoading, isAuthenticated } =
+  const { children, title, tooltip, secondary, isLoading, isAuthorized } =
     props;
   return (
     <Box sx={{ width: "48rem" }}>
@@ -39,7 +39,7 @@ export function ContentWrapper(props: ContentWrapperProps) {
             </Typography>
           </Box>
         )}
-        {isAuthenticated ? (
+        {isAuthorized ? (
           isLoading ? (
             <Loader />
           ) : (
