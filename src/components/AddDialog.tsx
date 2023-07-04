@@ -48,6 +48,7 @@ const schema = object({
     })
   )
     .min(1, "Must provide at least 1 wallet address")
+    .max(20)
     .refine(
       (items) => {
         const addresses = items.map((x) => x.address);
