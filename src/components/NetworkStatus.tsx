@@ -1,5 +1,7 @@
 import React from "react";
-import Button from "@mui/material/Button";
+
+import Chip from "@mui/material/Chip";
+
 import { useWeb3 } from "connectors/context";
 import { NetworkIdentifier } from "types";
 
@@ -22,17 +24,17 @@ function NetworkStatus() {
   }, [networkId]);
 
   return (
-    <React.Fragment>
-      <Button
-        variant="contained"
-        color="primary"
-        disabled={!Boolean(networkId)}
-        disableRipple
-        title="Network status"
-      >
-        {networkName}
-      </Button>
-    </React.Fragment>
+    <Chip
+      sx={{
+        borderRadius: "4px",
+        textTransform: "uppercase",
+        height: "36.5px",
+        fontWeight: 450,
+        fontSize: "0.875rem",
+      }}
+      variant="filled"
+      label={networkName}
+    />
   );
 }
 
