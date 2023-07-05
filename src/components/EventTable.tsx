@@ -1,7 +1,8 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link as NavLink } from "react-router-dom";
 import { useSetAtom } from "jotai";
 
+import Link from "@mui/material/Link";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import FileCopyIcon from "@mui/icons-material/FileCopy";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
@@ -86,7 +87,21 @@ export function EventTable(props: EventTableProps) {
         width: 45,
         minWidth: 45,
       },
-      { field: "title", headerName: "Title", type: "string", flex: 1 },
+      {
+        field: "title",
+        headerName: "Title",
+        type: "string",
+        flex: 1,
+        renderCell: (params) => (
+          <Link
+            sx={{ textDecoration: "none" }}
+            component={NavLink}
+            to={`/event/${params.row.id}`}
+          >
+            {params.value}
+          </Link>
+        ),
+      },
       {
         field: "dateStart",
         headerName: "Start",
