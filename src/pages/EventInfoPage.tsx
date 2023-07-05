@@ -5,18 +5,16 @@ import { useSnackbar } from "notistack";
 
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
-import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
-import Link from "@mui/material/Link";
-import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
-import type { GridColDef } from "@mui/x-data-grid";
 
 import API from "apis";
 import type { Event, Metadata } from "types";
 import Loader from "components/Loader";
-import DataTable from "components/DataTable";
+
 import { useAuth } from "components/AuthContext";
+import AttendanceTable, { AttendanceTableRow } from "components/AttendeeTable";
+import ContentWrapper from "components/ContentWrapper";
 
 function EventInfoPage() {
   const { jwt } = useAuth();
@@ -42,9 +40,12 @@ function EventInfoPage() {
           setData(undefined);
         }
         if (axios.isAxiosError(err)) {
-          enqueueSnackbar(`Failed to load event data: ${err.response?.data.error}`, {
-            variant: "error",
-          });
+          enqueueSnackbar(
+            `Failed to load event data: ${err.response?.data.error}`,
+            {
+              variant: "error",
+            }
+          );
         } else {
           enqueueSnackbar("Failed to load event data", {
             variant: "error",
@@ -54,7 +55,11 @@ function EventInfoPage() {
     };
 
     if (id) {
-      load();
+      if (parseInt(id)) {
+        load();
+      } else {
+        setData(null); // invalid, event not found
+      }
     } else {
       setData(undefined);
     }
@@ -83,9 +88,12 @@ function EventInfoPage() {
           setMetadata(undefined);
         }
         if (axios.isAxiosError(err)) {
-          enqueueSnackbar(`Failed to load event metadata: ${err.response?.data.error}`, {
-            variant: "error",
-          });
+          enqueueSnackbar(
+            `Failed to load event metadata: ${err.response?.data.error}`,
+            {
+              variant: "error",
+            }
+          );
         } else {
           enqueueSnackbar("Failed to load event metadata", {
             variant: "error",
@@ -105,54 +113,15 @@ function EventInfoPage() {
     };
   }, [data]);
 
-  const columns: GridColDef[] = [
-    { field: "index", headerName: "#", width: 45, minWidth: 45 },
-    { field: "address", headerName: "Wallet Address", width: 320 },
-    { field: "name", headerName: "Name", flex: 1 },
-    {
-      field: "email",
-      headerName: "Email",
-      align: "center",
-      sortable: false,
-      filterable: false,
-      width: 60,
-      renderCell: (params) => {
-        return (
-          <React.Fragment>
-            {params.row.emailAddress && (
-              <Link
-                target="_top"
-                rel="noopener noreferrer"
-                href={`mailto:${params.row.emailAddress}`}
-              >
-                <EmailOutlinedIcon />
-              </Link>
-            )}
-          </React.Fragment>
-        );
-      },
-    },
-  ];
-
-  const makeName = (first?: string, last?: string): string => {
-    let result = "";
-    if (first) {
-      result += first;
-    }
-    if (last) {
-      result += ` ${last}`;
-    }
-    return result.trim();
-  };
-
-  const rows = React.useMemo(() => {
+  const rows = React.useMemo<AttendanceTableRow[]>(() => {
     if (data && data.attendees) {
       return data.attendees.map((a, i) => ({
         id: i,
         index: i + 1,
-        address: a.walletAddress,
-        name: makeName(a.firstName, a.lastName),
-        emailAddress: a.email,
+        walletAddress: a.walletAddress,
+        firstName: a.firstName,
+        lastName: a.lastName,
+        email: a.email,
       }));
     } else {
       return [];
@@ -160,110 +129,103 @@ function EventInfoPage() {
   }, [data]);
 
   return (
-    <React.Fragment>
-      <Box sx={{ width: "48rem" }}>
-        <Paper sx={{ position: "relative", padding: "1.5rem" }} elevation={1}>
-          {data ? (
+    <ContentWrapper
+      isLoading={data === undefined}
+      isAuthorized={true}
+      secondary={
+        <IconButton
+          title="Return to previous page"
+          color="primary"
+          onClick={() => navigate(-1)}
+        >
+          <ArrowBackRoundedIcon />
+        </IconButton>
+      }
+    >
+      {data ? (
+        <React.Fragment>
+          <Box
+            sx={{
+              marginBottom: "0.75rem",
+            }}
+          >
+            <Typography
+              sx={{ marginRight: "4rem", fontWeight: "bold" }}
+              variant="h5"
+            >
+              {data.title}
+            </Typography>
+            <Typography
+              sx={{
+                marginBottom: "0.75rem",
+                color: "lightgray",
+                fontStyle: "italic",
+              }}
+              variant="h6"
+            >{`Event #${data.id}`}</Typography>
+          </Box>
+
+          {metadata ? (
             <React.Fragment>
               <Box
                 sx={{
                   marginBottom: "0.75rem",
                 }}
               >
-                <Typography
-                  sx={{ marginRight: "4rem", fontWeight: "bold" }}
-                  variant="h5"
-                >
-                  {data.title}
-                </Typography>
-                <Typography
+                <Box
+                  component="img"
                   sx={{
+                    maxHeight: 350,
+                    maxWidth: "45rem",
                     marginBottom: "0.75rem",
-                    color: "lightgray",
-                    fontStyle: "italic",
                   }}
-                  variant="h6"
-                >{`Event #${data.id}`}</Typography>
+                  alt="event banner"
+                  src={metadata.imageUrl}
+                />
+                <Typography variant="body1">{metadata.description}</Typography>
               </Box>
 
-              {metadata ? (
-                <React.Fragment>
-                  <Box
-                    sx={{
-                      marginBottom: "0.75rem",
-                    }}
-                  >
-                    <Box
-                      component="img"
-                      sx={{
-                        maxHeight: 350,
-                        maxWidth: "45rem",
-                        marginBottom: "0.75rem",
-                      }}
-                      alt="event banner"
-                      src={metadata.imageUrl}
-                    />
-                    <Typography variant="body1">
-                      {metadata.description}
-                    </Typography>
-                  </Box>
-
-                  <Box
-                    sx={{
-                      marginBottom: "0.75rem",
-                    }}
-                  >
-                    <Typography sx={{ marginBottom: "0.5rem" }} variant="h6">
-                      Information:
-                    </Typography>
-                    <Typography variant="body1">
-                      <strong>Date Start:</strong> {metadata.dateStart}
-                    </Typography>
-                    <Typography variant="body1">
-                      <strong>Date End:</strong> {metadata.dateEnd}
-                    </Typography>
-                    <Typography variant="body1">
-                      <strong>Location:</strong> {metadata.location}
-                    </Typography>
-                    <Typography variant="body1">
-                      <strong>Reserved slots:</strong> {data.attendees?.length}/
-                      {metadata.tokenCount}
-                    </Typography>
-                  </Box>
-
-                  <Box>
-                    <Typography sx={{ marginBottom: "0.75rem" }} variant="h6">
-                      Attendees:
-                    </Typography>
-                    <DataTable columns={columns} rows={rows} />
-                  </Box>
-                </React.Fragment>
-              ) : (
-                <Loader />
-              )}
+              <Box
+                sx={{
+                  marginBottom: "0.75rem",
+                }}
+              >
+                <Typography sx={{ marginBottom: "0.5rem" }} variant="h6">
+                  Information:
+                </Typography>
+                <Typography variant="body1">
+                  <strong>Date Start:</strong>{" "}
+                  {new Date(metadata.dateStart).toString()}
+                </Typography>
+                <Typography variant="body1">
+                  <strong>Date End:</strong>{" "}
+                  {new Date(metadata.dateEnd).toString()}
+                </Typography>
+                <Typography variant="body1">
+                  <strong>Location:</strong> {metadata.location}
+                </Typography>
+                <Typography variant="body1">
+                  <strong>Reserved slots:</strong> {data.attendees?.length}/
+                  {metadata.tokenCount}
+                </Typography>
+              </Box>
             </React.Fragment>
-          ) : data === null ? (
-            <Typography variant="h6">Event not found!</Typography>
           ) : (
             <Loader />
           )}
 
-          <IconButton
-            sx={{
-              position: "absolute",
-              top: "1rem",
-              right: "1rem",
-              borderRadius: 5,
-            }}
-            title="Return to previous page"
-            color="primary"
-            onClick={() => navigate(-1)}
-          >
-            <ArrowBackRoundedIcon />
-          </IconButton>
-        </Paper>
-      </Box>
-    </React.Fragment>
+          <Box>
+            <Typography sx={{ marginBottom: "0.75rem" }} variant="h6">
+              Attendees:
+            </Typography>
+            <AttendanceTable rows={rows} />
+          </Box>
+        </React.Fragment>
+      ) : (
+        // data === null
+        <Typography variant="h6">Event not found!</Typography>
+      )}
+    </ContentWrapper>
   );
 }
 
