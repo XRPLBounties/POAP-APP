@@ -170,7 +170,7 @@ function MintDialog(props: MintDialogProps) {
           isManaged: !values.isPublic,
         });
         console.debug("MintResult", result);
-        enqueueSnackbar(`Mint successful: Event ID #${result.eventId}`, {
+        enqueueSnackbar(`Mint successful: Event #${result.eventId}`, {
           variant: "success",
         });
         reset();

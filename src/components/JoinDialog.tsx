@@ -59,6 +59,9 @@ function JoinDialog() {
           eventId: data.eventId,
         });
         console.debug("JoinResult", offer);
+        enqueueSnackbar(`Sign-up successful: Event #${data?.eventId}`, {
+          variant: "success",
+        });
 
         if (!offer.claimed) {
           if (checked) {
