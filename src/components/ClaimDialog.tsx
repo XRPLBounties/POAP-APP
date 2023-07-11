@@ -55,7 +55,7 @@ function ClaimDialog() {
         });
         console.debug("ClaimResult", offer);
 
-        if (!offer.claimed) {
+        if (offer.offerIndex && !offer.claimed) {
           enqueueSnackbar(
             "Creating NFT claim request (confirm the transaction in your wallet)",
             {

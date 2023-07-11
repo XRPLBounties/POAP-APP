@@ -57,37 +57,32 @@ function JoinDialog() {
       if (provider && account && data?.eventId && jwt) {
         const offer = await API.event.join(jwt, {
           eventId: data.eventId,
+          createOffer: checked,
         });
         console.debug("JoinResult", offer);
         enqueueSnackbar(`Sign-up successful: Event #${data?.eventId}`, {
           variant: "success",
         });
 
-        if (!offer.claimed) {
-          if (checked) {
-            enqueueSnackbar(
-              "Creating NFT claim request (confirm the transaction in your wallet)",
-              {
-                variant: "warning",
-                autoHideDuration: 30000,
-              }
-            );
-            const success = await provider.acceptOffer(offer.offerIndex);
-
-            if (success) {
-              enqueueSnackbar("Claim successful", { 
-                variant: "success",
-              });
-            } else {
-              enqueueSnackbar(`Claim failed: Unable to claim NFT`, {
-                variant: "error",
-              });
+        if (checked && offer.offerIndex) {
+          enqueueSnackbar(
+            "Creating NFT claim request (confirm the transaction in your wallet)",
+            {
+              variant: "warning",
+              autoHideDuration: 30000,
             }
+          );
+          const success = await provider.acceptOffer(offer.offerIndex);
+
+          if (success) {
+            enqueueSnackbar("Claim successful", {
+              variant: "success",
+            });
+          } else {
+            enqueueSnackbar(`Claim failed: Unable to claim NFT`, {
+              variant: "error",
+            });
           }
-        } else {
-          enqueueSnackbar(`Claim successful: Already claimed NFT`, {
-            variant: "success",
-          });
         }
       }
     } catch (err) {

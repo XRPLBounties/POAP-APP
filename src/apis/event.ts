@@ -42,6 +42,7 @@ export const create = async (
 
 export type joinData = {
   eventId: number;
+  createOffer: boolean;
 };
 
 export const join = async (jwt: string, data: joinData): Promise<Offer> => {

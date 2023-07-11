@@ -61,7 +61,7 @@ export type Offer = {
   id: number;
   ownerWalletAddress: User["walletAddress"];
   tokenId: NFT["id"];
-  offerIndex: string;
+  offerIndex: string | null;
   claimed: boolean;
   owner?: User;
   token: NFT;
