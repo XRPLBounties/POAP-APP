@@ -25,16 +25,24 @@ export enum ConnectorType {
   GEM = "GEM",
 }
 
+export enum EventStatus {
+  ACTIVE,
+  CLOSED,
+  CANCELED,
+}
+
 export type User = {
   walletAddress: string;
   firstName?: string;
   lastName?: string;
   email?: string;
   isOrganizer: boolean;
+  slots: number;
 };
 
 export type Event = {
   id: number;
+  status: EventStatus;
   networkId: NetworkIdentifier;
   title: string;
   description: string;
