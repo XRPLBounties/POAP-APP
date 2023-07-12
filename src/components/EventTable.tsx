@@ -15,12 +15,13 @@ import {
 } from "@mui/x-data-grid";
 
 import { useWeb3 } from "connectors/context";
-import { DialogIdentifier } from "types";
+import { DialogIdentifier, EventStatus } from "types";
 import DataTable from "components/DataTable";
 import { activeDialogAtom } from "states/atoms";
 
 export type EventTableRow = {
   id: number;
+  status: EventStatus;
   title: string;
   dateStart: Date;
   dateEnd: Date;

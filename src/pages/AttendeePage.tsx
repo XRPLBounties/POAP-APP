@@ -68,6 +68,7 @@ function AttendeePage() {
     if (data) {
       return data.map((offer) => ({
         id: offer.token.eventId,
+        status: offer.token.event.status,
         title: offer.token.event.title,
         dateStart: new Date(offer.token.event.dateStart),
         dateEnd: new Date(offer.token.event.dateEnd),

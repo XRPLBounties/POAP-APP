@@ -75,6 +75,7 @@ function HomePage() {
     if (data) {
       return data.map((event) => ({
         id: event.id,
+        status: event.status,
         title: event.title,
         dateStart: new Date(event.dateStart),
         dateEnd: new Date(event.dateEnd),
