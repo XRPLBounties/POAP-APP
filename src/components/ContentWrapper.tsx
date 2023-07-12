@@ -1,8 +1,6 @@
 import type { ReactNode } from "react";
 
-import Box from "@mui/material/Box";
-import Paper from "@mui/material/Paper";
-import Typography from "@mui/material/Typography";
+import { Box, Paper, Stack, Typography } from "@mui/material";
 
 import HelpButton from "components/HelpButton";
 import Loader from "components/Loader";
@@ -27,10 +25,12 @@ export function ContentWrapper(props: ContentWrapperProps) {
         square
       >
         <Box sx={{ position: "absolute", top: "1rem", right: "1rem" }}>
-          {secondary}
-          {tooltip && (
-            <HelpButton sx={{ marginLeft: "16px" }} content={tooltip} />
-          )}
+          <Stack direction="row" spacing={2}>
+            {secondary}
+            {tooltip && (
+              <HelpButton sx={{ marginLeft: "16px" }} content={tooltip} />
+            )}
+          </Stack>
         </Box>
         {title && (
           <Box>
