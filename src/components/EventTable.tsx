@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate, Link as NavLink } from "react-router-dom";
 import { useSetAtom } from "jotai";
+import clsx from "clsx";
 
 import Link from "@mui/material/Link";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
@@ -10,6 +11,7 @@ import InfoIcon from "@mui/icons-material/Info";
 import {
   GridActionsCellItem,
   GridColDef,
+  GridRowClassNameParams,
   GridTreeNodeWithRender,
   GridValueGetterParams,
 } from "@mui/x-data-grid";
@@ -79,6 +81,12 @@ export function EventTable(props: EventTableProps) {
     [setActiveDialog]
   );
 
+  const rowClassName = (params: GridRowClassNameParams<EventTableRow>) => {
+    return clsx("data-table", {
+      expired: params.row.status !== EventStatus.ACTIVE,
+    });
+  };
+
   const columns = React.useMemo<GridColDef<EventTableRow>[]>(
     () => [
       {
@@ -93,15 +101,21 @@ export function EventTable(props: EventTableProps) {
         headerName: "Title",
         type: "string",
         flex: 1,
-        renderCell: (params) => (
-          <Link
-            sx={{ textDecoration: "none" }}
-            component={NavLink}
-            to={`/event/${params.row.id}`}
-          >
-            {params.value}
-          </Link>
-        ),
+        renderCell: (params) => {
+          if (params.row.status === EventStatus.ACTIVE) {
+            return (
+              <Link
+                sx={{ textDecoration: "none" }}
+                component={NavLink}
+                to={`/event/${params.row.id}`}
+              >
+                {params.value}
+              </Link>
+            );
+          } else {
+            return <div>{params.value}</div>;
+          }
+        },
       },
       {
         field: "dateStart",
@@ -109,7 +123,12 @@ export function EventTable(props: EventTableProps) {
         type: "date",
         width: 100,
       },
-      { field: "dateEnd", headerName: "End", type: "date", width: 100 },
+      {
+        field: "dateEnd",
+        headerName: "End",
+        type: "date",
+        width: 100,
+      },
       ...(isAttendee
         ? [
             {
@@ -139,35 +158,40 @@ export function EventTable(props: EventTableProps) {
         type: "actions",
         width: 45,
         minWidth: 45,
-        getActions: (params) => [
-          <GridActionsCellItem
-            icon={<GroupAddIcon />}
-            label="Add Participant"
-            onClick={() => handleAdd(params.row.id)}
-            disabled={!(isActive && isOwner)}
-            showInMenu
-          />,
-          <GridActionsCellItem
-            icon={<EventAvailableIcon />}
-            label="Join Event"
-            onClick={() => handleJoin(params.row.id, params.row.title)}
-            disabled={!(isActive && !isAttendee)}
-            showInMenu
-          />,
-          <GridActionsCellItem
-            icon={<FileCopyIcon />}
-            label="Claim NFT"
-            onClick={() => handleClaim(params.row.id)}
-            disabled={!(isActive && isAttendee && !params.row.claimed)}
-            showInMenu
-          />,
-          <GridActionsCellItem
-            icon={<InfoIcon />}
-            label="Show Details"
-            onClick={() => navigate(`/event/${params.row.id}`)}
-            showInMenu
-          />,
-        ],
+        getActions: (params) => {
+          const active = params.row.status === EventStatus.ACTIVE;
+          return [
+            <GridActionsCellItem
+              icon={<GroupAddIcon />}
+              label="Add Participant"
+              onClick={() => handleAdd(params.row.id)}
+              disabled={!(active && isActive && isOwner)}
+              showInMenu
+            />,
+            <GridActionsCellItem
+              icon={<EventAvailableIcon />}
+              label="Join Event"
+              onClick={() => handleJoin(params.row.id, params.row.title)}
+              disabled={!(active && isActive && !isAttendee)}
+              showInMenu
+            />,
+            <GridActionsCellItem
+              icon={<FileCopyIcon />}
+              label="Claim NFT"
+              onClick={() => handleClaim(params.row.id)}
+              disabled={
+                !(active && isActive && isAttendee && !params.row.claimed)
+              }
+              showInMenu
+            />,
+            <GridActionsCellItem
+              icon={<InfoIcon />}
+              label="Show Details"
+              onClick={() => navigate(`/event/${params.row.id}`)}
+              showInMenu
+            />,
+          ];
+        },
       },
     ],
     [
@@ -181,7 +205,18 @@ export function EventTable(props: EventTableProps) {
     ]
   );
 
-  return <DataTable columns={columns} rows={rows} />;
+  return (
+    <DataTable
+      sx={{
+        "& .data-table.expired": {
+          color: (theme) => theme.palette.grey[500],
+        },
+      }}
+      columns={columns}
+      rows={rows}
+      rowClassName={rowClassName}
+    />
+  );
 }
 
 export default EventTable;

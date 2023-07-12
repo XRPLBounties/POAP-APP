@@ -1,20 +1,23 @@
-import Box from "@mui/material/Box";
+import { Box, SxProps, Theme } from "@mui/material";
 import {
   DataGrid,
   GridColDef,
   gridClasses,
   GridOverlay,
+  GridRowClassNameParams,
 } from "@mui/x-data-grid";
 
 type DataTableProps = {
+  sx?: SxProps<Theme>;
   columns: GridColDef[];
   rows: any[];
+  rowClassName?: (params: GridRowClassNameParams<any>) => string;
 };
 
 function DataTable(props: DataTableProps) {
-  const { columns, rows } = props;
+  const { sx, columns, rows, rowClassName } = props;
   return (
-    <Box sx={{ width: "100%" }}>
+    <Box sx={{ width: "100%", ...sx }}>
       <DataGrid
         sx={{
           [`& .${gridClasses.cell}:focus, & .${gridClasses.cell}:focus-within`]:
@@ -44,6 +47,7 @@ function DataTable(props: DataTableProps) {
         slots={{
           noRowsOverlay: () => <GridOverlay>No data</GridOverlay>,
         }}
+        getRowClassName={rowClassName}
       />
     </Box>
   );
