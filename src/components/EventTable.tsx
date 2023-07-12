@@ -28,7 +28,7 @@ export type EventTableRow = {
   slotsTaken?: number;
   slotsTotal: number;
   claimed?: boolean;
-  offerIndex?: string;
+  offerIndex?: string | null;
 };
 
 export type EventTableProps = {
