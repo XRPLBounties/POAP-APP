@@ -78,10 +78,11 @@ type AddDialogData = Record<string, any>;
 
 function AddDialog() {
   const { account } = useWeb3();
-  const { isAuthenticated, jwt } = useAuth();
+  const { isAuthenticated, jwt, permissions } = useAuth();
   const [open, setOpen] = React.useState<boolean>(false);
   const [data, setData] = React.useState<AddDialogData | undefined>();
   const [loading, setLoading] = React.useState<boolean>(false);
+  const [options, setOptions] = React.useState<AddFormValues["addresses"]>([]);
   const [activeDialog, setActiveDialog] = useAtom(activeDialogAtom);
   const { enqueueSnackbar } = useSnackbar();
 
@@ -96,13 +97,61 @@ function AddDialog() {
     resolver: zodResolver(schema),
   });
 
-  // no default options for now
-  const options: AddFormValues["addresses"] = [];
+  const isAuthorized = React.useMemo(() => {
+    return isAuthenticated && permissions.includes("organizer");
+  }, [isAuthenticated, permissions]);
 
   React.useEffect(() => {
     setOpen(activeDialog.type === DialogIdentifier.DIALOG_ADD);
     setData(activeDialog.data);
   }, [activeDialog]);
+
+  React.useEffect(() => {
+    let mounted = true;
+
+    const load = async () => {
+      try {
+        if (jwt) {
+          const addresses = await API.users.getAll(jwt);
+
+          if (mounted) {
+            setOptions(
+              addresses.map((address) => {
+                return { address: address };
+              })
+            );
+          }
+        }
+      } catch (err) {
+        console.debug(err);
+        if (mounted) {
+          setOptions([]);
+        }
+        if (axios.isAxiosError(err)) {
+          enqueueSnackbar(
+            `Failed to load users data: ${err.response?.data.error}`,
+            {
+              variant: "error",
+            }
+          );
+        } else {
+          enqueueSnackbar("Failed to load users data", {
+            variant: "error",
+          });
+        }
+      }
+    };
+
+    if (isAuthorized) {
+      load();
+    } else {
+      setOptions([]);
+    }
+
+    return () => {
+      mounted = false;
+    };
+  }, [isAuthorized, jwt]);
 
   const handleClose = (event: {}, reason?: string) => {
     if (reason === "backdropClick") {
