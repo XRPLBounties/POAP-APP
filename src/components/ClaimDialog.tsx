@@ -39,10 +39,12 @@ function ClaimDialog() {
     if (reason === "backdropClick") {
       return;
     }
+    setData(undefined);
     setActiveDialog({});
   };
 
   const handleCancel = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setData(undefined);
     setActiveDialog({});
   };
 
@@ -93,9 +95,9 @@ function ClaimDialog() {
       }
     } finally {
       setLoading(false);
+      setData(undefined);
+      setActiveDialog({});
     }
-
-    setActiveDialog({});
   };
 
   return (

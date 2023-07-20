@@ -44,10 +44,12 @@ function JoinDialog() {
     if (reason === "backdropClick") {
       return;
     }
+    setData(undefined);
     setActiveDialog({});
   };
 
   const handleCancel = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setData(undefined);
     setActiveDialog({});
   };
 
@@ -98,6 +100,7 @@ function JoinDialog() {
       }
     } finally {
       setLoading(false);
+      setData(undefined);
       setActiveDialog({});
     }
   };

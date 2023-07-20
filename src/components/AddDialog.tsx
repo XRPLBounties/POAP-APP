@@ -157,11 +157,13 @@ function AddDialog() {
     if (reason === "backdropClick") {
       return;
     }
+    setData(undefined);
     setActiveDialog({});
   };
 
   const handleCancel = (event: React.MouseEvent<HTMLButtonElement>) => {
     reset();
+    setData(undefined);
     setActiveDialog({});
   };
 
@@ -197,6 +199,7 @@ function AddDialog() {
       }
     } finally {
       setLoading(false);
+      setData(undefined);
       setActiveDialog({});
     }
   };
