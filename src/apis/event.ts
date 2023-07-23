@@ -130,3 +130,21 @@ export const getInfo = async (
 
   return response.data.result as getInfoResult;
 };
+
+export const getLink = async (
+  jwt: string,
+  id: string | number
+): Promise<string> => {
+  const response = await axios.get(
+    new URL(`/event/link/${id}`, config.apiURL).toString(),
+    {
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+      },
+      responseType: "json",
+      timeout: config.timeout,
+    }
+  );
+
+  return response.data.result as string;
+};
