@@ -37,8 +37,8 @@ function MainLayout(props: any) {
         <LinkDialog />
         <MintDialog />
         {
-          // mounted component every time the dialog is opened to ensure
-          // the latest values from the database are load
+          // mount component every time the dialog is opened to ensure
+          // the latest values from the database are loaded
           activeDialog.type === DialogIdentifier.DIALOG_PROFILE && (
             <ProfileDialog />
           )
