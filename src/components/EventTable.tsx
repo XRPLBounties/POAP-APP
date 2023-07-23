@@ -8,6 +8,7 @@ import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import FileCopyIcon from "@mui/icons-material/FileCopy";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import InfoIcon from "@mui/icons-material/Info";
+import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
 import {
   GridActionsCellItem,
   GridColDef,
@@ -55,6 +56,16 @@ export function EventTable(props: EventTableProps) {
     (id: number) => {
       setActiveDialog({
         type: DialogIdentifier.DIALOG_ADD,
+        data: { eventId: id },
+      });
+    },
+    [setActiveDialog]
+  );
+
+  const handleLink = React.useCallback(
+    (id: number) => {
+      setActiveDialog({
+        type: DialogIdentifier.DIALOG_LINK,
         data: { eventId: id },
       });
     },
@@ -169,6 +180,13 @@ export function EventTable(props: EventTableProps) {
               showInMenu
             />,
             <GridActionsCellItem
+              icon={<QrCodeScannerIcon />}
+              label="Create Link"
+              onClick={() => handleLink(params.row.id)}
+              disabled={!(active && isActive && isOwner)}
+              showInMenu
+            />,
+            <GridActionsCellItem
               icon={<EventAvailableIcon />}
               label="Join Event"
               onClick={() => handleJoin(params.row.id, params.row.title)}
@@ -196,11 +214,12 @@ export function EventTable(props: EventTableProps) {
     ],
     [
       isActive,
-      isOwner,
       isAttendee,
+      isOwner,
       handleAdd,
       handleClaim,
       handleJoin,
+      handleLink,
       navigate,
     ]
   );

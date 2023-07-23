@@ -10,6 +10,7 @@ import AddDialog from "components/AddDialog";
 import ClaimDialog from "components/ClaimDialog";
 import Header from "components/Header";
 import JoinDialog from "components/JoinDialog";
+import LinkDialog from "components/LinkDialog"
 import MintDialog from "components/MintDialog";
 import ProfileDialog from "components/ProfileDialog";
 
@@ -33,6 +34,7 @@ function MainLayout(props: any) {
         <AddDialog />
         <ClaimDialog />
         <JoinDialog />
+        <LinkDialog />
         <MintDialog />
         {
           // mounted component every time the dialog is opened to ensure
