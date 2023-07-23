@@ -111,7 +111,7 @@ const defaultValues: DefaultValues<MintFormValues> = {
   dateStart: null,
   dateEnd: null,
   tokenCount: undefined,
-  isPublic: false,
+  isPublic: true,
 };
 
 type MintDialogProps = {
@@ -330,7 +330,7 @@ function MintDialog(props: MintDialogProps) {
             helperText={errors["tokenCount"]?.message}
             {...register("tokenCount", { valueAsNumber: true })}
           />
-          <Controller
+          {/* <Controller
             control={control}
             name="isPublic"
             render={({ field: { ref, value, ...field }, fieldState }) => (
@@ -361,7 +361,7 @@ function MintDialog(props: MintDialogProps) {
                 />
               </FormGroup>
             )}
-          />
+          /> */}
         </Stack>
       </DialogContent>
       <DialogActions>
