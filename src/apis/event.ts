@@ -1,8 +1,31 @@
 import axios from "axios";
 import config from "config";
 
-import type { Event, Offer } from "types";
+import type { Event, Offer, Minter } from "types";
 import { NetworkIdentifier } from "types";
+
+export type getMinterParams = {
+  networkId: NetworkIdentifier;
+};
+
+export const getMinter = async (
+  jwt: string,
+  params: getMinterParams
+): Promise<Minter> => {
+  const response = await axios.get(
+    new URL("/event/minter", config.apiURL).toString(),
+    {
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+      },
+      responseType: "json",
+      timeout: config.timeout,
+      params: params,
+    }
+  );
+
+  return response.data.result as Minter;
+};
 
 export type createData = {
   networkId: NetworkIdentifier;

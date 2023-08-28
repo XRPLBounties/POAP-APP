@@ -41,6 +41,11 @@ export type User = {
   slots: number;
 };
 
+export type Minter = {
+  walletAddress: string;
+  isConfigured: boolean;
+};
+
 export type Event = {
   id: number;
   status: EventStatus;
