@@ -4,7 +4,6 @@ import type { RouteObject } from "react-router-dom";
 import Loadable from "components/Loadable";
 import MainLayout from "layouts/MainLayout";
 
-const AdminPage = Loadable(React.lazy(() => import("pages/AdminPage")));
 const AttendeePage = Loadable(React.lazy(() => import("pages/AttendeePage")));
 const DebugPage = Loadable(React.lazy(() => import("pages/DebugPage")));
 const ErrorPage = Loadable(React.lazy(() => import("pages/ErrorPage")));
@@ -32,10 +31,6 @@ const MainRoutes: RouteObject = {
     {
       path: "/attendee",
       element: <AttendeePage />,
-    },
-    {
-      path: "/admin",
-      element: <AdminPage />,
     },
     {
       path: "/debug",

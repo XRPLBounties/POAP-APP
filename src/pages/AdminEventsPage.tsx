@@ -13,7 +13,7 @@ import EventTable, { type EventTableRow } from "components/EventTable";
 import ContentWrapper from "components/ContentWrapper";
 import { useAuth } from "components/AuthContext";
 
-function AdminPage() {
+function AdminEventsPage() {
   const { isActive, networkId } = useWeb3();
   const { isAuthenticated, jwt, permissions } = useAuth();
   const [data, setData] = React.useState<Event[]>();
@@ -25,32 +25,15 @@ function AdminPage() {
     return isAuthenticated && permissions.includes("admin");
   }, [isAuthenticated, permissions]);
 
-   const rows = React.useMemo<EventTableRow[]>(() => {
-    if (data) {
-      return data.map((event) => ({
-        id: event.id,
-        status: event.status,
-        title: event.title,
-        dateStart: new Date(event.dateStart),
-        dateEnd: new Date(event.dateEnd),
-        slotsTaken: event.attendees?.length,
-        slotsTotal: event.tokenCount,
-      }));
-    } else {
-      return [];
-    }
-  }, [data]);
-
-  // TODO add EventTable isAdmin
   return (
     <ContentWrapper
       title="Admin Panel"
-      isLoading={!Boolean(data)}
+      isLoading={false}
       isAuthorized={isAuthorized}
     >
-      <EventTable rows={rows} isOwner={true} />
+      Events
     </ContentWrapper>
   );
 }
 
-export default AdminPage;
+export default AdminEventsPage;

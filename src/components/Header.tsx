@@ -74,6 +74,7 @@ function Header() {
         bgcolor: "#c9e9ec",
         borderBottom: `1px solid #a8c3c5`,
         boxShadow: "none",
+        zIndex: (theme) => theme.zIndex.drawer + 1,
       }}
       color="inherit"
       position="fixed"
