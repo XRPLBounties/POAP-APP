@@ -47,20 +47,25 @@ function Header() {
   const { isActive } = useWeb3();
   const { isAuthenticated, permissions } = useAuth();
 
-  const isAuthorized = React.useMemo(() => {
+  const isOrganizer = React.useMemo(() => {
     return isAuthenticated && permissions.includes("organizer");
+  }, [isAuthenticated, permissions]);
+
+  const isAdmin = React.useMemo(() => {
+    return isAuthenticated && permissions.includes("admin");
   }, [isAuthenticated, permissions]);
 
   const entries: Array<[string, string, boolean]> = React.useMemo(
     () => [
       ["Home", "/", false],
-      ["Organizer", "/organizer", !(isActive && isAuthorized)],
       ["Attendee", "/attendee", !(isActive && isAuthenticated)],
+      ["Organizer", "/organizer", !(isActive && isOrganizer)],
+      ["Admin", "/admin", !(isActive && isAdmin)],
       ...(config.debug
         ? ([["Debug", "/debug", false]] as Array<[string, string, boolean]>)
         : []),
     ],
-    [isActive, isAuthenticated, isAuthorized]
+    [isActive, isAuthenticated, isOrganizer, isAdmin]
   );
 
   return (
