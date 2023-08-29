@@ -11,6 +11,7 @@ import {
   ListItemIcon,
   ListItemText,
   Toolbar,
+  useTheme,
 } from "@mui/material";
 import EventIcon from "@mui/icons-material/Event";
 import PeopleIcon from "@mui/icons-material/People";
@@ -22,11 +23,12 @@ import Header from "components/Header";
 // TODO remove
 const drawerWidth = 240;
 
-function AdminLayout(props: any) {
+function AdminLayout() {
+  const theme = useTheme();
   const activeDialog = useAtomValue(activeDialogAtom);
 
   const entries = [
-    { label: "Reserves", icon: <QueryStatsIcon />, to: "/admin/stats" },
+    { label: "Overview", icon: <QueryStatsIcon />, to: "/admin/stats" },
     { label: "Users", icon: <PeopleIcon />, to: "/admin/users" },
     { label: "Events", icon: <EventIcon />, to: "/admin/events" },
   ];
@@ -71,14 +73,21 @@ function AdminLayout(props: any) {
           </List>
         </Box>
       </Drawer>
-      <Box component="main" sx={{ position: "relative", minHeight: "100vh" }}>
+      <Box
+        component="main"
+        sx={{
+          position: "relative",
+          minHeight: "100vh",
+          backgroundColor: "rgb(252, 252, 252)",
+        }}
+      >
         <Container
           sx={{
             paddingTop: "8.5rem",
             display: "flex",
             justifyContent: "center",
           }}
-          maxWidth="md"
+          maxWidth="lg"
         >
           <Outlet />
         </Container>
