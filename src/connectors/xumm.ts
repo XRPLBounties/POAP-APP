@@ -32,15 +32,44 @@ export class XummWalletProvider extends Provider {
     return payload.resolved;
   }
 
-  public async signMessage(message: string): Promise<string> {
-    // TODO not yet supported
-    return "";
-  }
-
   public async acceptOffer(id: string): Promise<boolean> {
     const result = await this.submitPayload({
       TransactionType: "NFTokenAcceptOffer",
       NFTokenSellOffer: id,
+    });
+
+    return Boolean(result);
+  }
+
+  public async setAccount(minterAddress: string): Promise<boolean> {
+    const result = await this.submitPayload({
+      TransactionType: "AccountSet",
+      NFTokenMinter: minterAddress,
+    });
+
+    return Boolean(result);
+  }
+
+  public async sendPayment(
+    amount: string,
+    destination: string,
+    memo?: string
+  ): Promise<boolean> {
+    const result = await this.submitPayload({
+      TransactionType: "Payment",
+      Amount: amount,
+      Destination: destination,
+      Memos: memo
+        ? [
+            {
+              Memo: {
+                MemoData: Buffer.from(memo, "utf8")
+                  .toString("hex")
+                  .toUpperCase(),
+              },
+            },
+          ]
+        : [],
     });
 
     return Boolean(result);
@@ -70,6 +99,7 @@ export class XummWallet extends Connector {
 
   constructor({ apiKey, options, onError }: XummWalletConstructorArgs) {
     super(onError);
+    this.provider = undefined;
     this.apiKey = apiKey;
     this.options = options;
   }

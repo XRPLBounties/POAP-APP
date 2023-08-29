@@ -1,14 +1,6 @@
-import {
-  acceptNFTOffer,
-  getAddress,
-  getNetwork,
-  getPublicKey,
-  isInstalled,
-  Network,
-  signMessage,
-} from "@gemwallet/api";
-import API from "apis";
+import * as Gem from "@gemwallet/api";
 
+import API from "apis";
 import { Connector } from "connectors/connector";
 import { AuthData, Provider } from "connectors/provider";
 import { ConnectorType, NetworkIdentifier } from "types";
@@ -33,25 +25,50 @@ export class GemWalletProvider extends Provider {
     this.authData = authData;
   }
 
-  public async signMessage(message: string): Promise<string> {
-    const signed = await signMessage(message);
-    if (signed.type === "reject") {
-      throw Error("User refused to sign message");
-    }
-
-    if (!signed.result) {
-      throw Error("Failed to sign message");
-    }
-
-    return signed.result.signedMessage;
-  }
-
   public async acceptOffer(id: string): Promise<boolean> {
-    const response = await acceptNFTOffer({
+    const response = await Gem.acceptNFTOffer({
       NFTokenSellOffer: id,
     });
     if (response.type === "reject") {
-      throw Error("User refused to sign transaction");
+      throw Error("User refused to sign NFTokenAcceptOffer transaction");
+    }
+
+    return Boolean(response.result?.hash);
+  }
+
+  public async setAccount(minterAddress: string): Promise<boolean> {
+    const response = await Gem.setAccount({
+      NFTokenMinter: minterAddress,
+    });
+    if (response.type === "reject") {
+      throw Error("User refused to sign AccountSet transaction");
+    }
+
+    return Boolean(response.result?.hash);
+  }
+
+  public async sendPayment(
+    amount: string,
+    destination: string,
+    memo?: string
+  ): Promise<boolean> {
+    const response = await Gem.sendPayment({
+      amount: amount,
+      destination: destination,
+      memos: memo
+        ? [
+            {
+              memo: {
+                memoData: Buffer.from(memo, "utf8")
+                  .toString("hex")
+                  .toUpperCase(),
+              },
+            },
+          ]
+        : [],
+    });
+    if (response.type === "reject") {
+      throw Error("User refused to sign Payment transaction");
     }
 
     return Boolean(response.result?.hash);
@@ -73,13 +90,16 @@ export class GemWallet extends Connector {
   public provider: GemWalletProvider | undefined;
 
   private readonly options: GemWalletOptions;
+  private wallet: boolean;
 
   constructor({ options, onError }: GemWalletConstructorArgs) {
     super(onError);
+    this.provider = undefined;
     this.options = options;
+    this.wallet = false;
   }
 
-  private mapNetworkId(network: Network): NetworkIdentifier {
+  private mapNetworkId(network: Gem.Network): NetworkIdentifier {
     switch (network.toString().toLowerCase()) {
       case "mainnet":
         return NetworkIdentifier.MAINNET;
@@ -98,27 +118,41 @@ export class GemWallet extends Connector {
     return ConnectorType.GEM;
   }
 
-  public async activate(): Promise<void> {
+  private async init(): Promise<void> {
+    Gem.on("logout", async (event) => {
+      await this.deactivate();
+    });
+
+    Gem.on("networkChanged", (event) => {
+      this.state.update({
+        networkId: this.mapNetworkId(event.network.name),
+      });
+    });
+
+    Gem.on("walletChanged", async (event) => {
+      console.log("walletChanged", event.wallet.publicAddress);
+      await this.deactivate();
+      await this.initProvider();
+    });
+
+    this.wallet = true;
+  }
+
+  private async initProvider(): Promise<void> {
     const cancelActivation = this.state.startActivation();
-    this.provider = undefined;
 
     try {
-      const installed = await isInstalled();
-      if (!installed.result.isInstalled) {
-        throw new NoGemWalletError();
-      }
-
-      const address = await getAddress();
+      const address = await Gem.getAddress();
       if (address.type === "reject" || !address.result) {
-        throw Error("User refused to share GemWallet address");
+        throw Error("User refused to share wallet address");
       }
 
-      const network = await getNetwork();
+      const network = await Gem.getNetwork();
       if (network.type === "reject" || !network.result) {
         throw Error("User refused to share network");
       }
 
-      const pubkey = await getPublicKey();
+      const pubkey = await Gem.getPublicKey();
       if (pubkey.type === "reject" || !pubkey.result) {
         throw Error("User refused to share public key");
       }
@@ -127,7 +161,9 @@ export class GemWallet extends Connector {
         pubkey: pubkey.result.publicKey,
       });
 
-      const signed = await signMessage(`backend authentication: ${tempJwt}`);
+      const signed = await Gem.signMessage(
+        `backend authentication: ${tempJwt}`
+      );
       if (signed.type === "reject" || !signed.result) {
         throw Error("User refused to sign auth message");
       }
@@ -146,6 +182,24 @@ export class GemWallet extends Connector {
       this.onError?.(err as Error);
       throw err;
     }
+  }
+
+  public async activate(): Promise<void> {
+    const installed = await Gem.isInstalled();
+    if (!installed.result.isInstalled) {
+      throw new NoGemWalletError();
+    }
+
+    if (!this.wallet) {
+      await this.init();
+    }
+
+    // only do something, if not already connected
+    if (this.provider) {
+      return;
+    }
+
+    await this.initProvider();
   }
 
   public async deactivate(): Promise<void> {
