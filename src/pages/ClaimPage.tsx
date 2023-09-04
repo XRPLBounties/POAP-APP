@@ -19,7 +19,7 @@ import {
 } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
 
-import { Offer } from "types";
+import { Claim } from "types";
 import { useAuth } from "components/AuthContext";
 import { useWeb3 } from "connectors/context";
 import API from "apis";
@@ -77,7 +77,7 @@ function ClaimPage() {
   const { connector, provider, account, isActive } = useWeb3();
   const { isAuthenticated, jwt, permissions, isAuto, toggleAuto } = useAuth();
   const [selectedWallet, setSelectedWallet] = useAtom(selectedWalletAtom);
-  const [data, setData] = React.useState<Offer | null>();
+  const [data, setData] = React.useState<Claim | null>();
   const [uuid, setUuid] = React.useState<string>();
   const [errors, setErrors] = React.useState<string[]>(steps.map(() => ""));
   const [completed, setCompleted] = React.useState<string>();

@@ -39,12 +39,11 @@ export type User = {
   lastName?: string;
   email?: string;
   isOrganizer: boolean;
+  isAdmin: boolean;
   slots: number;
-};
-
-export type Minter = {
-  walletAddress: string;
-  isConfigured: boolean;
+  events?: Event[];
+  attendances?: Event[];
+  claims?: Claim[];
 };
 
 export type Accounting = {
@@ -55,6 +54,7 @@ export type Accounting = {
   refundTxHash?: string;
   accumulatedTxFees: number;
   eventId: Event["id"];
+  event?: Event;
 };
 
 export type Event = {
@@ -64,6 +64,7 @@ export type Event = {
   title: string;
   description: string;
   location: string;
+  imageUrl: string;
   uri: string;
   tokenCount: number;
   dateStart: string;
@@ -79,19 +80,25 @@ export type Event = {
 export type NFT = {
   id: string;
   issuerWalletAddress: User["walletAddress"];
-  eventId: Event["id"];
   issuer?: User;
+  eventId: Event["id"];
   event: Event;
+  claim?: Claim;
 };
 
-export type Offer = {
+export type Claim = {
   id: number;
-  ownerWalletAddress: User["walletAddress"];
-  tokenId: NFT["id"];
   offerIndex: string | null;
   claimed: boolean;
+  ownerWalletAddress: User["walletAddress"];
   owner?: User;
+  tokenId: NFT["id"];
   token: NFT;
+};
+
+export type Minter = {
+  walletAddress: string;
+  isConfigured: boolean;
 };
 
 export type Metadata = {

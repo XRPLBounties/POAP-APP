@@ -1,7 +1,7 @@
 import axios from "axios";
 import config from "config";
 
-import type { Offer } from "types";
+import type { Claim } from "types";
 import { NetworkIdentifier } from "types";
 
 export type getAllParams = {
@@ -12,7 +12,7 @@ export type getAllParams = {
 export const getAll = async (
   jwt: string,
   params: getAllParams
-): Promise<Offer[]> => {
+): Promise<Claim[]> => {
   const response = await axios.get(
     new URL("/offers", config.apiURL).toString(),
     {
@@ -25,5 +25,5 @@ export const getAll = async (
     }
   );
 
-  return response.data.result as Offer[];
+  return response.data.result as Claim[];
 };

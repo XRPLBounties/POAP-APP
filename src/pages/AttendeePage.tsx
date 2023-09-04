@@ -4,7 +4,7 @@ import { useAtomValue } from "jotai";
 import { useSnackbar } from "notistack";
 
 import { activeDialogAtom } from "states/atoms";
-import { Offer } from "types";
+import { Claim } from "types";
 import { useAuth } from "components/AuthContext";
 import { useWeb3 } from "connectors/context";
 import API from "apis";
@@ -14,7 +14,7 @@ import EventTable, { type EventTableRow } from "components/EventTable";
 function AttendeePage() {
   const { isActive, networkId } = useWeb3();
   const { isAuthenticated, jwt } = useAuth();
-  const [data, setData] = React.useState<Offer[]>();
+  const [data, setData] = React.useState<Claim[]>();
   const activeDialog = useAtomValue(activeDialogAtom);
   const { enqueueSnackbar } = useSnackbar();
 

@@ -1,7 +1,7 @@
 import axios from "axios";
 import config from "config";
 
-import type { Event, Offer, Minter } from "types";
+import type { Event, Claim, Minter } from "types";
 import { NetworkIdentifier } from "types";
 
 export type getMinterParams = {
@@ -68,7 +68,7 @@ export type joinData = {
   createOffer: boolean;
 };
 
-export const join = async (jwt: string, data: joinData): Promise<Offer> => {
+export const join = async (jwt: string, data: joinData): Promise<Claim> => {
   const response = await axios.post(
     new URL("/event/join", config.apiURL).toString(),
     data,
@@ -81,14 +81,14 @@ export const join = async (jwt: string, data: joinData): Promise<Offer> => {
     }
   );
 
-  return response.data.result as Offer;
+  return response.data.result as Claim;
 };
 
 export type claimData = {
   maskedEventId: string;
 };
 
-export const claim = async (jwt: string, data: claimData): Promise<Offer | null> => {
+export const claim = async (jwt: string, data: claimData): Promise<Claim | null> => {
   const response = await axios.post(
     new URL("/event/claim", config.apiURL).toString(),
     data,
@@ -101,7 +101,7 @@ export const claim = async (jwt: string, data: claimData): Promise<Offer | null>
     }
   );
 
-  return response.data.result as Offer | null;
+  return response.data.result as Claim | null;
 };
 
 export type inviteData = {
