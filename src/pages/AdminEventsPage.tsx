@@ -25,13 +25,75 @@ function AdminEventsPage() {
     return isAuthenticated && permissions.includes("admin");
   }, [isAuthenticated, permissions]);
 
+  React.useEffect(() => {
+    let mounted = true;
+
+    const load = async () => {
+      try {
+        if (networkId && jwt) {
+          const events = await API.events.getAll(jwt, {
+            networkId: networkId,
+            limit: 100,
+          });
+
+          if (mounted) {
+            setData(events);
+          }
+        }
+      } catch (err) {
+        console.debug(err);
+        if (mounted) {
+          setData(undefined);
+        }
+        if (axios.isAxiosError(err)) {
+          enqueueSnackbar(
+            `Failed to load events data: ${err.response?.data.error}`,
+            {
+              variant: "error",
+            }
+          );
+        } else {
+          enqueueSnackbar("Failed to load events data", {
+            variant: "error",
+          });
+        }
+      }
+    };
+
+    if (isAuthorized) {
+      load();
+    } else {
+      setData(undefined);
+    }
+
+    return () => {
+      mounted = false;
+    };
+  }, [isAuthorized, isActive, networkId, jwt]);
+
+  const rows = React.useMemo<EventTableRow[]>(() => {
+    if (data) {
+      return data.map((event) => ({
+        id: event.id,
+        status: event.status,
+        title: event.title,
+        dateStart: new Date(event.dateStart),
+        dateEnd: new Date(event.dateEnd),
+        slotsTaken: event.attendees?.length,
+        slotsTotal: event.tokenCount,
+      }));
+    } else {
+      return [];
+    }
+  }, [data]);
+
   return (
     <ContentWrapper
       title="Admin Panel"
       isLoading={false}
       isAuthorized={isAuthorized}
     >
-      Events
+      <EventTable rows={rows} isOwner={true} />
     </ContentWrapper>
   );
 }
