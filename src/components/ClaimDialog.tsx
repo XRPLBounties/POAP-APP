@@ -53,9 +53,16 @@ function ClaimDialog() {
     try {
       if (provider && account && data?.eventId && jwt) {
         const offer = await API.event.claim(jwt, {
-          eventId: data.eventId,
+          maskedEventId: data.eventId,
         });
         console.debug("ClaimResult", offer);
+
+        if(!offer) {
+          enqueueSnackbar(`Claim failed: User is not a participant`, {
+            variant: "error",
+          });
+          return;
+        }
 
         if (offer.offerIndex && !offer.claimed) {
           enqueueSnackbar(

@@ -3,8 +3,13 @@ import { XummPkce } from "xumm-oauth2-pkce";
 
 import config from "config";
 import { Connector } from "connectors/connector";
-import { AuthData, Provider } from "connectors/provider";
+import { AuthData, Provider, type ProviderRequestResult } from "connectors/provider";
 import { ConnectorType, NetworkIdentifier } from "types";
+
+async function _wrap<T>(promise?: Promise<T>): Promise<boolean> {
+  const result = await promise;
+  return !!result;
+}
 
 export class XummWalletProvider extends Provider {
   private sdk: XummSdkJwt;
@@ -18,7 +23,9 @@ export class XummWalletProvider extends Provider {
     this.pendingPayloads = []; // TODO make this session persistent (re-subscribe in case user refreshes page)
   }
 
-  private async submitPayload(tx: SdkTypes.XummJsonTransaction): Promise<any> {
+  private async submitPayload(
+    tx: SdkTypes.XummJsonTransaction
+  ): Promise<SdkTypes.PayloadAndSubscription> {
     const callback = async (event: SdkTypes.SubscriptionCallbackParams) => {
       console.debug("callback", event);
       if (event.data?.payload_uuidv4) {
@@ -27,35 +34,49 @@ export class XummWalletProvider extends Provider {
       }
     };
 
-    const payload = await this.sdk.payload.createAndSubscribe(tx, callback);
-    this.pendingPayloads.push(payload.created.uuid);
-    return payload.resolved;
+    const subscription = await this.sdk.payload.createAndSubscribe(
+      {
+        txjson: tx,
+        options: {},
+      },
+      callback
+    );
+
+    this.pendingPayloads.push(subscription.created.uuid);
+    console.log("sub", subscription);
+    return subscription;
   }
 
-  public async acceptOffer(id: string): Promise<boolean> {
-    const result = await this.submitPayload({
+  public async acceptOffer(id: string): Promise<ProviderRequestResult> {
+    const subscription = await this.submitPayload({
       TransactionType: "NFTokenAcceptOffer",
       NFTokenSellOffer: id,
     });
 
-    return Boolean(result);
+    return {
+      resolved: _wrap(subscription.resolved),
+      uuid: subscription.created.uuid,
+    };
   }
 
-  public async setAccount(minterAddress: string): Promise<boolean> {
-    const result = await this.submitPayload({
+  public async setAccount(minterAddress: string): Promise<ProviderRequestResult> {
+    const subscription = await this.submitPayload({
       TransactionType: "AccountSet",
       NFTokenMinter: minterAddress,
     });
 
-    return Boolean(result);
+    return {
+      resolved: _wrap(subscription.resolved),
+      uuid: subscription.created.uuid,
+    };
   }
 
   public async sendPayment(
     amount: string,
     destination: string,
     memo?: string
-  ): Promise<boolean> {
-    const result = await this.submitPayload({
+  ): Promise<ProviderRequestResult> {
+    const subscription = await this.submitPayload({
       TransactionType: "Payment",
       Amount: amount,
       Destination: destination,
@@ -72,7 +93,10 @@ export class XummWalletProvider extends Provider {
         : [],
     });
 
-    return Boolean(result);
+    return {
+      resolved: _wrap(subscription.resolved),
+      uuid: subscription.created.uuid,
+    };
   }
 
   public getAuthData(): AuthData {

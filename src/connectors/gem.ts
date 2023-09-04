@@ -2,7 +2,7 @@ import * as Gem from "@gemwallet/api";
 
 import API from "apis";
 import { Connector } from "connectors/connector";
-import { AuthData, Provider } from "connectors/provider";
+import { AuthData, Provider, type ProviderRequestResult } from "connectors/provider";
 import { ConnectorType, NetworkIdentifier } from "types";
 
 export class NoGemWalletError extends Error {
@@ -25,7 +25,7 @@ export class GemWalletProvider extends Provider {
     this.authData = authData;
   }
 
-  public async acceptOffer(id: string): Promise<boolean> {
+  public async acceptOffer(id: string): Promise<ProviderRequestResult> {
     const response = await Gem.acceptNFTOffer({
       NFTokenSellOffer: id,
     });
@@ -33,10 +33,12 @@ export class GemWalletProvider extends Provider {
       throw Error("User refused to sign NFTokenAcceptOffer transaction");
     }
 
-    return Boolean(response.result?.hash);
+    return {
+      resolved: Promise.resolve(Boolean(response.result?.hash)),
+    };
   }
 
-  public async setAccount(minterAddress: string): Promise<boolean> {
+  public async setAccount(minterAddress: string): Promise<ProviderRequestResult> {
     const response = await Gem.setAccount({
       NFTokenMinter: minterAddress,
     });
@@ -44,14 +46,16 @@ export class GemWalletProvider extends Provider {
       throw Error("User refused to sign AccountSet transaction");
     }
 
-    return Boolean(response.result?.hash);
+    return {
+      resolved: Promise.resolve(Boolean(response.result?.hash)),
+    };
   }
 
   public async sendPayment(
     amount: string,
     destination: string,
     memo?: string
-  ): Promise<boolean> {
+  ): Promise<ProviderRequestResult> {
     const response = await Gem.sendPayment({
       amount: amount,
       destination: destination,
@@ -71,7 +75,9 @@ export class GemWalletProvider extends Provider {
       throw Error("User refused to sign Payment transaction");
     }
 
-    return Boolean(response.result?.hash);
+    return {
+      resolved: Promise.resolve(Boolean(response.result?.hash)),
+    };
   }
 
   public getAuthData(): GemAuthData {

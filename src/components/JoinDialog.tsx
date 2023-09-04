@@ -58,7 +58,7 @@ function JoinDialog() {
     try {
       if (provider && account && data?.eventId && jwt) {
         const offer = await API.event.join(jwt, {
-          eventId: data.eventId,
+          maskedEventId: data.eventId,
           createOffer: checked,
         });
         console.debug("JoinResult", offer);

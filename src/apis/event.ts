@@ -64,7 +64,7 @@ export const create = async (
 };
 
 export type joinData = {
-  eventId: number;
+  maskedEventId: string;
   createOffer: boolean;
 };
 
@@ -85,10 +85,10 @@ export const join = async (jwt: string, data: joinData): Promise<Offer> => {
 };
 
 export type claimData = {
-  eventId: number;
+  maskedEventId: string;
 };
 
-export const claim = async (jwt: string, data: claimData): Promise<Offer> => {
+export const claim = async (jwt: string, data: claimData): Promise<Offer | null> => {
   const response = await axios.post(
     new URL("/event/claim", config.apiURL).toString(),
     data,
@@ -101,7 +101,7 @@ export const claim = async (jwt: string, data: claimData): Promise<Offer> => {
     }
   );
 
-  return response.data.result as Offer;
+  return response.data.result as Offer | null;
 };
 
 export type inviteData = {
