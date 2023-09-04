@@ -112,7 +112,7 @@ function AddDialog() {
     const load = async () => {
       try {
         if (jwt) {
-          const addresses = await API.users.getAll(jwt);
+          const addresses = await API.users.getAddresses(jwt);
 
           if (mounted) {
             setOptions(
