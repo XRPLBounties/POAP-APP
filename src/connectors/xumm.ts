@@ -3,7 +3,11 @@ import { XummPkce } from "xumm-oauth2-pkce";
 
 import config from "config";
 import { Connector } from "connectors/connector";
-import { AuthData, Provider, type ProviderRequestResult } from "connectors/provider";
+import {
+  AuthData,
+  Provider,
+  type ProviderRequestResult,
+} from "connectors/provider";
 import { ConnectorType, NetworkIdentifier } from "types";
 
 async function _wrap<T>(promise?: Promise<T>): Promise<boolean> {
@@ -37,7 +41,12 @@ export class XummWalletProvider extends Provider {
     const subscription = await this.sdk.payload.createAndSubscribe(
       {
         txjson: tx,
-        options: {},
+        options: {
+          return_url: {
+            app: document.location.href,
+            web: undefined,
+          },
+        },
       },
       callback
     );
@@ -59,7 +68,9 @@ export class XummWalletProvider extends Provider {
     };
   }
 
-  public async setAccount(minterAddress: string): Promise<ProviderRequestResult> {
+  public async setAccount(
+    minterAddress: string
+  ): Promise<ProviderRequestResult> {
     const subscription = await this.submitPayload({
       TransactionType: "AccountSet",
       NFTokenMinter: minterAddress,

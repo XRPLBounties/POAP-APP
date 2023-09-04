@@ -27,6 +27,7 @@ export enum ConnectorType {
 }
 
 export enum EventStatus {
+  PENDING,
   ACTIVE,
   CLOSED,
   CANCELED,

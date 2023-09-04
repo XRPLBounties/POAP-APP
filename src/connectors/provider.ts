@@ -5,7 +5,6 @@ export type AuthData = {
 export type ProviderRequestResult = {
   resolved: Promise<boolean>;
   uuid?: string;
-  payload?: any;
 }
 
 export abstract class Provider {
