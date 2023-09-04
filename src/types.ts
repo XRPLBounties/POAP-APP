@@ -47,6 +47,16 @@ export type Minter = {
   isConfigured: boolean;
 };
 
+export type Accounting = {
+  id: number;
+  depositValue: number;
+  depositTxHash?: string;
+  refundValue?: number;
+  refundTxHash?: string;
+  accumulatedTxFees: number;
+  eventId: Event["id"];
+};
+
 export type Event = {
   id: number;
   status: EventStatus;
@@ -61,7 +71,9 @@ export type Event = {
   isManaged: boolean;
   ownerWalletAddress: User["walletAddress"];
   owner?: User;
+  accounting?: Accounting;
   attendees?: User[];
+  nfts?: NFT[];
 };
 
 export type NFT = {

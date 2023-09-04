@@ -4,15 +4,21 @@ import config from "config";
 import type { Event } from "types";
 import { NetworkIdentifier } from "types";
 
-export type getPublicParams = {
+export type getAllParams = {
   networkId: NetworkIdentifier;
   limit?: number;
 };
 
-export const getPublic = async (params: getPublicParams): Promise<Event[]> => {
+export const getAll = async (
+  jwt: string,
+  params: getAllParams
+): Promise<Event[]> => {
   const response = await axios.get(
-    new URL("/events/public", config.apiURL).toString(),
+    new URL("/events/all", config.apiURL).toString(),
     {
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+      },
       responseType: "json",
       timeout: config.timeout,
       params: params,
@@ -25,7 +31,6 @@ export const getPublic = async (params: getPublicParams): Promise<Event[]> => {
 export type getOwnedParams = {
   networkId: NetworkIdentifier;
   limit?: number;
-  includeAttendees?: boolean;
 };
 
 export const getOwned = async (

@@ -34,7 +34,6 @@ function OrganizerPage() {
           const events = await API.events.getOwned(jwt, {
             networkId: networkId,
             limit: 100,
-            includeAttendees: true,
           });
 
           const [usedSlots, maxSlots] = await API.user.getSlots(jwt, {
