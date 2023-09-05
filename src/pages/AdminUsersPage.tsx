@@ -1,18 +1,15 @@
 import React from "react";
 import axios from "axios";
+import { dropsToXrp } from "xrpl";
 import { useSnackbar } from "notistack";
-import { useAtom } from "jotai";
-
-import { Box, Button } from "@mui/material";
 
 import API from "apis";
-import { useWeb3 } from "connectors/context";
 import ContentWrapper from "components/ContentWrapper";
 import { useAuth } from "components/AuthContext";
 import type { User } from "types";
+import UserTable, { UserTableRow } from "components/UserTable";
 
 function AdminUsersPage() {
-  const { isActive, networkId } = useWeb3();
   const { isAuthenticated, jwt, permissions } = useAuth();
   const [data, setData] = React.useState<User[]>();
   const { enqueueSnackbar } = useSnackbar();
@@ -65,13 +62,33 @@ function AdminUsersPage() {
     };
   }, [isAuthorized, jwt]);
 
+  const rows = React.useMemo<UserTableRow[]>(() => {
+    if (data) {
+      return data.map((user, index) => ({
+        id: index,
+        walletAddress: user.walletAddress,
+        isOrganizer: user.isOrganizer,
+        eventCount: user.events?.length,
+        totalDeposit: dropsToXrp(
+          user.events?.reduce<number>(
+            (accumulator, event) =>
+              accumulator + (event.accounting?.depositValue ?? 0),
+            0
+          ) ?? 0
+        ),
+      }));
+    } else {
+      return [];
+    }
+  }, [data]);
+
   return (
     <ContentWrapper
-      title="Admin Panel"
+      title="Organizers Overview"
       isLoading={!Boolean(data)}
       isAuthorized={isAuthorized}
     >
-      Users
+      <UserTable rows={rows} />
     </ContentWrapper>
   );
 }

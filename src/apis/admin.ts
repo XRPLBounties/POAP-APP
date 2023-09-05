@@ -1,10 +1,16 @@
 import axios from "axios";
 import config from "config";
 
-// TODO return type
+import type { NetworkIdentifier, PlatformStats } from "types";
+
+export type getStatsParams = {
+  networkId: NetworkIdentifier;
+};
+
 export const getStats = async (
   jwt: string,
-): Promise<boolean> => {
+  params: getStatsParams
+): Promise<PlatformStats> => {
   const response = await axios.get(
     new URL("/admin/stats", config.apiURL).toString(),
     {
@@ -13,8 +19,9 @@ export const getStats = async (
       },
       responseType: "json",
       timeout: config.timeout,
+      params: params,
     }
   );
 
-  return response.data.result as boolean;
+  return response.data.result as PlatformStats;
 };

@@ -111,6 +111,23 @@ export type Metadata = {
   dateEnd: string;
 };
 
+export type PlatformStats = {
+  users: {
+    total: number;
+    organizers: number;
+  };
+  events: {
+    total: number;
+    pending: number;
+    active: number;
+    finished: number;
+  };
+  account: {
+    balance: string;
+    reserve: string;
+  };
+};
+
 export type JwtPayload = {
   exp: number;
   walletAddress: string;
