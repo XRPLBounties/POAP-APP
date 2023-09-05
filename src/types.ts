@@ -1,9 +1,9 @@
 export enum DialogIdentifier {
   DIALOG_ADD,
   DIALOG_CLAIM,
+  DIALOG_CREATE,
   DIALOG_JOIN,
   DIALOG_LINK,
-  DIALOG_MINT,
   DIALOG_PROFILE,
 }
 

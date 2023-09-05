@@ -101,7 +101,7 @@ function OrganizerPage() {
   }, [data]);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setActiveDialog({ type: DialogIdentifier.DIALOG_MINT });
+    setActiveDialog({ type: DialogIdentifier.DIALOG_CREATE });
   };
 
   return (

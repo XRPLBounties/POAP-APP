@@ -11,7 +11,7 @@ import ClaimDialog from "components/ClaimDialog";
 import Header from "components/Header";
 import JoinDialog from "components/JoinDialog";
 import LinkDialog from "components/LinkDialog"
-import MintDialog from "components/MintDialog";
+import CreateDialog from "components/CreateDialog";
 import ProfileDialog from "components/ProfileDialog";
 
 function MainLayout(props: any) {
@@ -33,9 +33,9 @@ function MainLayout(props: any) {
         </Container>
         <AddDialog />
         <ClaimDialog />
+        <CreateDialog />
         <JoinDialog />
         <LinkDialog />
-        <MintDialog />
         {
           // mount component every time the dialog is opened to ensure
           // the latest values from the database are loaded

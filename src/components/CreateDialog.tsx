@@ -101,9 +101,9 @@ const schemaDates = object({
 
 const schema = intersection(schemaCommon, schemaDates);
 
-type MintFormValues = TypeOf<typeof schema>;
+type CreateFormValues = TypeOf<typeof schema>;
 
-const defaultValues: DefaultValues<MintFormValues> = {
+const defaultValues: DefaultValues<CreateFormValues> = {
   title: "",
   description: "",
   location: "",
@@ -114,11 +114,11 @@ const defaultValues: DefaultValues<MintFormValues> = {
   isPublic: true,
 };
 
-type MintDialogProps = {
+type CreateDialogProps = {
   children?: ReactNode;
 };
 
-function MintDialog(props: MintDialogProps) {
+function CreateDialog(props: CreateDialogProps) {
   const { account, networkId } = useWeb3();
   const { isAuthenticated, jwt } = useAuth();
   const [open, setOpen] = React.useState<boolean>(false);
@@ -132,14 +132,14 @@ function MintDialog(props: MintDialogProps) {
     formState: { errors, isValid },
     reset,
     handleSubmit,
-  } = useForm<MintFormValues>({
+  } = useForm<CreateFormValues>({
     mode: "all",
     defaultValues: defaultValues,
     resolver: zodResolver(schema),
   });
 
   React.useEffect(() => {
-    setOpen(activeDialog.type === DialogIdentifier.DIALOG_MINT);
+    setOpen(activeDialog.type === DialogIdentifier.DIALOG_CREATE);
   }, [activeDialog]);
 
   const handleClose = (event: {}, reason?: string) => {
@@ -154,7 +154,7 @@ function MintDialog(props: MintDialogProps) {
     setActiveDialog({});
   };
 
-  const onSubmit: SubmitHandler<MintFormValues> = async (values) => {
+  const onSubmit: SubmitHandler<CreateFormValues> = async (values) => {
     setLoading(true);
     try {
       if (account && networkId && jwt) {
@@ -169,8 +169,8 @@ function MintDialog(props: MintDialogProps) {
           dateEnd: values.dateEnd!,
           isManaged: !values.isPublic,
         });
-        console.debug("MintResult", result);
-        enqueueSnackbar(`Mint successful: Event #${result.eventId}`, {
+        console.debug("CreateResult", result);
+        enqueueSnackbar(`Creation successful: Event #${result.eventId}`, {
           variant: "success",
         });
         reset();
@@ -178,11 +178,11 @@ function MintDialog(props: MintDialogProps) {
     } catch (err) {
       console.debug(err);
       if (axios.isAxiosError(err)) {
-        enqueueSnackbar(`Mint failed: ${err.response?.data.error}`, {
+        enqueueSnackbar(`Creation failed: ${err.response?.data.error}`, {
           variant: "error",
         });
       } else {
-        enqueueSnackbar(`Mint failed: ${(err as Error).message}`, {
+        enqueueSnackbar(`Creation failed: ${(err as Error).message}`, {
           variant: "error",
         });
       }
@@ -383,4 +383,4 @@ function MintDialog(props: MintDialogProps) {
   );
 }
 
-export default MintDialog;
+export default CreateDialog;
