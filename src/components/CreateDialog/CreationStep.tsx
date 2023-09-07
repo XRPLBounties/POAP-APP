@@ -108,7 +108,9 @@ const defaultValues: DefaultValues<CreateFormValues> = {
 function CreationStep({
   active,
   loading,
+  eventId,
   setLoading,
+  setEventId,
   setError,
   setComplete,
   close,
@@ -134,10 +136,10 @@ function CreationStep({
     return isAuthenticated && permissions.includes("organizer");
   }, [isAuthenticated, permissions]);
 
-  // // TODO update parent state
-  // React.useEffect(() => {
-  //   setComplete(Boolean(data?.isConfigured));
-  // }, [data, setComplete]);
+  // update parent state
+  React.useEffect(() => {
+    setComplete(Boolean(eventId));
+  }, [eventId]);
 
   // const handleClose = (event: {}, reason?: string) => {
   //   if (reason === "backdropClick") {

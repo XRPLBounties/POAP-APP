@@ -93,6 +93,7 @@ const stepInfo: StepInfo[] = [
 type State = {
   loading: boolean;
   activeStep: Steps;
+  eventId?: number;
   dialogActions: { [key in Steps]: React.ReactNode[] };
   error: { [key in Steps]: string | null };
   complete: { [key in Steps]: boolean };
@@ -101,6 +102,7 @@ type State = {
 type Actions = {
   setLoading: (value: boolean) => void;
   setActiveStep: (step: Steps) => void;
+  setEventId: (value?: number) => void;
   setError: (step: Steps, text: string | null) => void;
   setComplete: (step: Steps, value: boolean) => void;
   setDialogActions: (step: Steps, actions: React.ReactNode[]) => void;
@@ -110,6 +112,7 @@ type Actions = {
 const initialState: State = {
   loading: false,
   activeStep: Steps.AUTHORIZATION,
+  eventId: undefined,
   dialogActions: {
     [Steps.AUTHORIZATION]: [],
     [Steps.CREATION]: [],
@@ -141,6 +144,9 @@ const useStore = create<State & Actions>()((set, get) => ({
   setLoading: (value: boolean) => {
     set({ loading: value });
   },
+  setEventId: (value?: number) => {
+    set({ eventId: value });
+  },
   setActiveStep: (step: Steps) => {
     set({ activeStep: step });
   },
@@ -165,6 +171,7 @@ function CreateDialog() {
 
   React.useEffect(() => {
     setOpen(activeDialog.type === DialogIdentifier.DIALOG_CREATE);
+    state.setEventId(activeDialog.data?.eventId);
   }, [activeDialog]);
 
   // TODO where and how do we reset the state (including step components)
@@ -260,7 +267,9 @@ function CreateDialog() {
         <AuthorizationStep
           active={state.activeStep === Steps.AUTHORIZATION}
           loading={state.loading}
+          eventId={state.eventId}
           setLoading={state.setLoading}
+          setEventId={state.setEventId}
           setError={(text) => state.setError(Steps.AUTHORIZATION, text)}
           setComplete={(value) => state.setComplete(Steps.AUTHORIZATION, value)}
           setActions={(actions) =>
@@ -271,7 +280,9 @@ function CreateDialog() {
         <CreationStep
           active={state.activeStep === Steps.CREATION}
           loading={state.loading}
+          eventId={state.eventId}
           setLoading={state.setLoading}
+          setEventId={state.setEventId}
           setError={(text) => state.setError(Steps.CREATION, text)}
           setComplete={(value) => state.setComplete(Steps.CREATION, value)}
           setActions={(actions) =>
@@ -282,7 +293,9 @@ function CreateDialog() {
         <PaymentStep
           active={state.activeStep === Steps.PAYMENT}
           loading={state.loading}
+          eventId={state.eventId}
           setLoading={state.setLoading}
+          setEventId={state.setEventId}
           setError={(text) => state.setError(Steps.PAYMENT, text)}
           setComplete={(value) => state.setComplete(Steps.PAYMENT, value)}
           setActions={(actions) =>
@@ -293,7 +306,9 @@ function CreateDialog() {
         <SummaryStep
           active={state.activeStep === Steps.SUMMARY}
           loading={state.loading}
+          eventId={state.eventId}
           setLoading={state.setLoading}
+          setEventId={state.setEventId}
           setError={(text) => state.setError(Steps.SUMMARY, text)}
           setComplete={(value) => state.setComplete(Steps.SUMMARY, value)}
           setActions={(actions) =>
