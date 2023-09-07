@@ -12,6 +12,7 @@ import { activeDialogAtom } from "states/atoms";
 import EventTable, { type EventTableRow } from "components/EventTable";
 import ContentWrapper from "components/ContentWrapper";
 import { useAuth } from "components/AuthContext";
+import EventGrid from "components/EventGrid";
 
 function OrganizerPage() {
   const { isActive, networkId } = useWeb3();
@@ -111,6 +112,7 @@ function OrganizerPage() {
       }
     >
       <EventTable rows={rows} isOwner={true} />
+      <EventGrid events={data ?? []} />
     </ContentWrapper>
   );
 }

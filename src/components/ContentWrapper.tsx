@@ -18,7 +18,7 @@ export function ContentWrapper(props: ContentWrapperProps) {
   const { children, title, tooltip, secondary, isLoading, isAuthorized } =
     props;
   return (
-    <Box sx={{ width: "48rem" }}>
+    <Box sx={{ width: "100%" }}>
       <Paper
         sx={{ position: "relative", padding: "1.5rem", borderRadius: "4px" }}
         elevation={1}

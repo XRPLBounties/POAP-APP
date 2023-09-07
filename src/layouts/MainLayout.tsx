@@ -27,7 +27,7 @@ function MainLayout(props: any) {
             display: "flex",
             justifyContent: "center",
           }}
-          maxWidth="md"
+          maxWidth="lg"
         >
           <Outlet />
         </Container>
