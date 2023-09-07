@@ -1,7 +1,7 @@
 import axios from "axios";
 import config from "config";
 
-import type { NetworkIdentifier, User } from "types";
+import type { User } from "types";
 
 export type getInfoParams = {
   includeEvents?: boolean;
@@ -49,29 +49,4 @@ export const update = async (
   );
 
   return response.data.result as boolean;
-};
-
-export type getSlotsParams = {
-  networkId: NetworkIdentifier;
-};
-
-export type getSlotsResult = [number, number];
-
-export const getSlots = async (
-  jwt: string,
-  params: getSlotsParams
-): Promise<getSlotsResult> => {
-  const response = await axios.get(
-    new URL("/user/slots", config.apiURL).toString(),
-    {
-      headers: {
-        Authorization: `Bearer ${jwt}`,
-      },
-      responseType: "json",
-      timeout: config.timeout,
-      params: params,
-    }
-  );
-
-  return response.data.result as getSlotsResult;
 };

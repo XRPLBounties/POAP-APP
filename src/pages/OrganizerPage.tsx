@@ -3,7 +3,7 @@ import axios from "axios";
 import { useSnackbar } from "notistack";
 import { useAtom } from "jotai";
 
-import { Box, Button } from "@mui/material";
+import { Button } from "@mui/material";
 
 import API from "apis";
 import { useWeb3 } from "connectors/context";
@@ -17,7 +17,6 @@ function OrganizerPage() {
   const { isActive, networkId } = useWeb3();
   const { isAuthenticated, jwt, permissions } = useAuth();
   const [data, setData] = React.useState<Event[]>();
-  const [slots, setSlots] = React.useState<{ used: number; max: number }>();
   const [activeDialog, setActiveDialog] = useAtom(activeDialogAtom);
   const { enqueueSnackbar } = useSnackbar();
 
@@ -36,23 +35,14 @@ function OrganizerPage() {
             limit: 100,
           });
 
-          const [usedSlots, maxSlots] = await API.user.getSlots(jwt, {
-            networkId: networkId,
-          });
-
           if (mounted) {
             setData(events);
-            setSlots({
-              used: usedSlots,
-              max: maxSlots,
-            });
           }
         }
       } catch (err) {
         console.debug(err);
         if (mounted) {
           setData(undefined);
-          setSlots(undefined);
         }
         if (axios.isAxiosError(err)) {
           enqueueSnackbar(
@@ -75,7 +65,6 @@ function OrganizerPage() {
         load();
       } else {
         setData(undefined);
-        setSlots(undefined);
       }
     }
 
@@ -110,31 +99,15 @@ function OrganizerPage() {
       isLoading={!Boolean(data)}
       isAuthorized={isAuthorized}
       secondary={
-        <React.Fragment>
-          {slots && (
-            <Box
-              sx={{
-                display: "flex",
-                flexWrap: "nowrap",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <strong>
-                Slots: {slots.used}/{slots.max}
-              </strong>
-            </Box>
-          )}
-          <Button
-            title="Create a new event"
-            color="primary"
-            variant="contained"
-            onClick={handleClick}
-            disabled={!(isActive && isAuthorized)}
-          >
-            New
-          </Button>
-        </React.Fragment>
+        <Button
+          title="Create a new event"
+          color="primary"
+          variant="contained"
+          onClick={handleClick}
+          disabled={!(isActive && isAuthorized)}
+        >
+          New
+        </Button>
       }
     >
       <EventTable rows={rows} isOwner={true} />
