@@ -75,7 +75,7 @@ type IView = {};
 
 function ClaimPage() {
   const { connector, provider, account, isActive } = useWeb3();
-  const { isAuthenticated, jwt, permissions, isAuto, toggleAuto } = useAuth();
+  const { isAuthenticated, jwt, permissions, isAuto, toggleAuto, setClaimFlow } = useAuth();
   const [selectedWallet, setSelectedWallet] = useAtom(selectedWalletAtom);
   const [data, setData] = React.useState<Claim | null>();
   const [uuid, setUuid] = React.useState<string>();
@@ -245,6 +245,9 @@ function ClaimPage() {
       }
     }
 
+    // set login flow
+    setClaimFlow(true);
+
     setLoading(true);
     try {
       await xumm.activate();
@@ -256,7 +259,7 @@ function ClaimPage() {
     } finally {
       setLoading(false);
     }
-  }, [connector, isActive, setSelectedWallet]);
+  }, [connector, isActive, setSelectedWallet, setClaimFlow, enqueueSnackbar]);
 
   // TODO make useCallback
   const handleClaim = async (event: React.MouseEvent<HTMLButtonElement>) => {

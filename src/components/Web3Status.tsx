@@ -15,7 +15,8 @@ import { useWeb3 } from "connectors/context";
 import { xumm } from "connectors/xumm";
 import { getConnector } from "connectors";
 import type { Connector } from "connectors/connector";
-import { ConnectorType, DialogIdentifier } from "types";
+import { ConnectorType } from "types";
+import { useAuth } from "components/AuthContext";
 
 const StyledMenu = styled((props: MenuProps) => (
   <Menu
@@ -45,6 +46,7 @@ const DEFAULT_STATUS = "CONNECT WALLET";
 
 function Web3Status() {
   const { connector, account, isActive } = useWeb3();
+  const { setClaimFlow } = useAuth();
   const [selectedWallet, setSelectedWallet] = useAtom(selectedWalletAtom);
   const [status, setStatus] = React.useState<string>(DEFAULT_STATUS);
   const [menuAnchor, setMenuAnchor] = React.useState<null | HTMLElement>(null);
@@ -107,6 +109,7 @@ function Web3Status() {
           );
         }
       } else if (action === "xumm") {
+        setClaimFlow(false);
         try {
           await xumm.activate();
           setSelectedWallet(ConnectorType.XUMM);
@@ -117,6 +120,7 @@ function Web3Status() {
           );
         }
       } else if (action === "gem") {
+        setClaimFlow(false);
         try {
           await gem.activate();
           setSelectedWallet(ConnectorType.GEM);
@@ -128,7 +132,7 @@ function Web3Status() {
         }
       }
     },
-    [connector, enqueueSnackbar, setSelectedWallet]
+    [connector, enqueueSnackbar, setSelectedWallet, setClaimFlow]
   );
 
   return (

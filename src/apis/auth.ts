@@ -37,6 +37,7 @@ export type loginData = {
   walletType: WalletType;
   data: string;
   signature?: string;
+  claimFlow: boolean;
 };
 
 export const login = async (data: loginData): Promise<string> => {

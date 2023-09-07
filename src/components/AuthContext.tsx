@@ -57,11 +57,13 @@ export type AuthContextType = {
   isAvailable: boolean;
   isAuthenticated: boolean;
   isAuto: boolean;
+  isClaimFlow: boolean;
   jwt?: string;
   permissions: string[];
   login: () => Promise<void>;
   logout: () => void;
-  toggleAuto: () => void;
+  toggleAuto: Actions["toggleAuto"];
+  setClaimFlow: (value: boolean) => void;
 };
 
 export const AuthContext = React.createContext<AuthContextType | undefined>(
@@ -75,6 +77,7 @@ export type AuthProviderProps = {
 export function AuthProvider({ children }: AuthProviderProps) {
   const { connector, provider, account, networkId } = useWeb3();
   const { isAuto, tokens, addToken, removeToken, toggleAuto } = useAuthStore();
+  const [isClaimFlow, setIsClaimFlow] = React.useState<boolean>(false);
   const [isAvailable, setIsAvailable] = React.useState<boolean>(true);
   const [isAuthenticated, setIsAuthenticated] = React.useState<boolean>(false);
   const [jwt, setJwt] = React.useState<string>();
@@ -98,6 +101,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             walletAddress: account,
             walletType: WalletType.XUMM_WALLET,
             data: data.tempJwt,
+            claimFlow: isClaimFlow,
           });
           return token;
         }
@@ -108,12 +112,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
             walletType: WalletType.GEM_WALLET,
             data: data.tempJwt,
             signature: data.signature,
+            claimFlow: isClaimFlow,
           });
           return token;
         }
       }
     }
-  }, [account, connector, provider]);
+  }, [account, connector, provider, isClaimFlow]);
 
   const reset = React.useCallback(() => {
     setIsAuthenticated(false);
@@ -129,7 +134,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         console.debug("Using cached jwt");
         const payload = decodeToken(token);
         setJwt(token);
-        setPermissions((payload as JwtPayload)?.permissions ?? [])
+        setPermissions((payload as JwtPayload)?.permissions ?? []);
         setIsAuthenticated(true);
         return;
       }
@@ -139,7 +144,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (token) {
         const payload = decodeToken(token);
         setJwt(token);
-        setPermissions((payload as JwtPayload)?.permissions ?? [])
+        setPermissions((payload as JwtPayload)?.permissions ?? []);
         addToken(account, token);
         setIsAuthenticated(true);
         return;
@@ -202,7 +207,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (account) {
         load();
       } else {
-        reset()
+        reset();
       }
     }
 
@@ -217,11 +222,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
         isAvailable,
         isAuthenticated,
         isAuto,
+        isClaimFlow,
         jwt,
         permissions,
         login,
         logout,
         toggleAuto,
+        setClaimFlow: setIsClaimFlow,
       }}
     >
       {children}
