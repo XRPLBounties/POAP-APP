@@ -1,3 +1,4 @@
+import { AccountSetAsfFlags } from "xrpl";
 import { XummSdkJwt, SdkTypes } from "xumm-sdk";
 import { XummPkce } from "xumm-oauth2-pkce";
 
@@ -74,6 +75,7 @@ export class XummWalletProvider extends Provider {
     const subscription = await this.submitPayload({
       TransactionType: "AccountSet",
       NFTokenMinter: minterAddress,
+      SetFlag: AccountSetAsfFlags.asfAuthorizedNFTokenMinter,
     });
 
     return {

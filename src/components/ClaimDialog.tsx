@@ -72,7 +72,8 @@ function ClaimDialog() {
               autoHideDuration: 30000,
             }
           );
-          const success = await provider.acceptOffer(offer.offerIndex);
+          const result = await provider.acceptOffer(offer.offerIndex);
+          const success = await result.resolved;
 
           if (success) {
             enqueueSnackbar("Claim successful", {

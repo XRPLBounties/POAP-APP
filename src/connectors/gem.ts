@@ -1,8 +1,13 @@
+import { AccountSetAsfFlags } from "xrpl";
 import * as Gem from "@gemwallet/api";
 
 import API from "apis";
 import { Connector } from "connectors/connector";
-import { AuthData, Provider, type ProviderRequestResult } from "connectors/provider";
+import {
+  AuthData,
+  Provider,
+  type ProviderRequestResult,
+} from "connectors/provider";
 import { ConnectorType, NetworkIdentifier } from "types";
 
 export class NoGemWalletError extends Error {
@@ -38,9 +43,12 @@ export class GemWalletProvider extends Provider {
     };
   }
 
-  public async setAccount(minterAddress: string): Promise<ProviderRequestResult> {
+  public async setAccount(
+    minterAddress: string
+  ): Promise<ProviderRequestResult> {
     const response = await Gem.setAccount({
       NFTokenMinter: minterAddress,
+      setFlag: AccountSetAsfFlags.asfAuthorizedNFTokenMinter,
     });
     if (response.type === "reject") {
       throw Error("User refused to sign AccountSet transaction");
