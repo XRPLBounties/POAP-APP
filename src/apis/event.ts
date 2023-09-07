@@ -41,7 +41,6 @@ export type createData = {
 
 export type createResult = {
   eventId: number;
-  metadataUri: string;
 };
 
 export const create = async (

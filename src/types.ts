@@ -28,6 +28,7 @@ export enum ConnectorType {
 
 export enum EventStatus {
   PENDING,
+  PAID,
   ACTIVE,
   CLOSED,
   CANCELED,
@@ -48,7 +49,8 @@ export type User = {
 
 export type Accounting = {
   id: number;
-  depositValue: number;
+  depositReserveValue: number;
+  depositFeeValue: number;
   depositTxHash?: string;
   refundValue?: number;
   refundTxHash?: string;
