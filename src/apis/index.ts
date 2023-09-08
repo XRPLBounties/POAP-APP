@@ -3,6 +3,7 @@ import * as auth from "./auth";
 import * as event from "./event";
 import * as events from "./events";
 import * as offers from "./offers";
+import * as payment from "./payment"
 import * as user from "./user";
 import * as users from "./users";
 
@@ -12,6 +13,7 @@ export const API = {
   event,
   events,
   offers,
+  payment,
   user,
   users,
 };

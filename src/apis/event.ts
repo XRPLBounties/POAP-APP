@@ -108,12 +108,10 @@ export type inviteData = {
   attendeeWalletAddresses: string[];
 };
 
-export type inviteResult = boolean;
-
 export const invite = async (
   jwt: string,
   data: inviteData
-): Promise<inviteResult> => {
+): Promise<boolean> => {
   const response = await axios.post(
     new URL("/event/invite", config.apiURL).toString(),
     data,
@@ -126,7 +124,7 @@ export const invite = async (
     }
   );
 
-  return response.data.result as inviteResult;
+  return response.data.result as boolean;
 };
 
 export type getInfoResult = Event | undefined;
