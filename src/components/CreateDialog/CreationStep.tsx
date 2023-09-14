@@ -20,16 +20,13 @@ import {
 } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { Box } from "@mui/material";
-import Stack from "@mui/material/Stack";
-import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
+import { Box, Button, Stack, TextField } from "@mui/material";
+
 import CircularProgress from "@mui/material/CircularProgress";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 
 import API from "apis";
 import { useWeb3 } from "connectors/context";
-import { activeDialogAtom } from "states/atoms";
 import { useAuth } from "components/AuthContext";
 import { StepProps } from "./types";
 
@@ -111,9 +108,9 @@ function CreationStep({
   eventId,
   setLoading,
   setEventId,
+  setActions,
   setError,
   setComplete,
-  close,
 }: StepProps) {
   const { networkId } = useWeb3();
   const { isAuthenticated, jwt, permissions } = useAuth();
@@ -138,58 +135,80 @@ function CreationStep({
 
   // update parent state
   React.useEffect(() => {
-    setComplete(Boolean(eventId));
-  }, [eventId]);
-
-  // const handleClose = (event: {}, reason?: string) => {
-  //   if (reason === "backdropClick") {
-  //     return;
-  //   }
-  //   setActiveDialog({});
-  // };
-
-  // const handleCancel = (event: React.MouseEvent<HTMLButtonElement>) => {
-  //   reset();
-  //   setActiveDialog({});
-  // };
-
-  const onSubmit: SubmitHandler<CreateFormValues> = async (values) => {
-    setLoading(true);
-    try {
-      if (networkId && isAuthorized && jwt) {
-        const result = await API.event.create(jwt, {
-          networkId: networkId,
-          tokenCount: values.tokenCount,
-          title: values.title,
-          description: values.description,
-          location: values.location,
-          imageUrl: values.url,
-          dateStart: values.dateStart!,
-          dateEnd: values.dateEnd!,
-          isManaged: !values.isPublic,
-        });
-        console.debug("CreateResult", result);
-        enqueueSnackbar(`Creation successful: Event #${result.eventId}`, {
-          variant: "success",
-        });
-        reset();
-      }
-    } catch (err) {
-      console.debug(err);
-      if (axios.isAxiosError(err)) {
-        enqueueSnackbar(`Creation failed: ${err.response?.data.error}`, {
-          variant: "error",
-        });
-      } else {
-        enqueueSnackbar(`Creation failed: ${(err as Error).message}`, {
-          variant: "error",
-        });
-      }
-    } finally {
-      setLoading(false);
-      // setActiveDialog({});
+    if (active) {
+      setComplete(Boolean(eventId));
     }
-  };
+  }, [active, eventId]);
+
+  const onSubmit: SubmitHandler<CreateFormValues> = React.useCallback(
+    async (values) => {
+      setLoading(true);
+      try {
+        if (networkId && isAuthorized && jwt) {
+          const result = await API.event.create(jwt, {
+            networkId: networkId,
+            tokenCount: values.tokenCount,
+            title: values.title,
+            description: values.description,
+            location: values.location,
+            imageUrl: values.url,
+            dateStart: values.dateStart!,
+            dateEnd: values.dateEnd!,
+            isManaged: !values.isPublic,
+          });
+          console.debug("CreateResult", result);
+          enqueueSnackbar(`Creation successful: Event #${result.eventId}`, {
+            variant: "success",
+          });
+
+          setEventId(result.eventId);
+          // TODO
+          // reset();
+        }
+      } catch (err) {
+        console.debug(err);
+        if (axios.isAxiosError(err)) {
+          enqueueSnackbar(`Creation failed: ${err.response?.data.error}`, {
+            variant: "error",
+          });
+        } else {
+          enqueueSnackbar(`Creation failed: ${(err as Error).message}`, {
+            variant: "error",
+          });
+        }
+      } finally {
+        setLoading(false);
+        // setActiveDialog({});
+      }
+    },
+    [
+      enqueueSnackbar,
+      isAuthorized,
+      jwt,
+      networkId,
+      // reset,
+      setLoading,
+      setEventId,
+    ]
+  );
+
+  // set actions
+  React.useEffect(() => {
+    if (active) {
+      setActions([
+        <Button
+          color="primary"
+          onClick={handleSubmit(onSubmit)}
+          startIcon={loading && <CircularProgress size={20} />}
+          disabled={loading || !isAuthorized || !isValid}
+        >
+          Create
+        </Button>,
+      ]);
+    } else {
+      setActions([]);
+    }
+  }, [active, loading, isAuthorized, isValid, handleSubmit, onSubmit]);
 
   return active ? (
     <Box>

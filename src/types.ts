@@ -30,8 +30,9 @@ export enum EventStatus {
   PENDING,
   PAID,
   ACTIVE,
-  CLOSED,
   CANCELED,
+  CLOSED,
+  REFUNDED,
 }
 
 export type User = {
@@ -49,10 +50,11 @@ export type User = {
 
 export type Accounting = {
   id: number;
-  depositReserveValue: number;
-  depositFeeValue: number;
+  depositAddress: string;
+  depositReserveValue: string;
+  depositFeeValue: string;
   depositTxHash?: string;
-  refundValue?: number;
+  refundValue?: string;
   refundTxHash?: string;
   accumulatedTxFees: number;
   eventId: Event["id"];

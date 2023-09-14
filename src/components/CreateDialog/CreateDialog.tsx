@@ -1,40 +1,26 @@
 import React from "react";
-import axios from "axios";
 import { useAtom } from "jotai";
-import { useSnackbar } from "notistack";
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
 
 import {
   Box,
   Button,
-  Stepper,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  IconButton,
   Step,
-  StepLabel,
   StepContent,
-  Paper,
+  StepLabel,
+  Stepper,
   Typography,
 } from "@mui/material";
-
-import Checkbox from "@mui/material/Checkbox";
 import CloseIcon from "@mui/icons-material/Close";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import FormGroup from "@mui/material/FormGroup";
-import IconButton from "@mui/material/IconButton";
-import Stack from "@mui/material/Stack";
-import TextField from "@mui/material/TextField";
-import CircularProgress from "@mui/material/CircularProgress";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 
-import API from "apis";
-import { useWeb3 } from "connectors/context";
 import { activeDialogAtom } from "states/atoms";
 import { DialogIdentifier } from "types";
-import { useAuth } from "components/AuthContext";
 import AuthorizationStep from "./AuthorizationStep";
 import CreationStep from "./CreationStep";
 import SummaryStep from "./SummaryStep";
@@ -85,10 +71,6 @@ const stepInfo: StepInfo[] = [
               they're running and how to resolve approval issues.`,
   },
 ];
-
-// TODO how to solve loading icon ?
-// just create react node, easiest ?
-// type DialogAction = { label: string; callback: () => void; disabled?: boolean };
 
 type State = {
   loading: boolean;
@@ -159,15 +141,9 @@ const useStore = create<State & Actions>()((set, get) => ({
 }));
 
 function CreateDialog() {
-  const { account, networkId } = useWeb3();
-  const { isAuthenticated, jwt, permissions } = useAuth();
-  // const [state, dispatch] = React.useReducer<boolean>();
   const state = useStore();
   const [open, setOpen] = React.useState<boolean>(false);
-  // const [loading, setLoading] = React.useState<boolean>(false);
   const [activeDialog, setActiveDialog] = useAtom(activeDialogAtom);
-  // const [activeStep, setActiveStep] = React.useState(0);
-  const { enqueueSnackbar } = useSnackbar();
 
   React.useEffect(() => {
     setOpen(activeDialog.type === DialogIdentifier.DIALOG_CREATE);
@@ -179,28 +155,24 @@ function CreateDialog() {
 
   // update active step
   React.useEffect(() => {
+    state.setActiveStep(Steps.SUMMARY);
+    return;
+
     for (const step of stepInfo) {
       if (!state.complete[step.id]) {
         state.setActiveStep(step.id);
         break;
       }
     }
-
-    // if (!state.complete[Steps.AUTHORIZATION]) {
-    //   state.setActiveStep(Steps.AUTHORIZATION);
-    //   return;
-    // } else if (!state.complete[Steps.CREATION]) {
-    //   state.setActiveStep(Steps.CREATION);
-    //   return;
-    // }
-    // TODO reset
-    // TODO does this even work (as expected)?
   }, [state.complete]);
 
   const handleClose = (event?: {}, reason?: string) => {
     if (reason === "backdropClick") {
       return;
     }
+    // TODO reset dialog (including every step)
+    // state.reset();
+    // setOpen(false); // doesnt fix strange change while close
     setActiveDialog({});
   };
 
@@ -243,85 +215,91 @@ function CreateDialog() {
           flexDirection: "row",
         }}
       >
-        <Box
-          sx={{
-            minWidth: "350px",
-            maxWidth: "350px",
-            padding: "0 2rem 0 1rem",
-          }}
-        >
-          <Stepper activeStep={activeStepIndex} orientation="vertical">
-            {stepInfo.map((step, index) => (
-              <Step key={index} completed={state.complete[step.id]}>
-                <StepLabel error={!!state.error[step.id]}>
-                  {step.label}
-                </StepLabel>
-                <StepContent>
-                  <Typography variant="body2">{step.description}</Typography>
-                </StepContent>
-              </Step>
-            ))}
-          </Stepper>
-        </Box>
-        {/* TODO loop this ? */}
-        <AuthorizationStep
-          active={state.activeStep === Steps.AUTHORIZATION}
-          loading={state.loading}
-          eventId={state.eventId}
-          setLoading={state.setLoading}
-          setEventId={state.setEventId}
-          setError={(text) => state.setError(Steps.AUTHORIZATION, text)}
-          setComplete={(value) => state.setComplete(Steps.AUTHORIZATION, value)}
-          setActions={(actions) =>
-            state.setDialogActions(Steps.AUTHORIZATION, actions)
-          }
-          close={handleClose}
-        />
-        <CreationStep
-          active={state.activeStep === Steps.CREATION}
-          loading={state.loading}
-          eventId={state.eventId}
-          setLoading={state.setLoading}
-          setEventId={state.setEventId}
-          setError={(text) => state.setError(Steps.CREATION, text)}
-          setComplete={(value) => state.setComplete(Steps.CREATION, value)}
-          setActions={(actions) =>
-            state.setDialogActions(Steps.CREATION, actions)
-          }
-          close={handleClose}
-        />
-        <PaymentStep
-          active={state.activeStep === Steps.PAYMENT}
-          loading={state.loading}
-          eventId={state.eventId}
-          setLoading={state.setLoading}
-          setEventId={state.setEventId}
-          setError={(text) => state.setError(Steps.PAYMENT, text)}
-          setComplete={(value) => state.setComplete(Steps.PAYMENT, value)}
-          setActions={(actions) =>
-            state.setDialogActions(Steps.PAYMENT, actions)
-          }
-          close={handleClose}
-        />
-        <SummaryStep
-          active={state.activeStep === Steps.SUMMARY}
-          loading={state.loading}
-          eventId={state.eventId}
-          setLoading={state.setLoading}
-          setEventId={state.setEventId}
-          setError={(text) => state.setError(Steps.SUMMARY, text)}
-          setComplete={(value) => state.setComplete(Steps.SUMMARY, value)}
-          setActions={(actions) =>
-            state.setDialogActions(Steps.SUMMARY, actions)
-          }
-          close={handleClose}
-        />
+        <Grid container>
+          <Grid item xs={5}>
+            <Box
+              sx={{
+                paddingLeft: "2rem",
+                paddingRight: "1rem",
+              }}
+            >
+              <Stepper activeStep={activeStepIndex} orientation="vertical">
+                {stepInfo.map((step, index) => (
+                  <Step key={index} completed={state.complete[step.id]}>
+                    <StepLabel error={!!state.error[step.id]}>
+                      {step.label}
+                    </StepLabel>
+                    <StepContent>
+                      <Typography variant="body2">
+                        {step.description}
+                      </Typography>
+                    </StepContent>
+                  </Step>
+                ))}
+              </Stepper>
+            </Box>
+          </Grid>
+          <Grid item xs={7}>
+            <AuthorizationStep
+              active={state.activeStep === Steps.AUTHORIZATION}
+              loading={state.loading}
+              eventId={state.eventId}
+              setLoading={state.setLoading}
+              setEventId={state.setEventId}
+              setError={(text) => state.setError(Steps.AUTHORIZATION, text)}
+              setComplete={(value) =>
+                state.setComplete(Steps.AUTHORIZATION, value)
+              }
+              setActions={(actions) =>
+                state.setDialogActions(Steps.AUTHORIZATION, actions)
+              }
+            />
+            <CreationStep
+              active={state.activeStep === Steps.CREATION}
+              loading={state.loading}
+              eventId={state.eventId}
+              setLoading={state.setLoading}
+              setEventId={state.setEventId}
+              setError={(text) => state.setError(Steps.CREATION, text)}
+              setComplete={(value) => state.setComplete(Steps.CREATION, value)}
+              setActions={(actions) =>
+                state.setDialogActions(Steps.CREATION, actions)
+              }
+            />
+            <PaymentStep
+              active={state.activeStep === Steps.PAYMENT}
+              loading={state.loading}
+              eventId={state.eventId}
+              setLoading={state.setLoading}
+              setEventId={state.setEventId}
+              setError={(text) => state.setError(Steps.PAYMENT, text)}
+              setComplete={(value) => state.setComplete(Steps.PAYMENT, value)}
+              setActions={(actions) =>
+                state.setDialogActions(Steps.PAYMENT, actions)
+              }
+            />
+            <SummaryStep
+              active={state.activeStep === Steps.SUMMARY}
+              loading={state.loading}
+              eventId={state.eventId}
+              setLoading={state.setLoading}
+              setEventId={state.setEventId}
+              setError={(text) => state.setError(Steps.SUMMARY, text)}
+              setComplete={(value) => state.setComplete(Steps.SUMMARY, value)}
+              setActions={(actions) =>
+                state.setDialogActions(Steps.SUMMARY, actions)
+              }
+            />
+          </Grid>
+        </Grid>
       </DialogContent>
       <DialogActions>
         <Button color="primary" onClick={handleClose}>
-          Cancel
+          {state.activeStep === Steps.SUMMARY ? "Close" : "Cancel"}
         </Button>
-        {state.dialogActions[state.activeStep].map((x) => x)}
+        {state.dialogActions[state.activeStep].map((button, index) => (
+          <React.Fragment key={index}>{button}</React.Fragment>
+        ))}
       </DialogActions>
     </Dialog>
   );

@@ -10,5 +10,4 @@ export type StepProps = {
   setError: (text: string | null) => void;
   setComplete: (value: boolean) => void;
   setActions: (actions: ReactNode[]) => void;
-  close: (event?: {}, reason?: string) => void;
 };

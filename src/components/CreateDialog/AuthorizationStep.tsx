@@ -21,11 +21,11 @@ function AuthorizationStep({
   setError,
   setComplete,
   setActions,
-  close,
 }: StepProps) {
   const { provider, networkId } = useWeb3();
   const { isAuthenticated, jwt, permissions } = useAuth();
   const [data, setData] = React.useState<Minter>();
+  const [count, setCount] = React.useState<number>(0);
   // const [loading, setLoading] = React.useState<boolean>(false);
   const { enqueueSnackbar } = useSnackbar();
 
@@ -37,8 +37,10 @@ function AuthorizationStep({
 
   // update parent state
   React.useEffect(() => {
-    setComplete(Boolean(data?.isConfigured));
-  }, [data]);
+    if (active) {
+      setComplete(Boolean(data?.isConfigured));
+    }
+  }, [active, data]);
 
   // fetch authorized minter info
   React.useEffect(() => {
@@ -78,6 +80,7 @@ function AuthorizationStep({
       }
     };
 
+    // TODO consider adding && active
     if (isAuthorized) {
       load();
     } else {
@@ -87,53 +90,59 @@ function AuthorizationStep({
     return () => {
       mounted = false;
     };
-  }, [isAuthorized, networkId, jwt]);
+  }, [isAuthorized, networkId, jwt, count]);
 
-  // TODO
-  const handleConfirm = async (event: React.MouseEvent<HTMLButtonElement>) => {
-    setLoading(true);
-    try {
-      if (provider && data?.walletAddress) {
-        const result = await provider.setAccount(data.walletAddress);
-        const success = await result.resolved;
+  const handleConfirm = React.useCallback(
+    async (event: React.MouseEvent<HTMLButtonElement>) => {
+      setLoading(true);
+      try {
+        if (provider && data?.walletAddress) {
+          const result = await provider.setAccount(data.walletAddress);
+          const txHash = await result.resolved;
 
-        console.log(success);
-        // TODO force redownload minter
+          console.log(txHash);
+          // TODO force redownload minter
+          setCount((c) => c + 1);
+
+          // TODO reset local state?
+        }
+      } catch (err) {
+        console.debug(err);
+        if (axios.isAxiosError(err)) {
+          enqueueSnackbar(`Sign-up failed: ${err.response?.data.error}`, {
+            variant: "error",
+          });
+        } else {
+          enqueueSnackbar(`Sign-up failed: ${(err as Error).message}`, {
+            variant: "error",
+          });
+        }
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.debug(err);
-      if (axios.isAxiosError(err)) {
-        enqueueSnackbar(`Sign-up failed: ${err.response?.data.error}`, {
-          variant: "error",
-        });
-      } else {
-        enqueueSnackbar(`Sign-up failed: ${(err as Error).message}`, {
-          variant: "error",
-        });
-      }
-    } finally {
-      setLoading(false);
+    },
+    [data?.walletAddress, provider, enqueueSnackbar, setLoading]
+  );
+
+  // set actions
+  React.useEffect(() => {
+    if (active) {
+      setActions([
+        <Button
+          color="primary"
+          onClick={handleConfirm}
+          startIcon={loading && <CircularProgress size={20} />}
+          disabled={
+            loading || !isAuthorized || !Boolean(data) || data?.isConfigured
+          }
+        >
+          Authorize
+        </Button>,
+      ]);
+    } else {
+      setActions([]);
     }
-  };
-
-  // // set actions
-  // React.useEffect(() => {
-  //   console.log("setting actions", active);
-  //   if (active) {
-  //     setActions([
-  //       <Button
-  //         color="primary"
-  //         onClick={handleConfirm}
-  //         startIcon={loading && <CircularProgress size={20} />}
-  //         disabled={loading || !isAuthorized || !Boolean(data)}
-  //       >
-  //         Authorize
-  //       </Button>,
-  //     ]);
-  //   } else {
-  //     setActions([]);
-  //   }
-  // }, [active, loading, isAuthorized, data, handleConfirm]);
+  }, [active, loading, isAuthorized, data, handleConfirm]);
 
   // TODO display "checking minter status" while we load the status with spinner
   // TODO
@@ -152,7 +161,7 @@ function AuthorizationStep({
         </div>
       )}
 
-      <Button color="primary" onClick={close} disabled={loading}>
+      {/* <Button color="primary" onClick={close} disabled={loading}>
         Cancel
       </Button>
       <Button
@@ -162,7 +171,7 @@ function AuthorizationStep({
         disabled={loading || !isAuthorized || !Boolean(data)}
       >
         Authorize
-      </Button>
+      </Button> */}
     </Box>
   ) : null;
 }
