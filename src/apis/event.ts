@@ -62,6 +62,29 @@ export const create = async (
   return response.data.result as createResult;
 };
 
+export type cancelData = {
+  eventId: number;
+};
+
+export const cancel = async (
+  jwt: string,
+  data: cancelData
+): Promise<boolean> => {
+  const response = await axios.post(
+    new URL("/event/cancel", config.apiURL).toString(),
+    data,
+    {
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+      },
+      responseType: "json",
+      timeout: config.timeout,
+    }
+  );
+
+  return response.data.result as boolean;
+};
+
 export type joinData = {
   maskedEventId: string;
   createOffer: boolean;
@@ -87,7 +110,10 @@ export type claimData = {
   maskedEventId: string;
 };
 
-export const claim = async (jwt: string, data: claimData): Promise<Claim | null> => {
+export const claim = async (
+  jwt: string,
+  data: claimData
+): Promise<Claim | null> => {
   const response = await axios.post(
     new URL("/event/claim", config.apiURL).toString(),
     data,
