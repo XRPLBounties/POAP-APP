@@ -11,9 +11,16 @@ import {
 } from "connectors/provider";
 import { ConnectorType, NetworkIdentifier } from "types";
 
-async function _wrap<T>(promise?: Promise<T>): Promise<boolean> {
+type CallbackData = {
+  signed: boolean;
+  txHash: string;
+};
+
+async function _wrap(
+  promise?: Promise<CallbackData>
+): Promise<string | undefined> {
   const result = await promise;
-  return !!result;
+  return result?.signed ? result.txHash : undefined;
 }
 
 export class XummWalletProvider extends Provider {
@@ -31,11 +38,16 @@ export class XummWalletProvider extends Provider {
   private async submitPayload(
     tx: SdkTypes.XummJsonTransaction
   ): Promise<SdkTypes.PayloadAndSubscription> {
-    const callback = async (event: SdkTypes.SubscriptionCallbackParams) => {
+    const callback = async (
+      event: SdkTypes.SubscriptionCallbackParams
+    ): Promise<CallbackData | undefined> => {
       console.debug("callback", event);
       if (event.data?.payload_uuidv4) {
         // set the deferred promise value and close the subscription
-        return event.data?.signed;
+        return {
+          signed: event.data.signed,
+          txHash: event.data.txid,
+        };
       }
     };
 
@@ -44,7 +56,7 @@ export class XummWalletProvider extends Provider {
         txjson: tx,
         options: {
           return_url: {
-            app: document.location.href,
+            app: undefined, // TODO document.location.href,
             web: undefined,
           },
         },
@@ -53,7 +65,7 @@ export class XummWalletProvider extends Provider {
     );
 
     this.pendingPayloads.push(subscription.created.uuid);
-    console.log("sub", subscription);
+
     return subscription;
   }
 
@@ -64,7 +76,9 @@ export class XummWalletProvider extends Provider {
     });
 
     return {
-      resolved: _wrap(subscription.resolved),
+      resolved: _wrap(
+        subscription.resolved as Promise<CallbackData> | undefined
+      ),
       uuid: subscription.created.uuid,
     };
   }
@@ -79,19 +93,21 @@ export class XummWalletProvider extends Provider {
     });
 
     return {
-      resolved: _wrap(subscription.resolved),
+      resolved: _wrap(
+        subscription.resolved as Promise<CallbackData> | undefined
+      ),
       uuid: subscription.created.uuid,
     };
   }
 
   public async sendPayment(
-    amount: string,
+    value: string,
     destination: string,
     memo?: string
   ): Promise<ProviderRequestResult> {
     const subscription = await this.submitPayload({
       TransactionType: "Payment",
-      Amount: amount,
+      Amount: value,
       Destination: destination,
       Memos: memo
         ? [
@@ -107,7 +123,9 @@ export class XummWalletProvider extends Provider {
     });
 
     return {
-      resolved: _wrap(subscription.resolved),
+      resolved: _wrap(
+        subscription.resolved as Promise<CallbackData> | undefined
+      ),
       uuid: subscription.created.uuid,
     };
   }

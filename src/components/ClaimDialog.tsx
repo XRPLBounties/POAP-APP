@@ -73,9 +73,9 @@ function ClaimDialog() {
             }
           );
           const result = await provider.acceptOffer(offer.offerIndex);
-          const success = await result.resolved;
+          const txHash = await result.resolved;
 
-          if (success) {
+          if (txHash) {
             enqueueSnackbar("Claim successful", {
               variant: "success",
             });

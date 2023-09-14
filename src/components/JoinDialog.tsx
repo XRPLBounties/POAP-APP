@@ -74,9 +74,10 @@ function JoinDialog() {
               autoHideDuration: 30000,
             }
           );
-          const success = await provider.acceptOffer(offer.offerIndex);
+          const result = await provider.acceptOffer(offer.offerIndex);
+          const txHash = await result.resolved;
 
-          if (success) {
+          if (txHash) {
             enqueueSnackbar("Claim successful", {
               variant: "success",
             });

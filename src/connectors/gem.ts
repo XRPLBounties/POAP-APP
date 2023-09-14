@@ -39,7 +39,7 @@ export class GemWalletProvider extends Provider {
     }
 
     return {
-      resolved: Promise.resolve(Boolean(response.result?.hash)),
+      resolved: Promise.resolve(response.result?.hash),
     };
   }
 
@@ -55,17 +55,17 @@ export class GemWalletProvider extends Provider {
     }
 
     return {
-      resolved: Promise.resolve(Boolean(response.result?.hash)),
+      resolved: Promise.resolve(response.result?.hash),
     };
   }
 
   public async sendPayment(
-    amount: string,
+    value: string,
     destination: string,
     memo?: string
   ): Promise<ProviderRequestResult> {
     const response = await Gem.sendPayment({
-      amount: amount,
+      amount: value,
       destination: destination,
       memos: memo
         ? [
@@ -84,7 +84,7 @@ export class GemWalletProvider extends Provider {
     }
 
     return {
-      resolved: Promise.resolve(Boolean(response.result?.hash)),
+      resolved: Promise.resolve(response.result?.hash),
     };
   }
 

@@ -294,9 +294,10 @@ function ClaimPage() {
 
           setUuid(result.uuid);
 
-          const success = await result.resolved;
+          const txHash = await result.resolved;
+          console.log("txHash", txHash);
 
-          if (success) {
+          if (txHash) {
             enqueueSnackbar("Claim successful", {
               variant: "success",
             });

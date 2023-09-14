@@ -3,7 +3,7 @@ export type AuthData = {
 };
 
 export type ProviderRequestResult = {
-  resolved: Promise<boolean>;
+  resolved: Promise<string | undefined>;
   uuid?: string;
 }
 
@@ -11,7 +11,7 @@ export abstract class Provider {
   public abstract acceptOffer(offerIndex: string): Promise<ProviderRequestResult>;
   public abstract setAccount(minterAddress: string): Promise<ProviderRequestResult>;
   public abstract sendPayment(
-    amount: string,
+    value: string,
     destination: string,
     memo?: string
   ): Promise<ProviderRequestResult>;
