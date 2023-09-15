@@ -19,6 +19,7 @@ import QueryStatsIcon from "@mui/icons-material/QueryStats";
 
 import { activeDialogAtom } from "states/atoms";
 import Header from "components/Header";
+import CancelDialog from "components/CancelDialog";
 
 // TODO remove
 const drawerWidth = 240;
@@ -29,7 +30,7 @@ function AdminLayout() {
 
   const entries = [
     { label: "Overview", icon: <QueryStatsIcon />, to: "/admin/stats" },
-    { label: "Users", icon: <PeopleIcon />, to: "/admin/users" },
+    { label: "Organizers", icon: <PeopleIcon />, to: "/admin/users" },
     { label: "Events", icon: <EventIcon />, to: "/admin/events" },
   ];
 
@@ -92,6 +93,7 @@ function AdminLayout() {
           <Outlet />
         </Container>
       </Box>
+      <CancelDialog />
     </Box>
   );
 }

@@ -9,7 +9,6 @@ import API from "apis";
 import { useWeb3 } from "connectors/context";
 import { DialogIdentifier, Event } from "types";
 import { activeDialogAtom } from "states/atoms";
-import EventTable, { type EventTableRow } from "components/EventTable";
 import ContentWrapper from "components/ContentWrapper";
 import { useAuth } from "components/AuthContext";
 import EventGrid from "components/EventGrid";
@@ -74,22 +73,6 @@ function OrganizerPage() {
     };
   }, [activeDialog, isActive, networkId, isAuthorized, jwt]);
 
-  const rows = React.useMemo<EventTableRow[]>(() => {
-    if (data) {
-      return data.map((event) => ({
-        id: event.id,
-        status: event.status,
-        title: event.title,
-        dateStart: new Date(event.dateStart),
-        dateEnd: new Date(event.dateEnd),
-        slotsTaken: event.attendees?.length,
-        slotsTotal: event.tokenCount,
-      }));
-    } else {
-      return [];
-    }
-  }, [data]);
-
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setActiveDialog({ type: DialogIdentifier.DIALOG_CREATE });
   };
@@ -111,7 +94,6 @@ function OrganizerPage() {
         </Button>
       }
     >
-      <EventTable rows={rows} isOwner={true} />
       <EventGrid events={data ?? []} />
     </ContentWrapper>
   );

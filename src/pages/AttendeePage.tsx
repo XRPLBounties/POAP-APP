@@ -88,7 +88,7 @@ function AttendeePage() {
       isLoading={!Boolean(data)}
       isAuthorized={isAuthenticated}
     >
-      <EventTable rows={rows} isAttendee={true} />;
+      <EventTable rows={rows} />;
     </ContentWrapper>
   );
 }

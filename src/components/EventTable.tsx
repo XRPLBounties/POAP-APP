@@ -4,11 +4,12 @@ import { useSetAtom } from "jotai";
 import clsx from "clsx";
 
 import Link from "@mui/material/Link";
+import BlockIcon from "@mui/icons-material/Block";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import FileCopyIcon from "@mui/icons-material/FileCopy";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import InfoIcon from "@mui/icons-material/Info";
-import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
+import QrCodeScannerIcon from "@mui/icons-material/QrCodeScanner";
 import {
   GridActionsCellItem,
   GridColDef,
@@ -36,8 +37,6 @@ export type EventTableRow = {
 
 export type EventTableProps = {
   rows: EventTableRow[];
-  isOwner?: boolean;
-  isAttendee?: boolean;
 };
 
 type GetterParamsType = GridValueGetterParams<
@@ -46,9 +45,7 @@ type GetterParamsType = GridValueGetterParams<
   GridTreeNodeWithRender
 >;
 
-export function EventTable(props: EventTableProps) {
-  const { rows, isOwner, isAttendee } = props;
-  const { isActive } = useWeb3();
+export function EventTable({ rows }: EventTableProps) {
   const setActiveDialog = useSetAtom(activeDialogAtom);
   const navigate = useNavigate();
 
@@ -86,6 +83,16 @@ export function EventTable(props: EventTableProps) {
     (id: number) => {
       setActiveDialog({
         type: DialogIdentifier.DIALOG_CLAIM,
+        data: { eventId: id },
+      });
+    },
+    [setActiveDialog]
+  );
+
+  const handleCancel = React.useCallback(
+    (id: number) => {
+      setActiveDialog({
+        type: DialogIdentifier.DIALOG_CANCEL,
         data: { eventId: id },
       });
     },
@@ -140,30 +147,19 @@ export function EventTable(props: EventTableProps) {
         type: "date",
         width: 100,
       },
-      ...(isAttendee
-        ? [
-            {
-              field: "claimed",
-              headerName: "Claimed",
-              type: "boolean",
-              width: 80,
-            },
-          ]
-        : [
-            {
-              field: "slots",
-              headerName: "Slots",
-              type: "number",
-              width: 60,
-              valueGetter: ({ row }: GetterParamsType) => {
-                if (row.slotsTaken !== undefined) {
-                  return `${row.slotsTaken}/${row.slotsTotal}`;
-                } else {
-                  return row.slotsTotal;
-                }
-              },
-            },
-          ]),
+      {
+        field: "slots",
+        headerName: "Slots",
+        type: "number",
+        width: 60,
+        valueGetter: ({ row }: GetterParamsType) => {
+          if (row.slotsTaken !== undefined) {
+            return `${row.slotsTaken}/${row.slotsTotal}`;
+          } else {
+            return row.slotsTotal;
+          }
+        },
+      },
       {
         field: "actions",
         type: "actions",
@@ -171,35 +167,45 @@ export function EventTable(props: EventTableProps) {
         minWidth: 45,
         getActions: (params) => {
           const active = params.row.status === EventStatus.ACTIVE;
+          const cancellable = [
+            EventStatus.PENDING,
+            EventStatus.PAID,
+            EventStatus.ACTIVE,
+          ].includes(params.row.status);
           return [
             <GridActionsCellItem
               icon={<GroupAddIcon />}
               label="Add Participant"
               onClick={() => handleAdd(params.row.id)}
-              disabled={!(active && isActive && isOwner)}
+              disabled={!active}
               showInMenu
             />,
             <GridActionsCellItem
               icon={<QrCodeScannerIcon />}
               label="Create Link"
               onClick={() => handleLink(params.row.id)}
-              disabled={!(active && isActive && isOwner)}
+              disabled={!active}
               showInMenu
             />,
             <GridActionsCellItem
               icon={<EventAvailableIcon />}
               label="Join Event"
               onClick={() => handleJoin(params.row.id, params.row.title)}
-              disabled={!(active && isActive && !isAttendee)}
+              disabled={!active}
               showInMenu
             />,
             <GridActionsCellItem
               icon={<FileCopyIcon />}
               label="Claim NFT"
               onClick={() => handleClaim(params.row.id)}
-              disabled={
-                !(active && isActive && isAttendee && !params.row.claimed)
-              }
+              disabled={!active}
+              showInMenu
+            />,
+            <GridActionsCellItem
+              icon={<BlockIcon />}
+              label="Cancel Event"
+              onClick={() => handleCancel(params.row.id)}
+              disabled={!cancellable}
               showInMenu
             />,
             <GridActionsCellItem
@@ -213,10 +219,8 @@ export function EventTable(props: EventTableProps) {
       },
     ],
     [
-      isActive,
-      isAttendee,
-      isOwner,
       handleAdd,
+      handleCancel,
       handleClaim,
       handleJoin,
       handleLink,

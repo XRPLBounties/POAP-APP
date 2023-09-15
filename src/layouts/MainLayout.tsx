@@ -6,12 +6,13 @@ import Container from "@mui/material/Container";
 
 import { activeDialogAtom } from "states/atoms";
 import { DialogIdentifier } from "types";
-import AddDialog from "components/AddDialog";
-import ClaimDialog from "components/ClaimDialog";
 import Header from "components/Header";
+import AddDialog from "components/AddDialog";
+import CancelDialog from "components/CancelDialog";
+import ClaimDialog from "components/ClaimDialog";
+import CreateDialog from "components/CreateDialog";
 import JoinDialog from "components/JoinDialog";
 import LinkDialog from "components/LinkDialog"
-import CreateDialog from "components/CreateDialog";
 import ProfileDialog from "components/ProfileDialog";
 
 function MainLayout(props: any) {
@@ -32,6 +33,7 @@ function MainLayout(props: any) {
           <Outlet />
         </Container>
         <AddDialog />
+        <CancelDialog />
         <ClaimDialog />
         <CreateDialog />
         <JoinDialog />

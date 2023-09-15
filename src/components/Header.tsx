@@ -58,7 +58,7 @@ function Header() {
   const entries: Array<[string, string, boolean]> = React.useMemo(
     () => [
       ["Home", "/", false],
-      ["Attendee", "/attendee", !(isActive && isAuthenticated)],
+      // ["Attendee", "/attendee", !(isActive && isAuthenticated)],
       ["Organizer", "/organizer", !(isActive && isOrganizer)],
       ["Admin", "/admin", !(isActive && isAdmin)],
       ...(config.debug
