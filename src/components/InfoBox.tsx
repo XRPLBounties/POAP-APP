@@ -9,16 +9,17 @@ import {
 } from "@mui/material";
 
 type InfoBoxProps = {
+  title?: string;
   sx?: SxProps<Theme>;
-  text: React.ReactNode;
+  children?: React.ReactNode;
 };
 
-function InfoBox({ sx, text }: InfoBoxProps) {
+function InfoBox({ title, sx, children }: InfoBoxProps) {
   return (
     <Box sx={sx}>
       <Alert severity="info">
-        <AlertTitle>Info</AlertTitle>
-        {text}
+        <AlertTitle>{title ?? "Info"}</AlertTitle>
+        {children}
       </Alert>
     </Box>
   );

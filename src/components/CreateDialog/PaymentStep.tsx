@@ -3,7 +3,7 @@ import axios from "axios";
 
 import { useSnackbar } from "notistack";
 
-import { Box, Button, Link } from "@mui/material";
+import { Box, Button, Grid, Link, Typography } from "@mui/material";
 
 import CircularProgress from "@mui/material/CircularProgress";
 
@@ -13,6 +13,10 @@ import { useAuth } from "components/AuthContext";
 import Loader from "components/Loader";
 import { StepProps } from "./types";
 import { Event } from "types";
+import InfoBox from "components/InfoBox";
+import ContentBox from "./ContentBox";
+import Debug from "components/Debug";
+import { dropsToXrp } from "xrpl";
 
 function PaymentStep({
   active,
@@ -40,8 +44,6 @@ function PaymentStep({
     }
   }, [active, data?.accounting]);
 
-  // TODO only load event info, if active, if not active reset
-
   // fetch authorized minter info
   React.useEffect(() => {
     let mounted = true;
@@ -51,35 +53,35 @@ function PaymentStep({
         if (eventId && jwt) {
           const event = await API.event.getInfo(eventId, jwt);
 
-          // TODO
-          console.log(event);
+          if (!event?.accounting) {
+            throw Error("Unable to fetch event");
+          }
 
           if (mounted) {
+            setError(null);
             setData(event);
           }
         }
       } catch (err) {
+        const msg = "Failed to load payment info";
         console.debug(err);
         if (mounted) {
+          setError(msg);
           setData(undefined);
         }
         if (axios.isAxiosError(err)) {
-          enqueueSnackbar(
-            `Failed to load stats data: ${err.response?.data.error}`,
-            {
-              variant: "error",
-            }
-          );
+          enqueueSnackbar(`${msg}: ${err.response?.data.error}`, {
+            variant: "error",
+          });
         } else {
-          enqueueSnackbar("Failed to load stats data", {
+          enqueueSnackbar(`${msg}: ${(err as Error).message}`, {
             variant: "error",
           });
         }
       }
     };
 
-    // TODO only if active, but don't reset?
-    if (isAuthorized && active) {
+    if (active && isAuthorized) {
       load();
     } else {
       setData(undefined);
@@ -105,11 +107,9 @@ function PaymentStep({
             `deposit event ${eventId}`
           );
           const txHash = await result.resolved;
-          console.log(txHash);
 
           if (!txHash) {
-            // TODO
-            throw Error("Payment failed");
+            throw Error("Transaction rejected");
           }
 
           const success = await API.payment.check(jwt, {
@@ -117,24 +117,23 @@ function PaymentStep({
             txHash: txHash,
           });
 
-          console.log(success);
+          if (!success) {
+            throw Error("Payment unconfirmed");
+          }
 
-          // TODO handle fail
-
-          // TODO force re-download event
+          // force update event info
           setCount((c) => c + 1);
-          // TODO reset local state?
         }
-
-        // DEBUG
       } catch (err) {
+        const msg = "Failed to transfer payment";
         console.debug(err);
+        setError(msg);
         if (axios.isAxiosError(err)) {
-          enqueueSnackbar(`Sign-up failed: ${err.response?.data.error}`, {
+          enqueueSnackbar(`${msg}: ${err.response?.data.error}`, {
             variant: "error",
           });
         } else {
-          enqueueSnackbar(`Sign-up failed: ${(err as Error).message}`, {
+          enqueueSnackbar(`${msg}: ${(err as Error).message}`, {
             variant: "error",
           });
         }
@@ -142,7 +141,7 @@ function PaymentStep({
         setLoading(false);
       }
     },
-    [eventId, jwt, networkId, data, provider, enqueueSnackbar, setLoading]
+    [eventId, jwt, networkId, data, provider]
   );
 
   // set actions
@@ -157,7 +156,7 @@ function PaymentStep({
             loading || !isActive || !isAuthorized || !Boolean(data?.accounting)
           }
         >
-          Send
+          Pay
         </Button>,
       ]);
     } else {
@@ -172,55 +171,141 @@ function PaymentStep({
     handleConfirm,
   ]);
 
-  // TODO display "checking minter status" while we load the status with spinner
+  const reserveInfo = React.useMemo(() => {
+    if (data?.tokenCount) {
+      const tokenCount = data.tokenCount;
+      const baseReserve = 2;
+      const pageReserve = data.tokenCount / 16;
+      const pageReserveRounded =
+        baseReserve * Math.floor((data.tokenCount + 15) / 16);
+      const offerReserve = baseReserve * data.tokenCount;
+      return {
+        "Token Count": `${tokenCount}`,
+        "Base Reserve": `${baseReserve} XRP`,
+        "NFT Page Reserve": `${baseReserve} * ⌈(${tokenCount}/16)⌉ = ${baseReserve} * ⌈${pageReserve}⌉ = ${pageReserveRounded} XRP`,
+        "NFT Offer Reserve": `${baseReserve} * ${tokenCount} = ${offerReserve} XRP`,
+        "Total Reserve": `${pageReserveRounded} + ${offerReserve} = ${
+          pageReserveRounded + offerReserve
+        } XRP`,
+      };
+    }
+  }, [data?.tokenCount]);
+
+  const depositInfo = React.useMemo(() => {
+    if (data?.accounting) {
+      const total = (
+        BigInt(data.accounting.depositReserveValue) +
+        BigInt(data.accounting?.depositFeeValue)
+      ).toString();
+      return {
+        "Deposit Address": data.accounting.depositAddress,
+        "Reserve Deposit": `${dropsToXrp(
+          data.accounting.depositReserveValue
+        )} XRP`,
+        "Tx Fee Deposit": `${dropsToXrp(data.accounting.depositFeeValue)} XRP`,
+        "Total Deposit": `${dropsToXrp(total)} XRP`,
+        "Transaction Fee": `~${dropsToXrp(15)} XRP`,
+      };
+    }
+  }, [data?.accounting]);
+
   return active ? (
     <Box>
-      <p>isAuthorized: {isAuthorized ? "true" : "false"}</p>
+      <InfoBox sx={{ marginBottom: "1rem" }}>
+        <Typography>
+          Ledger objects are owned by a specific account. Each object
+          contributes to the owner's reserve requirement. More details can be
+          found in the XRPL{" "}
+          <Link
+            href="https://xrpl.org/reserves.html#owner-reserves"
+            target="_blank"
+            rel="noopener noreferrer"
+            underline="none"
+          >
+            documentation
+          </Link>
+          .
+        </Typography>
+      </InfoBox>
 
-      {data?.accounting ? (
+      {data && reserveInfo && depositInfo ? (
         <React.Fragment>
           <Box>
-            <p>Reserve Deposit Breakdown</p>
-            <p>For tokenCount: {data.tokenCount}</p>
-            <code>
-              Base Owner Reserve = 2 XRP NFTokenPage Reserve = 2 *
-              ([tokenCount]/16) = 8.33 = 10 XRP (Reserves round up) NFTokenOffer
-              Reserve = 2 * [tokenCount] = 200 XRP Total Deposit = TODO
-            </code>
-            <Link
-              href="https://xrpl.org/nftokenpage.html#reserve-for-nftokenpage-objects"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Typography
+              sx={{ fontWeight: "500", marginBottom: "0.375rem" }}
+              variant="body2"
             >
-              Details here
-            </Link>
-            <Link
-              href="https://xrpl.org/reserves.html#owner-reserves"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Details here
-            </Link>
-          </Box>
+              Reserve Breakdown:
+            </Typography>
+            <ContentBox sx={{ marginBottom: "1rem" }}>
+              <Grid
+                container
+                direction="row"
+                justifyContent="space-between"
+                spacing={0.5}
+              >
+                {Object.entries(reserveInfo).map(([key, value], index) => (
+                  <React.Fragment key={index}>
+                    <Grid item xs={12}>
+                      <Typography
+                        sx={{ fontFamily: "monospace" }}
+                        variant="body2"
+                      >
+                        {key}: <strong>{value}</strong>
+                      </Typography>
+                    </Grid>
+                  </React.Fragment>
+                ))}
+              </Grid>
+            </ContentBox>
 
-          <Box>
-            <p>txHash: {data.accounting.depositTxHash}</p>
-            <p>Deposit Address: {data.accounting.depositAddress}</p>
-            <p>Deposit Reserve: {data.accounting.depositReserveValue}</p>
-            <p>Deposit Fee: {data.accounting.depositFeeValue}</p>
-            <p>
-              Deposit Total:{" "}
-              {(
-                BigInt(data.accounting.depositReserveValue) +
-                BigInt(data.accounting?.depositFeeValue)
-              ).toString()}
-            </p>
-            <p>Transaction Cost: ~15 drops</p>
+            <Typography
+              sx={{ fontWeight: "500", marginBottom: "0.375rem" }}
+              variant="body2"
+            >
+              Deposit Info:
+            </Typography>
+            <ContentBox>
+              <Grid
+                container
+                direction="row"
+                justifyContent="space-between"
+                spacing={0.5}
+              >
+                {Object.entries(depositInfo).map(([key, value], index) => (
+                  <React.Fragment key={index}>
+                    <Grid item xs={4}>
+                      <Typography
+                        sx={{ fontFamily: "monospace" }}
+                        variant="body2"
+                      >
+                        {key}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={8}>
+                      <Typography
+                        sx={{ fontFamily: "monospace", textAlign: "right" }}
+                        variant="body2"
+                        fontWeight="bold"
+                      >
+                        {value}
+                      </Typography>
+                    </Grid>
+                  </React.Fragment>
+                ))}
+              </Grid>
+            </ContentBox>
           </Box>
         </React.Fragment>
       ) : (
-        <Loader text="Loading Event Payment Status..." />
+        <Loader text="Loading Payment Status..." />
       )}
+
+      <Debug
+        value={{
+          depositTxHash: data?.accounting?.depositTxHash,
+        }}
+      />
     </Box>
   ) : null;
 }

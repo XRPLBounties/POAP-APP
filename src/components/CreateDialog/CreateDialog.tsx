@@ -22,55 +22,17 @@ import CloseIcon from "@mui/icons-material/Close";
 import { activeDialogAtom } from "states/atoms";
 import { DialogIdentifier } from "types";
 import AuthorizationStep from "./AuthorizationStep";
-import CreationStep from "./CreationStep";
+import RegistrationStep from "./RegistrationStep";
 import SummaryStep from "./SummaryStep";
 import PaymentStep from "./PaymentStep";
 
 enum Steps {
+  UNKNOWN,
   AUTHORIZATION,
-  CREATION,
+  REGISTRATION,
   PAYMENT,
   SUMMARY,
 }
-
-type StepInfo = {
-  id: Steps;
-  label: string;
-  description: string;
-};
-
-const stepInfo: StepInfo[] = [
-  {
-    id: Steps.AUTHORIZATION,
-    label: "Authorize Minter",
-    description: `For each ad campaign that you create, you can control how much
-              you're willing to spend on clicks and conversions, which networks
-              and geographical locations you want your ads to show on, and more.`,
-  },
-  {
-    id: Steps.CREATION,
-    label: "Create Event",
-    description:
-      "An ad group contains one or more ads which target a shared set of keywords.",
-  },
-  {
-    id: Steps.PAYMENT,
-    label: "Submit Payment",
-    description: `Try out different ad text to see what brings in the most customers,
-              and learn how to enhance your ads using features like ad extensions.
-              If you run into any problems with your ads, find out how to tell if
-              they're running and how to resolve approval issues.`,
-  },
-  {
-    id: Steps.SUMMARY,
-    label: "Summary",
-    description: `TODO SHOW QR code and link:
-              Try out different ad text to see what brings in the most customers,
-              and learn how to enhance your ads using features like ad extensions.
-              If you run into any problems with your ads, find out how to tell if
-              they're running and how to resolve approval issues.`,
-  },
-];
 
 type State = {
   loading: boolean;
@@ -93,23 +55,26 @@ type Actions = {
 
 const initialState: State = {
   loading: false,
-  activeStep: Steps.AUTHORIZATION,
+  activeStep: Steps.UNKNOWN,
   eventId: undefined,
   dialogActions: {
+    [Steps.UNKNOWN]: [],
     [Steps.AUTHORIZATION]: [],
-    [Steps.CREATION]: [],
+    [Steps.REGISTRATION]: [],
     [Steps.PAYMENT]: [],
     [Steps.SUMMARY]: [],
   },
   error: {
+    [Steps.UNKNOWN]: null,
     [Steps.AUTHORIZATION]: null,
-    [Steps.CREATION]: null,
+    [Steps.REGISTRATION]: null,
     [Steps.PAYMENT]: null,
     [Steps.SUMMARY]: null,
   },
   complete: {
+    [Steps.UNKNOWN]: true,
     [Steps.AUTHORIZATION]: false,
-    [Steps.CREATION]: false,
+    [Steps.REGISTRATION]: false,
     [Steps.PAYMENT]: false,
     [Steps.SUMMARY]: false,
   },
@@ -140,6 +105,37 @@ const useStore = create<State & Actions>()((set, get) => ({
   },
 }));
 
+type StepInfo = {
+  id: Steps;
+  label: string;
+  description: React.ReactNode;
+};
+
+const stepInfo: StepInfo[] = [
+  {
+    id: Steps.AUTHORIZATION,
+    label: "Authorize Minter",
+    description: "Set the platform wallet address as your authorized minter.",
+  },
+  {
+    id: Steps.REGISTRATION,
+    label: "Register Event",
+    description: `Provide the event details. Information is stored on-chain 
+      and cannot be modified once submitted.`,
+  },
+  {
+    id: Steps.PAYMENT,
+    label: "Submit Payment",
+    description: `Transfer the event deposit to cover reserve requirements and transaction fees.
+      The deposit will be refunded once the event has ended.`,
+  },
+  {
+    id: Steps.SUMMARY,
+    label: "Summary",
+    description: "Share the provided link to invite participants to the event.",
+  },
+];
+
 function CreateDialog() {
   const state = useStore();
   const [open, setOpen] = React.useState<boolean>(false);
@@ -150,14 +146,8 @@ function CreateDialog() {
     state.setEventId(activeDialog.data?.eventId);
   }, [activeDialog]);
 
-  // TODO where and how do we reset the state (including step components)
-  // might be best, if each component does it themselves
-
   // update active step
   React.useEffect(() => {
-    state.setActiveStep(Steps.SUMMARY);
-    return;
-
     for (const step of stepInfo) {
       if (!state.complete[step.id]) {
         state.setActiveStep(step.id);
@@ -170,15 +160,25 @@ function CreateDialog() {
     if (reason === "backdropClick") {
       return;
     }
-    // TODO reset dialog (including every step)
-    // state.reset();
-    // setOpen(false); // doesnt fix strange change while close
     setActiveDialog({});
+    state.reset();
   };
 
   const activeStepIndex = React.useMemo(() => {
     return stepInfo.findIndex((x) => x.id === state.activeStep);
   }, [state.activeStep]);
+
+  const createStepFields = (state: State & Actions, step: Steps) => ({
+    active: state.activeStep === step,
+    loading: state.loading,
+    eventId: state.eventId,
+    setLoading: state.setLoading,
+    setEventId: state.setEventId,
+    setError: (text: string | null) => state.setError(step, text),
+    setComplete: (value: boolean) => state.setComplete(step, value),
+    setActions: (actions: React.ReactNode[]) =>
+      state.setDialogActions(step, actions),
+  });
 
   return (
     <Dialog
@@ -219,8 +219,8 @@ function CreateDialog() {
           <Grid item xs={5}>
             <Box
               sx={{
-                paddingLeft: "2rem",
-                paddingRight: "1rem",
+                paddingLeft: "1rem",
+                paddingRight: "2rem",
               }}
             >
               <Stepper activeStep={activeStepIndex} orientation="vertical">
@@ -241,55 +241,13 @@ function CreateDialog() {
           </Grid>
           <Grid item xs={7}>
             <AuthorizationStep
-              active={state.activeStep === Steps.AUTHORIZATION}
-              loading={state.loading}
-              eventId={state.eventId}
-              setLoading={state.setLoading}
-              setEventId={state.setEventId}
-              setError={(text) => state.setError(Steps.AUTHORIZATION, text)}
-              setComplete={(value) =>
-                state.setComplete(Steps.AUTHORIZATION, value)
-              }
-              setActions={(actions) =>
-                state.setDialogActions(Steps.AUTHORIZATION, actions)
-              }
+              {...createStepFields(state, Steps.AUTHORIZATION)}
             />
-            <CreationStep
-              active={state.activeStep === Steps.CREATION}
-              loading={state.loading}
-              eventId={state.eventId}
-              setLoading={state.setLoading}
-              setEventId={state.setEventId}
-              setError={(text) => state.setError(Steps.CREATION, text)}
-              setComplete={(value) => state.setComplete(Steps.CREATION, value)}
-              setActions={(actions) =>
-                state.setDialogActions(Steps.CREATION, actions)
-              }
+            <RegistrationStep
+              {...createStepFields(state, Steps.REGISTRATION)}
             />
-            <PaymentStep
-              active={state.activeStep === Steps.PAYMENT}
-              loading={state.loading}
-              eventId={state.eventId}
-              setLoading={state.setLoading}
-              setEventId={state.setEventId}
-              setError={(text) => state.setError(Steps.PAYMENT, text)}
-              setComplete={(value) => state.setComplete(Steps.PAYMENT, value)}
-              setActions={(actions) =>
-                state.setDialogActions(Steps.PAYMENT, actions)
-              }
-            />
-            <SummaryStep
-              active={state.activeStep === Steps.SUMMARY}
-              loading={state.loading}
-              eventId={state.eventId}
-              setLoading={state.setLoading}
-              setEventId={state.setEventId}
-              setError={(text) => state.setError(Steps.SUMMARY, text)}
-              setComplete={(value) => state.setComplete(Steps.SUMMARY, value)}
-              setActions={(actions) =>
-                state.setDialogActions(Steps.SUMMARY, actions)
-              }
-            />
+            <PaymentStep {...createStepFields(state, Steps.PAYMENT)} />
+            <SummaryStep {...createStepFields(state, Steps.SUMMARY)} />
           </Grid>
         </Grid>
       </DialogContent>

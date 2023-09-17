@@ -1,7 +1,5 @@
 import React from "react";
 import axios from "axios";
-import { useAtom } from "jotai";
-import type { ReactNode } from "react";
 import { useSnackbar } from "notistack";
 import {
   useForm,
@@ -20,14 +18,14 @@ import {
 } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { Box, Button, Stack, TextField } from "@mui/material";
-
+import { Box, Button, Stack, TextField, Typography } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 
 import API from "apis";
 import { useWeb3 } from "connectors/context";
 import { useAuth } from "components/AuthContext";
+import InfoBox from "components/InfoBox";
 import { StepProps } from "./types";
 
 const schemaCommon = object({
@@ -102,7 +100,7 @@ const defaultValues: DefaultValues<CreateFormValues> = {
   isPublic: true,
 };
 
-function CreationStep({
+function RegistrationStep({
   active,
   loading,
   eventId,
@@ -114,7 +112,6 @@ function CreationStep({
 }: StepProps) {
   const { networkId } = useWeb3();
   const { isAuthenticated, jwt, permissions } = useAuth();
-  // const [loading, setLoading] = React.useState<boolean>(false);
   const { enqueueSnackbar } = useSnackbar();
 
   const {
@@ -137,6 +134,8 @@ function CreationStep({
   React.useEffect(() => {
     if (active) {
       setComplete(Boolean(eventId));
+    } else {
+      reset();
     }
   }, [active, eventId]);
 
@@ -156,40 +155,32 @@ function CreationStep({
             dateEnd: values.dateEnd!,
             isManaged: !values.isPublic,
           });
-          console.debug("CreateResult", result);
-          enqueueSnackbar(`Creation successful: Event #${result.eventId}`, {
+
+          enqueueSnackbar(`Registration successful: Event #${result.eventId}`, {
             variant: "success",
           });
 
           setEventId(result.eventId);
-          // TODO
-          // reset();
+          reset();
         }
       } catch (err) {
+        const msg = "Failed to register event";
         console.debug(err);
+        setError(msg);
         if (axios.isAxiosError(err)) {
-          enqueueSnackbar(`Creation failed: ${err.response?.data.error}`, {
+          enqueueSnackbar(`${msg}: ${err.response?.data.error}`, {
             variant: "error",
           });
         } else {
-          enqueueSnackbar(`Creation failed: ${(err as Error).message}`, {
+          enqueueSnackbar(`${msg}: ${(err as Error).message}`, {
             variant: "error",
           });
         }
       } finally {
         setLoading(false);
-        // setActiveDialog({});
       }
     },
-    [
-      enqueueSnackbar,
-      isAuthorized,
-      jwt,
-      networkId,
-      // reset,
-      setLoading,
-      setEventId,
-    ]
+    [isAuthorized, jwt, networkId, reset]
   );
 
   // set actions
@@ -202,7 +193,7 @@ function CreationStep({
           startIcon={loading && <CircularProgress size={20} />}
           disabled={loading || !isAuthorized || !isValid}
         >
-          Create
+          Register
         </Button>,
       ]);
     } else {
@@ -212,6 +203,12 @@ function CreationStep({
 
   return active ? (
     <Box>
+      <InfoBox title="Important" sx={{ marginBottom: "1rem" }}>
+        <Typography>
+          Each event slot has a reserve requirement of <strong>~2.1 XRP</strong>
+          , which has to be deposited for the duration of the event!
+        </Typography>
+      </InfoBox>
       <Stack
         component="form"
         noValidate
@@ -357,4 +354,4 @@ function CreationStep({
   ) : null;
 }
 
-export default CreationStep;
+export default RegistrationStep;

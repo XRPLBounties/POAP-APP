@@ -7,21 +7,18 @@ import { CopyToClipboard } from "react-copy-to-clipboard";
 import { saveAs } from "file-saver";
 
 import { Box, IconButton, Tooltip, Button } from "@mui/material";
-
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import CircularProgress from "@mui/material/CircularProgress";
 
 import API from "apis";
 import { useAuth } from "components/AuthContext";
 import Loader from "components/Loader";
 import { StepProps } from "./types";
 import InfoBox from "components/InfoBox";
+import ContentBox from "./ContentBox";
 
 function SummaryStep({
   active,
-  loading,
   eventId,
-  setLoading,
   setError,
   setComplete,
   setActions,
@@ -50,30 +47,30 @@ function SummaryStep({
         if (jwt && eventId) {
           const masked = await API.event.getLink(jwt, eventId);
           if (mounted) {
+            setError(null);
             setData(`${window.location.origin}/claim/${masked}`);
           }
         }
       } catch (err) {
+        const msg = "Failed to load event link";
         console.debug(err);
         if (mounted) {
+          setError(msg);
           setData(undefined);
         }
         if (axios.isAxiosError(err)) {
-          enqueueSnackbar(
-            `Failed to load event link: ${err.response?.data.error}`,
-            {
-              variant: "error",
-            }
-          );
+          enqueueSnackbar(`${msg}: ${err.response?.data.error}`, {
+            variant: "error",
+          });
         } else {
-          enqueueSnackbar("Failed to load event link", {
+          enqueueSnackbar(`${msg}: ${(err as Error).message}`, {
             variant: "error",
           });
         }
       }
     };
 
-    if (isAuthorized && active) {
+    if (active && isAuthorized) {
       load();
     } else {
       setData(undefined);
@@ -83,14 +80,6 @@ function SummaryStep({
       mounted = false;
     };
   }, [active, eventId, jwt, isAuthorized]);
-
-  const handleConfirm = React.useCallback(
-    async (event: React.MouseEvent<HTMLButtonElement>) => {
-      // TODO reset local state
-      // setData(undefined);
-    },
-    []
-  );
 
   const handleDownload = React.useCallback(() => {
     const canvas = document.getElementById("qrcode") as HTMLCanvasElement;
@@ -108,8 +97,7 @@ function SummaryStep({
         <Button
           color="primary"
           onClick={handleDownload}
-          startIcon={loading && <CircularProgress size={20} />}
-          disabled={loading || !Boolean(data)}
+          disabled={!Boolean(data)}
         >
           Save
         </Button>,
@@ -117,16 +105,14 @@ function SummaryStep({
     } else {
       setActions([]);
     }
-  }, [active, loading, data, handleConfirm, handleDownload]);
+  }, [active, data, handleDownload]);
 
   return active ? (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-      }}
-    >
+    <Box>
+      <InfoBox sx={{ marginBottom: "1rem" }}>
+        The QR code and link can also be viewed in the dashboard.
+      </InfoBox>
+
       {data ? (
         <React.Fragment>
           <Box
@@ -145,14 +131,9 @@ function SummaryStep({
               includeMargin={true}
             />
           </Box>
-          <Box
+          <ContentBox
             sx={{
-              bgcolor: (theme) => theme.palette.grey[100],
-              border: "1px solid",
-              borderRadius: "4px",
-              borderColor: (theme) => theme.palette.grey[300],
               padding: "0.75rem",
-              marginTop: "1rem",
               position: "relative",
             }}
           >
@@ -192,14 +173,10 @@ function SummaryStep({
                 </Tooltip>
               </CopyToClipboard>
             </Box>
-          </Box>
-          <InfoBox
-            sx={{ marginTop: "1rem" }}
-            text={"The QR code and link can later be found in the dashboard"}
-          />
+          </ContentBox>
         </React.Fragment>
       ) : (
-        <Loader text="Fetching link" />
+        <Loader text="Generating Link..." />
       )}
     </Box>
   ) : null;

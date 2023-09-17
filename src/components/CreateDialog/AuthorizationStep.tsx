@@ -3,16 +3,19 @@ import axios from "axios";
 
 import { useSnackbar } from "notistack";
 
-import { Box, Button } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 
 import CircularProgress from "@mui/material/CircularProgress";
 
 import API from "apis";
+import { Minter } from "types";
 import { useWeb3 } from "connectors/context";
 import { useAuth } from "components/AuthContext";
 import Loader from "components/Loader";
+import Debug from "components/Debug";
 import { StepProps } from "./types";
-import { Minter } from "types";
+import ContentBox from "./ContentBox";
+import InfoBox from "components/InfoBox";
 
 function AuthorizationStep({
   active,
@@ -26,14 +29,11 @@ function AuthorizationStep({
   const { isAuthenticated, jwt, permissions } = useAuth();
   const [data, setData] = React.useState<Minter>();
   const [count, setCount] = React.useState<number>(0);
-  // const [loading, setLoading] = React.useState<boolean>(false);
   const { enqueueSnackbar } = useSnackbar();
 
   const isAuthorized = React.useMemo(() => {
     return isAuthenticated && permissions.includes("organizer");
   }, [isAuthenticated, permissions]);
-
-  // TODO set errors
 
   // update parent state
   React.useEffect(() => {
@@ -53,35 +53,31 @@ function AuthorizationStep({
             networkId: networkId,
           });
 
-          // TODO
-          console.log(minter);
-
           if (mounted) {
+            setError(null);
             setData(minter);
           }
         }
       } catch (err) {
+        const msg = "Failed to load minter data";
         console.debug(err);
         if (mounted) {
+          setError(msg);
           setData(undefined);
         }
         if (axios.isAxiosError(err)) {
-          enqueueSnackbar(
-            `Failed to load stats data: ${err.response?.data.error}`,
-            {
-              variant: "error",
-            }
-          );
+          enqueueSnackbar(`${msg}: ${err.response?.data.error}`, {
+            variant: "error",
+          });
         } else {
-          enqueueSnackbar("Failed to load stats data", {
+          enqueueSnackbar(`${msg}: ${(err as Error).message}`, {
             variant: "error",
           });
         }
       }
     };
 
-    // TODO consider adding && active
-    if (isAuthorized) {
+    if (active && isAuthorized) {
       load();
     } else {
       setData(undefined);
@@ -90,7 +86,7 @@ function AuthorizationStep({
     return () => {
       mounted = false;
     };
-  }, [isAuthorized, networkId, jwt, count]);
+  }, [active, isAuthorized, networkId, jwt, count]);
 
   const handleConfirm = React.useCallback(
     async (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -100,20 +96,23 @@ function AuthorizationStep({
           const result = await provider.setAccount(data.walletAddress);
           const txHash = await result.resolved;
 
-          console.log(txHash);
-          // TODO force redownload minter
-          setCount((c) => c + 1);
+          if (!txHash) {
+            throw Error("Transaction rejected");
+          }
 
-          // TODO reset local state?
+          // force update authorized minter info
+          setCount((c) => c + 1);
         }
       } catch (err) {
+        const msg = "Failed to authorized account";
         console.debug(err);
+        setError(msg);
         if (axios.isAxiosError(err)) {
-          enqueueSnackbar(`Sign-up failed: ${err.response?.data.error}`, {
+          enqueueSnackbar(`${msg}: ${err.response?.data.error}`, {
             variant: "error",
           });
         } else {
-          enqueueSnackbar(`Sign-up failed: ${(err as Error).message}`, {
+          enqueueSnackbar(`${msg}: ${(err as Error).message}`, {
             variant: "error",
           });
         }
@@ -121,7 +120,7 @@ function AuthorizationStep({
         setLoading(false);
       }
     },
-    [data?.walletAddress, provider, enqueueSnackbar, setLoading]
+    [data?.walletAddress, provider]
   );
 
   // set actions
@@ -144,34 +143,38 @@ function AuthorizationStep({
     }
   }, [active, loading, isAuthorized, data, handleConfirm]);
 
-  // TODO display "checking minter status" while we load the status with spinner
-  // TODO
   return active ? (
     <Box>
-      <p>isAuthorized: {isAuthorized ? "true" : "false"}</p>
+      <InfoBox sx={{ marginBottom: "1rem" }}>
+        The platform mints and manages event NFTs on behalf of an organizer.
+        This requires a one-time on-chain authorization.
+      </InfoBox>
 
       {data ? (
-        <div>
-          <p>isConfigured: {data.isConfigured ? "true" : "false"}</p>
-          <p>minter address: {data.walletAddress}</p>
-        </div>
+        <React.Fragment>
+          <Typography
+            sx={{ fontWeight: "500", marginBottom: "0.375rem" }}
+            variant="body2"
+          >
+            Platform Minter Address:
+          </Typography>
+          <ContentBox>
+            <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
+              {data.walletAddress}
+            </Typography>
+          </ContentBox>
+        </React.Fragment>
       ) : (
-        <div>
-          <Loader text="Checking Minter Status..." />
-        </div>
+        <Loader text="Checking Minter Status..." />
       )}
 
-      {/* <Button color="primary" onClick={close} disabled={loading}>
-        Cancel
-      </Button>
-      <Button
-        color="primary"
-        onClick={handleConfirm}
-        startIcon={loading && <CircularProgress size={20} />}
-        disabled={loading || !isAuthorized || !Boolean(data)}
-      >
-        Authorize
-      </Button> */}
+      <Debug
+        value={{
+          isAuthorized,
+          isConfigured: data?.isConfigured,
+          minterAddress: data?.walletAddress,
+        }}
+      />
     </Box>
   ) : null;
 }

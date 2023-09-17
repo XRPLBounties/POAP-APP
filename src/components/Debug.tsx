@@ -64,3 +64,5 @@ export function Debug(props: DebugProps) {
     </DebugWrapper>
   );
 }
+
+export default Debug;
