@@ -17,7 +17,7 @@ type Config = {
 };
 
 const DEFAULT: Config = {
-  debug: true,
+  debug: false,
   apiURL: process.env.REACT_APP_URL_POAP_API as string,
   timeout: 5000,
   storage: window.sessionStorage,
