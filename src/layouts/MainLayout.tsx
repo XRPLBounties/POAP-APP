@@ -12,7 +12,7 @@ import CancelDialog from "components/CancelDialog";
 import ClaimDialog from "components/ClaimDialog";
 import CreateDialog from "components/CreateDialog";
 import JoinDialog from "components/JoinDialog";
-import LinkDialog from "components/LinkDialog"
+import LinkDialog from "components/LinkDialog";
 import ProfileDialog from "components/ProfileDialog";
 
 function MainLayout(props: any) {
@@ -21,7 +21,14 @@ function MainLayout(props: any) {
   return (
     <Box>
       <Header />
-      <Box component="main" sx={{ position: "relative", minHeight: "100vh" }}>
+      <Box
+        component="main"
+        sx={{
+          position: "relative",
+          minHeight: "100vh",
+          backgroundColor: "rgb(252, 252, 252)",
+        }}
+      >
         <Container
           sx={{
             paddingTop: "8.5rem",

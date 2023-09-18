@@ -1,34 +1,139 @@
 import * as React from "react";
 import { Link } from "react-router-dom";
+import { useSetAtom } from "jotai";
 
 import {
+  Box,
+  Button,
   Card,
+  CardActionArea,
   CardActions,
   CardContent,
   CardMedia,
-  CardActionArea,
-  Button,
-  Typography,
   IconButton,
+  Tooltip,
+  Typography,
 } from "@mui/material";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
-import { Event } from "types";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import BlockIcon from "@mui/icons-material/Block";
+
+import { Event, DialogIdentifier, EventStatus } from "types";
+import { activeDialogAtom } from "states/atoms";
 
 type EventCardProps = {
   event: Event;
 };
 
 function EventCard({ event }: EventCardProps) {
+  const setActiveDialog = useSetAtom(activeDialogAtom);
+
+  const handleShare = React.useCallback(
+    (id: number) => {
+      setActiveDialog({
+        type: DialogIdentifier.DIALOG_LINK,
+        data: { eventId: id },
+      });
+    },
+    [setActiveDialog]
+  );
+
+  const handleCancel = React.useCallback(
+    (id: number) => {
+      setActiveDialog({
+        type: DialogIdentifier.DIALOG_CANCEL,
+        data: { eventId: id },
+      });
+    },
+    [setActiveDialog]
+  );
+
+  const handlePay = React.useCallback(
+    (id: number) => {
+      setActiveDialog({
+        type: DialogIdentifier.DIALOG_CREATE,
+        data: { eventId: id },
+      });
+    },
+    [setActiveDialog]
+  );
+
+  const statusIcon = React.useMemo(() => {
+    switch (event.status) {
+      case EventStatus.PENDING:
+        return (
+          <Tooltip title="Event requires payment">
+            <IconButton disableRipple>
+              <WarningAmberIcon color="warning" />
+            </IconButton>
+          </Tooltip>
+        );
+      case EventStatus.PAID:
+        return (
+          <Tooltip title="Event will be ready soon">
+            <IconButton disableRipple>
+              <CheckCircleOutlineIcon color="success" />
+            </IconButton>
+          </Tooltip>
+        );
+      case EventStatus.ACTIVE:
+        return (
+          <Tooltip title="Event is active">
+            <IconButton disableRipple>
+              <CheckCircleOutlineIcon color="success" />
+            </IconButton>
+          </Tooltip>
+        );
+      case EventStatus.CANCELED:
+      case EventStatus.CLOSED:
+        return (
+          <Tooltip title="Event is closed">
+            <IconButton disableRipple>
+              <BlockIcon
+                sx={{
+                  color: "grey.600",
+                }}
+              />
+            </IconButton>
+          </Tooltip>
+        );
+      case EventStatus.REFUNDED:
+        return (
+          <Tooltip title="Event deposit has been refunded">
+            <IconButton disableRipple>
+              <BlockIcon
+                sx={{
+                  color: "grey.600",
+                }}
+              />
+            </IconButton>
+          </Tooltip>
+        );
+    }
+  }, [event.status]);
+
+  const options: Intl.DateTimeFormatOptions = {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  };
+
   return (
     <Card>
       <CardActionArea disableRipple component={Link} to={`/event/${event.id}`}>
         <CardMedia
+          sx={
+            {
+              // TODO for closed events ?
+              // filter: "grayscale(1) opacity(60%)",
+            }
+          }
           component="img"
           height="140"
           image={event.imageUrl}
           alt="event image"
         />
-        <CardContent>
+        <CardContent sx={{ minHeight: "150px" }}>
           <Typography noWrap variant="h6" component="div">
             {event.title}
           </Typography>
@@ -36,20 +141,57 @@ function EventCard({ event }: EventCardProps) {
             Event #{event.id}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            {event.description}
+            <strong>Date Start:</strong>{" "}
+            {new Date(event.dateStart).toLocaleDateString(undefined, options)}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            <strong>Date End:</strong>{" "}
+            {new Date(event.dateEnd).toLocaleDateString(undefined, options)}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            <strong>Taken Slots:</strong> {event.attendees?.length}/
+            {event.tokenCount}
           </Typography>
         </CardContent>
       </CardActionArea>
       <CardActions disableSpacing>
-        <Button size="small" color="primary">
+        <Box sx={{ marginRight: "auto" }}>{statusIcon}</Box>
+
+        {event.status === EventStatus.PENDING && (
+          <Button
+            title="Transfer the event deposit"
+            onClick={() => handlePay(event.id)}
+            size="small"
+            color="primary"
+            disabled={event.status !== EventStatus.PENDING}
+          >
+            Pay
+          </Button>
+        )}
+        <Button
+          title="Generate an invitation link"
+          onClick={() => handleShare(event.id)}
+          size="small"
+          color="primary"
+          disabled={event.status !== EventStatus.ACTIVE}
+        >
           Share
         </Button>
-        <Button size="small" color="primary">
+        <Button
+          title="Close down the event"
+          onClick={() => handleCancel(event.id)}
+          size="small"
+          color="primary"
+          disabled={
+            ![
+              EventStatus.PENDING,
+              EventStatus.PAID,
+              EventStatus.ACTIVE,
+            ].includes(event.status)
+          }
+        >
           Cancel
         </Button>
-        <IconButton>
-          <WarningAmberIcon color="warning" />
-        </IconButton>
       </CardActions>
     </Card>
   );
