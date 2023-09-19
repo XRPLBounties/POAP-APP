@@ -30,7 +30,10 @@ export class GemWalletProvider extends Provider {
     this.authData = authData;
   }
 
-  public async acceptOffer(id: string): Promise<ProviderRequestResult> {
+  public async acceptOffer(
+    id: string,
+    isMobile?: boolean
+  ): Promise<ProviderRequestResult> {
     const response = await Gem.acceptNFTOffer({
       NFTokenSellOffer: id,
     });
@@ -44,7 +47,8 @@ export class GemWalletProvider extends Provider {
   }
 
   public async setAccount(
-    minterAddress: string
+    minterAddress: string,
+    isMobile?: boolean
   ): Promise<ProviderRequestResult> {
     const response = await Gem.setAccount({
       NFTokenMinter: minterAddress,
@@ -62,7 +66,8 @@ export class GemWalletProvider extends Provider {
   public async sendPayment(
     value: string,
     destination: string,
-    memo?: string
+    memo?: string,
+    isMobile?: boolean
   ): Promise<ProviderRequestResult> {
     const response = await Gem.sendPayment({
       amount: value,

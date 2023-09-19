@@ -36,7 +36,8 @@ export class XummWalletProvider extends Provider {
   }
 
   private async submitPayload(
-    tx: SdkTypes.XummJsonTransaction
+    tx: SdkTypes.XummJsonTransaction,
+    isMobile?: boolean
   ): Promise<SdkTypes.PayloadAndSubscription> {
     const callback = async (
       event: SdkTypes.SubscriptionCallbackParams
@@ -54,12 +55,14 @@ export class XummWalletProvider extends Provider {
     const subscription = await this.sdk.payload.createAndSubscribe(
       {
         txjson: tx,
-        options: {
-          return_url: {
-            app: undefined, // TODO document.location.href,
-            web: undefined,
-          },
-        },
+        options: isMobile
+          ? {
+              return_url: {
+                app: document.location.href,
+                web: document.location.href,
+              },
+            }
+          : {},
       },
       callback
     );
@@ -69,11 +72,17 @@ export class XummWalletProvider extends Provider {
     return subscription;
   }
 
-  public async acceptOffer(id: string): Promise<ProviderRequestResult> {
-    const subscription = await this.submitPayload({
-      TransactionType: "NFTokenAcceptOffer",
-      NFTokenSellOffer: id,
-    });
+  public async acceptOffer(
+    id: string,
+    isMobile?: boolean
+  ): Promise<ProviderRequestResult> {
+    const subscription = await this.submitPayload(
+      {
+        TransactionType: "NFTokenAcceptOffer",
+        NFTokenSellOffer: id,
+      },
+      isMobile
+    );
 
     return {
       resolved: _wrap(
@@ -84,13 +93,17 @@ export class XummWalletProvider extends Provider {
   }
 
   public async setAccount(
-    minterAddress: string
+    minterAddress: string,
+    isMobile?: boolean
   ): Promise<ProviderRequestResult> {
-    const subscription = await this.submitPayload({
-      TransactionType: "AccountSet",
-      NFTokenMinter: minterAddress,
-      SetFlag: AccountSetAsfFlags.asfAuthorizedNFTokenMinter,
-    });
+    const subscription = await this.submitPayload(
+      {
+        TransactionType: "AccountSet",
+        NFTokenMinter: minterAddress,
+        SetFlag: AccountSetAsfFlags.asfAuthorizedNFTokenMinter,
+      },
+      isMobile
+    );
 
     return {
       resolved: _wrap(
@@ -103,24 +116,28 @@ export class XummWalletProvider extends Provider {
   public async sendPayment(
     value: string,
     destination: string,
-    memo?: string
+    memo?: string,
+    isMobile?: boolean
   ): Promise<ProviderRequestResult> {
-    const subscription = await this.submitPayload({
-      TransactionType: "Payment",
-      Amount: value,
-      Destination: destination,
-      Memos: memo
-        ? [
-            {
-              Memo: {
-                MemoData: Buffer.from(memo, "utf8")
-                  .toString("hex")
-                  .toUpperCase(),
+    const subscription = await this.submitPayload(
+      {
+        TransactionType: "Payment",
+        Amount: value,
+        Destination: destination,
+        Memos: memo
+          ? [
+              {
+                Memo: {
+                  MemoData: Buffer.from(memo, "utf8")
+                    .toString("hex")
+                    .toUpperCase(),
+                },
               },
-            },
-          ]
-        : [],
-    });
+            ]
+          : [],
+      },
+      isMobile
+    );
 
     return {
       resolved: _wrap(
