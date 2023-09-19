@@ -26,7 +26,7 @@ const DEFAULT: Config = {
       apiKey: process.env.REACT_APP_KEY_XUMM_API as string,
       options: {
         rememberJwt: true,
-        storage: window.sessionStorage,
+        storage: window.localStorage,
         implicit: true,
       },
     },
