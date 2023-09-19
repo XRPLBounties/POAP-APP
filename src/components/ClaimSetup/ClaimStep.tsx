@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import { isMobile } from "react-device-detect";
 
-import { Box, Button } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
 
 import API from "apis";
@@ -20,7 +20,7 @@ function SummaryStep({
   setComplete,
   setLoading,
 }: StepProps) {
-  const { isActive, account, provider, networkId } = useWeb3();
+  const { account, provider } = useWeb3();
   const { isAuthenticated, jwt, permissions } = useAuth();
   const [data, setData] = React.useState<Claim | null>();
   const [uuid, setUuid] = React.useState<string>();
@@ -79,8 +79,6 @@ function SummaryStep({
     };
   }, [active, isAuthorized, jwt, id, count]);
 
-  // TODO make useCallback
-  // TODO change account -> isActive ?
   const handleClaim = React.useCallback(
     async (event: React.MouseEvent<HTMLButtonElement>) => {
       setLoading(true);
@@ -95,59 +93,42 @@ function SummaryStep({
               createOffer: true,
             });
             console.debug("JoinResult", offer);
-            // enqueueSnackbar(`Sign-up successful: Event #${id}`, {
-            //   variant: "success",
-            // });
             setData(offer);
           }
 
           // claim nft
           if (offer?.offerIndex && !offer?.claimed) {
-            // TODO this might actually be helpful
-            // enqueueSnackbar(
-            //   "Creating NFT claim request (confirm the transaction in your wallet)",
-            //   {
-            //     variant: "warning",
-            //     autoHideDuration: 30000,
-            //   }
-            // );
-            const result = await provider.acceptOffer(offer.offerIndex);
-
+            const result = await provider.acceptOffer(
+              offer.offerIndex,
+              isMobile
+            );
             setUuid(result.uuid);
 
-            const txHash = await result.resolved;
-            console.log("txHash", txHash);
-
-            if (txHash) {
-              // enqueueSnackbar("Claim successful", {
-              //   variant: "success",
-              // });
-              // TODO trigger accepted to reload claim info
-
-              // force update claim info
-              setCount((c) => c + 1);
-
-              // bad
-              // offer.claimed = true;
-              // setData(offer);
-            } else {
-              setError(`Claim failed: Unable to claim NFT`);
-              setUuid(undefined);
+            // open app
+            if (isMobile) {
+              window.location.href = `xumm://xumm.app/sign/${result.uuid}/deeplink`;
             }
+
+            const txHash = await result.resolved;
+
+            if (!txHash) {
+              setUuid(undefined);
+              throw Error("Transaction rejected");
+            }
+
+            // force update claim info
+            setCount((c) => c + 1);
           }
         }
       } catch (err) {
         console.debug(err);
         if (axios.isAxiosError(err)) {
-          setError(`Sign-up failed: ${err.response?.data.error}`);
+          setError(`Claim failed: ${err.response?.data.error}`);
         } else {
-          setError(`Sign-up failed: ${(err as Error).message}`);
+          setError(`Claim failed: ${(err as Error).message}`);
         }
       } finally {
-        console.log("Finally being called");
         setLoading(false);
-        // setData(undefined);
-        // setActiveDialog({});
       }
     },
     [provider, account, id, jwt, data]
@@ -161,39 +142,34 @@ function SummaryStep({
         alignItems: "center",
       }}
     >
+      <Typography
+        sx={{
+          marginBottom: "1rem",
+        }}
+        align="center"
+        variant="body1"
+        color="text.secondary"
+      >
+        Claim your NFT by signing an NFT offer acceptance transaction.
+      </Typography>
+
       <Button
-        sx={{ whiteSpace: "nowrap" }}
+        sx={{ whiteSpace: "nowrap", margin: "1rem 0rem" }}
         variant="contained"
         onClick={handleClaim}
         startIcon={loading && <CircularProgress size={20} />}
-        disabled={loading || !isAuthenticated || data?.claimed}
+        disabled={loading || !isAuthorized || data?.claimed}
         color="primary"
-        title="Claim NFT"
+        title="Claim your NFT"
       >
-        Claim NFT
+        {isMobile ? "Claim NFT (Open App)" : "Claim NFT"}
       </Button>
-
-      {isMobile && uuid && (
-        <Box>
-          <Button
-            sx={{ whiteSpace: "nowrap" }}
-            variant="contained"
-            onClick={() => {
-              window.location.href = `xumm://xumm.app/sign/${uuid}/deeplink`;
-            }}
-            color="primary"
-            title="Open Mobile App"
-          >
-            Open App
-          </Button>
-        </Box>
-      )}
 
       <Debug
         value={{
           isMobile,
           uuid,
-          offerIndex: data?.offerIndex,
+          // offerIndex: data?.offerIndex,
           claimed: data?.claimed,
         }}
       />

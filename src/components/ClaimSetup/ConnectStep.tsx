@@ -1,7 +1,7 @@
 import React from "react";
 import { useAtom } from "jotai";
 
-import { Box, Button } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
 
 import { useAuth } from "components/AuthContext";
@@ -77,10 +77,22 @@ function ConnectStep({
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
+        justifyContent: "center",
       }}
     >
+      <Typography
+        sx={{
+          marginBottom: "1rem",
+        }}
+        align="center"
+        variant="body1"
+        color="text.secondary"
+      >
+        Connect your Xumm wallet to start the NFT claiming process.
+      </Typography>
+      
       <Button
-        sx={{ whiteSpace: "nowrap" }}
+        sx={{ whiteSpace: "nowrap", margin: "1rem 0rem" }}
         variant="contained"
         onClick={handleConnect}
         startIcon={loading && <CircularProgress size={20} />}

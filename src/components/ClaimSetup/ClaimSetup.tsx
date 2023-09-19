@@ -1,11 +1,24 @@
 import React from "react";
+import { useParams } from "react-router-dom";
 import { useAtom } from "jotai";
 import { create } from "zustand";
 import { isMobile } from "react-device-detect";
 
-import { Alert, Box, Collapse, Step, StepLabel, Stepper } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Collapse,
+  IconButton,
+  Step,
+  StepLabel,
+  Stepper,
+  Tooltip,
+  Typography,
+} from "@mui/material";
+import ChangeCircleIcon from "@mui/icons-material/ChangeCircle";
 
 import { useAuth } from "components/AuthContext";
+import { useWeb3 } from "connectors/context";
 import { selectedWalletAtom } from "states/atoms";
 import { xumm } from "connectors/xumm";
 import { getConnector } from "connectors";
@@ -88,22 +101,25 @@ type StepInfo = {
 const stepInfo: StepInfo[] = [
   {
     id: Steps.CONNECT,
-    label: "Connect Wallet",
+    label: "Connect",
   },
   {
     id: Steps.CLAIM,
-    label: "Claim NFT",
+    label: "Claim",
   },
   {
     id: Steps.SUMMARY,
-    label: "Finished",
+    label: "Finish",
   },
 ];
 
 function ClaimSetup() {
   const state = useStore();
-  const { isAuto, toggleAuto, setClaimFlow } = useAuth();
+  const { connector, isActive } = useWeb3();
+  const { isAuto, toggleAuto } = useAuth();
   const [selectedWallet, setSelectedWallet] = useAtom(selectedWalletAtom);
+
+  const { id } = useParams();
 
   // force enable auto login
   React.useEffect(() => {
@@ -138,7 +154,6 @@ function ClaimSetup() {
       try {
         await xumm.activate();
         if (mounted) {
-          state.setError(Steps.CONNECT, null);
           setSelectedWallet(ConnectorType.XUMM);
         }
       } catch (err) {
@@ -161,6 +176,24 @@ function ClaimSetup() {
       mounted = false;
     };
   }, []);
+
+  const handleDisconnect = React.useCallback(async () => {
+    try {
+      if (connector?.deactivate) {
+        await connector.deactivate();
+      } else {
+        await connector?.reset();
+      }
+      setSelectedWallet(ConnectorType.EMPTY);
+      state.reset();
+    } catch (err) {
+      console.debug(err);
+      state.setError(
+        Steps.CONNECT,
+        `Failed to disconnect wallet: ${(err as Error).message}`
+      );
+    }
+  }, [connector, setSelectedWallet, state.reset]);
 
   // update active step
   React.useEffect(() => {
@@ -187,25 +220,76 @@ function ClaimSetup() {
   return (
     <Box>
       <Collapse in={!!state.error[state.activeStep]}>
-        <Alert severity="error">{state.error[state.activeStep]}</Alert>
+        <Alert sx={{ borderRadius: 0 }} severity="error">
+          {state.error[state.activeStep]}
+        </Alert>
       </Collapse>
 
       <Box
         sx={{
-          paddingTop: "2rem",
+          position: "relative",
+          padding: "2rem 1rem",
         }}
       >
+        {[Steps.CLAIM, Steps.SUMMARY].includes(state.activeStep) && (
+          <Tooltip title="Change your wallet">
+            <IconButton
+              sx={{
+                position: "absolute",
+                right: 8,
+                top: 8,
+                color: (theme) => theme.palette.grey[500],
+              }}
+              size="small"
+              onClick={handleDisconnect}
+              disabled={state.loading}
+            >
+              <ChangeCircleIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        )}
+
+        <Typography
+          sx={{
+            marginBottom: "0.5rem",
+          }}
+          align="center"
+          variant="h5"
+        >
+          Claim Your Event NFT
+        </Typography>
+        <Typography
+          sx={{
+            marginBottom: "1rem",
+          }}
+          align="center"
+          variant="body2"
+          color="grey.400"
+        >
+          Event ID: {id}
+        </Typography>
+
         <ConnectStep {...createStepFields(state, Steps.CONNECT)} />
         <ClaimStep {...createStepFields(state, Steps.CLAIM)} />
         <SummaryStep {...createStepFields(state, Steps.SUMMARY)} />
-        <Stepper activeStep={activeStepIndex}>
-          {stepInfo.map((step, index) => (
-            <Step key={index} completed={state.complete[step.id]}>
-              <StepLabel error={!!state.error[step.id]}>{step.label}</StepLabel>
-            </Step>
-          ))}
-        </Stepper>
       </Box>
+      <Stepper
+        sx={{
+          position: "fixed",
+          bottom: "0px",
+          right: "0px",
+          left: "0px",
+          width: "calc(-1rem + 100vw)",
+          padding: "1rem",
+        }}
+        activeStep={activeStepIndex}
+      >
+        {stepInfo.map((step, index) => (
+          <Step key={index} completed={state.complete[step.id]}>
+            <StepLabel error={!!state.error[step.id]}>{step.label}</StepLabel>
+          </Step>
+        ))}
+      </Stepper>
     </Box>
   );
 }
