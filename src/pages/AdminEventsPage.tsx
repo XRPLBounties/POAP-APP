@@ -1,5 +1,6 @@
 import React from "react";
 import axios from "axios";
+import { dropsToXrp } from "xrpl";
 import { useSnackbar } from "notistack";
 
 import API from "apis";
@@ -75,6 +76,14 @@ function AdminEventsPage() {
         dateEnd: new Date(event.dateEnd),
         slotsTaken: event.attendees?.length,
         slotsTotal: event.tokenCount,
+        depositAmount: event.accounting?.depositTxHash
+          ? dropsToXrp(
+              (
+                BigInt(event.accounting.depositReserveValue) +
+                BigInt(event.accounting.depositFeeValue)
+              ).toString()
+            )
+          : undefined,
       }));
     } else {
       return [];
@@ -87,7 +96,7 @@ function AdminEventsPage() {
       isLoading={false}
       isAuthorized={isAuthorized}
     >
-      <EventTable rows={rows} isOwner={true} />
+      <EventTable rows={rows} />
     </ContentWrapper>
   );
 }

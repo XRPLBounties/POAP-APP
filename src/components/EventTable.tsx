@@ -31,8 +31,7 @@ export type EventTableRow = {
   dateEnd: Date;
   slotsTaken?: number;
   slotsTotal: number;
-  claimed?: boolean;
-  offerIndex?: string | null;
+  depositAmount?: string;
 };
 
 export type EventTableProps = {
@@ -161,6 +160,26 @@ export function EventTable({ rows }: EventTableProps) {
         },
       },
       {
+        field: "depositAmount",
+        headerName: "Deposit",
+        type: "number",
+        width: 110,
+        valueGetter: ({ row }: GetterParamsType) => {
+          if (row.depositAmount) {
+            return `${row.depositAmount} XRP`;
+          }
+        },
+      },
+      {
+        field: "status",
+        headerName: "Status",
+        type: "string",
+        width: 100,
+        valueGetter: ({ row }: GetterParamsType) => {
+          return EventStatus[row.status];
+        },
+      },
+      {
         field: "actions",
         type: "actions",
         width: 45,
@@ -218,14 +237,7 @@ export function EventTable({ rows }: EventTableProps) {
         },
       },
     ],
-    [
-      handleAdd,
-      handleCancel,
-      handleClaim,
-      handleJoin,
-      handleLink,
-      navigate,
-    ]
+    [handleAdd, handleCancel, handleClaim, handleJoin, handleLink, navigate]
   );
 
   return (
