@@ -59,7 +59,7 @@ function Header() {
     () => [
       ["Home", "/", false],
       // ["Attendee", "/attendee", !(isActive && isAuthenticated)],
-      ["Organizer", "/organizer", !(isActive && isOrganizer)],
+      ["Dashboard", "/organizer", !(isActive && isOrganizer)],
       ["Admin", "/admin", !(isActive && isAdmin)],
       ...(config.debug
         ? ([["Debug", "/debug", false]] as Array<[string, string, boolean]>)
