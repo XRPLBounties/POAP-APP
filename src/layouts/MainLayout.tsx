@@ -15,7 +15,7 @@ import JoinDialog from "components/JoinDialog";
 import LinkDialog from "components/LinkDialog";
 import ProfileDialog from "components/ProfileDialog";
 
-function MainLayout(props: any) {
+function MainLayout() {
   const activeDialog = useAtomValue(activeDialogAtom);
 
   return (
