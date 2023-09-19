@@ -1,0 +1,104 @@
+import React from "react";
+import { useAtom } from "jotai";
+
+import { Box, Button } from "@mui/material";
+import CircularProgress from "@mui/material/CircularProgress";
+
+import { useAuth } from "components/AuthContext";
+import { Debug } from "components/Debug";
+import { useWeb3 } from "connectors/context";
+import { selectedWalletAtom } from "states/atoms";
+import { xumm } from "connectors/xumm";
+import { ConnectorType } from "types";
+import { StepProps } from "./types";
+
+// TODO need a way to change/disconnect a wallet
+// TODO need to check isAuthenticated somewhere and display error if needed
+
+function ConnectStep({
+  active,
+  loading,
+  setError,
+  setComplete,
+  setLoading,
+}: StepProps) {
+  const { connector, isActive } = useWeb3();
+  const { isAuthenticated, permissions, setClaimFlow } = useAuth();
+  const [selectedWallet, setSelectedWallet] = useAtom(selectedWalletAtom);
+
+  const isAuthorized = React.useMemo(() => {
+    return isAuthenticated && permissions.includes("attendee");
+  }, [isAuthenticated, permissions]);
+
+  // update parent state
+  React.useEffect(() => {
+    if (active) {
+      setComplete(isActive && isAuthorized);
+    }
+  }, [active, isActive, isAuthorized]);
+
+  const handleConnect = React.useCallback(async () => {
+    // disconnect, if not Xumm
+    if (isActive && connector?.getType() !== ConnectorType.XUMM) {
+      try {
+        if (connector?.deactivate) {
+          await connector.deactivate();
+        } else {
+          await connector?.reset();
+        }
+        setSelectedWallet(ConnectorType.EMPTY);
+        setError(null);
+      } catch (err) {
+        console.debug(err);
+        setError(`Failed to disconnect wallet: ${(err as Error).message}`);
+        return;
+      }
+    }
+
+    // set login flow
+    setClaimFlow(true);
+
+    setLoading(true);
+    try {
+      await xumm.activate();
+      setSelectedWallet(ConnectorType.XUMM);
+      setError(null);
+    } catch (err) {
+      console.debug(err);
+      setError(`Failed to connect wallet: ${(err as Error).message}`);
+    } finally {
+      setLoading(false);
+    }
+  }, [connector, isActive, setSelectedWallet, setClaimFlow]);
+
+  return active ? (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+      }}
+    >
+      <Button
+        sx={{ whiteSpace: "nowrap" }}
+        variant="contained"
+        onClick={handleConnect}
+        startIcon={loading && <CircularProgress size={20} />}
+        disabled={loading || isActive}
+        color="primary"
+        title="Connect Xumm wallet"
+      >
+        Connect Xumm
+      </Button>
+
+      <Debug
+        value={{
+          connected: isActive,
+          type: connector?.getType(),
+        }}
+      />
+    </Box>
+  ) : null;
+}
+
+export default ConnectStep;
