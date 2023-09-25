@@ -3,7 +3,7 @@ import axios from "axios";
 import { useSnackbar } from "notistack";
 import { useAtom } from "jotai";
 
-import { Button } from "@mui/material";
+import { Button, Grid, Tooltip, Typography } from "@mui/material";
 
 import API from "apis";
 import { useWeb3 } from "connectors/context";
@@ -78,22 +78,30 @@ function OrganizerPage() {
   };
 
   return (
-    <ContentWrapper
-      title="My Events Overview"
-      isLoading={!Boolean(data)}
-      isAuthorized={isAuthorized}
-      secondary={
-        <Button
-          title="Create a new event"
-          color="primary"
-          variant="contained"
-          onClick={handleClick}
-          disabled={!(isActive && isAuthorized)}
-        >
-          New
-        </Button>
-      }
-    >
+    <ContentWrapper isLoading={!Boolean(data)} isAuthorized={isAuthorized}>
+      <Grid
+        sx={{ mb: "1.125rem" }}
+        container
+        alignItems="center"
+        justifyContent="space-between"
+      >
+        <Grid item>
+          <Typography variant="h6">Events Overview</Typography>
+        </Grid>
+        <Grid item>
+          <Tooltip title="Create a new event">
+            <Button
+              title="Create a new event"
+              color="primary"
+              variant="contained"
+              onClick={handleClick}
+              disabled={!(isActive && isAuthorized)}
+            >
+              New
+            </Button>
+          </Tooltip>
+        </Grid>
+      </Grid>
       <EventGrid events={data ?? []} />
     </ContentWrapper>
   );
