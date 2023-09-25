@@ -7,7 +7,13 @@ import { isMobile } from "react-device-detect";
 import {
   Alert,
   Box,
+  Button,
   Collapse,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   IconButton,
   Step,
   StepLabel,
@@ -15,6 +21,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import ChangeCircleIcon from "@mui/icons-material/ChangeCircle";
 
 import { useAuth } from "components/AuthContext";
@@ -118,6 +125,7 @@ function ClaimSetup() {
   const { connector, isActive } = useWeb3();
   const { isAuto, toggleAuto } = useAuth();
   const [selectedWallet, setSelectedWallet] = useAtom(selectedWalletAtom);
+  const [openDialog, setOpenDialog] = React.useState<boolean>(false);
 
   const { id } = useParams();
 
@@ -168,7 +176,7 @@ function ClaimSetup() {
     };
 
     const params = new URLSearchParams(document?.location?.search || "");
-    if (params.get("access_token")) {
+    if (params.get("access_token") || params.get("connect")) {
       load();
     }
 
@@ -176,6 +184,16 @@ function ClaimSetup() {
       mounted = false;
     };
   }, []);
+
+  const handleCloseDialog = React.useCallback(
+    (event: {}, reason?: string) => {
+      if (reason === "backdropClick") {
+        return;
+      }
+      setOpenDialog(false);
+    },
+    [setOpenDialog]
+  );
 
   const handleDisconnect = React.useCallback(async () => {
     try {
@@ -241,7 +259,7 @@ function ClaimSetup() {
                 color: (theme) => theme.palette.grey[500],
               }}
               size="small"
-              onClick={handleDisconnect}
+              onClick={() => setOpenDialog(true)}
               disabled={state.loading}
             >
               <ChangeCircleIcon fontSize="small" />
@@ -290,6 +308,40 @@ function ClaimSetup() {
           </Step>
         ))}
       </Stepper>
+      <Dialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        maxWidth="sm"
+        fullWidth
+        disableEscapeKeyDown
+      >
+        <IconButton
+          sx={{
+            position: "absolute",
+            right: 8,
+            top: 8,
+            color: (theme) => theme.palette.grey[500],
+          }}
+          size="small"
+          onClick={handleCloseDialog}
+        >
+          <CloseIcon fontSize="small" />
+        </IconButton>
+        <DialogTitle variant="h5">Change wallet</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Disconnecting current wallet. Confirm?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button color="primary" onClick={handleCloseDialog}>
+            Cancel
+          </Button>
+          <Button color="primary" onClick={handleDisconnect}>
+            OK
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

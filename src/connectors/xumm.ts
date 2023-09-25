@@ -52,14 +52,17 @@ export class XummWalletProvider extends Provider {
       }
     };
 
+    const url = new URL(document.location.href);
+    url.searchParams.set("connect", "1");
+
     const subscription = await this.sdk.payload.createAndSubscribe(
       {
         txjson: tx,
         options: isMobile
           ? {
               return_url: {
-                app: document.location.href,
-                web: document.location.href,
+                app: url.toString(),
+                web: url.toString(),
               },
             }
           : {},
