@@ -91,7 +91,6 @@ function OrganizerPage() {
         <Grid item>
           <Tooltip title="Create a new event">
             <Button
-              title="Create a new event"
               color="primary"
               variant="contained"
               onClick={handleClick}
