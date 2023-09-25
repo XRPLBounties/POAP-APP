@@ -149,7 +149,6 @@ export class GemWallet extends Connector {
     });
 
     Gem.on("walletChanged", async (event) => {
-      console.log("walletChanged", event.wallet.publicAddress);
       await this.deactivate();
       await this.initProvider();
     });
