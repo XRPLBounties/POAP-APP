@@ -4,7 +4,6 @@ import type { RouteObject } from "react-router-dom";
 import Loadable from "components/Loadable";
 import MainLayout from "layouts/MainLayout";
 
-const AttendeePage = Loadable(React.lazy(() => import("pages/AttendeePage")));
 const DebugPage = Loadable(React.lazy(() => import("pages/DebugPage")));
 const ErrorPage = Loadable(React.lazy(() => import("pages/ErrorPage")));
 const EventInfoPage = Loadable(React.lazy(() => import("pages/EventInfoPage")));
@@ -27,10 +26,6 @@ const MainRoutes: RouteObject = {
     {
       path: "/organizer",
       element: <OrganizerPage />,
-    },
-    {
-      path: "/attendee",
-      element: <AttendeePage />,
     },
     {
       path: "/debug",
