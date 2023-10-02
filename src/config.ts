@@ -14,6 +14,11 @@ type Config = {
       };
     };
   };
+  socials: {
+    discordUrl: string;
+    githubUrl: string;
+    twitterUrl: string;
+  }
 };
 
 const DEFAULT: Config = {
@@ -31,6 +36,11 @@ const DEFAULT: Config = {
       },
     },
   },
+  socials: {
+    discordUrl: "https://discord.gg/xrpl",
+    githubUrl: "https://github.com/XRPLBounties/POAP-APP",
+    twitterUrl: "https://twitter.com/",
+  }
 };
 
 const config = DEFAULT;

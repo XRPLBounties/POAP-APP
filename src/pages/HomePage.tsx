@@ -63,7 +63,7 @@ function HomePage() {
 
         <Grid item xs={12}>
           <Typography
-            sx={{ marginTop: 12, marginBottom: -2.25 }}
+            sx={{ marginTop: "1rem", marginBottom: "-18px" }}
             variant="h4"
             align="center"
           >

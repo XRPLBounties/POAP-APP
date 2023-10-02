@@ -23,7 +23,7 @@ export function ContentWrapper({
   isAuthorized,
 }: ContentWrapperProps) {
   return (
-    <Box sx={{ width: "100%", position: "relative" }}>
+    <Box sx={{ width: "100%", position: "relative", paddingBottom: "3.0rem" }}>
       <Box
         sx={{
           position: "absolute",

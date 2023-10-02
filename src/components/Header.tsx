@@ -34,7 +34,7 @@ const StyledList = styled(MuiList)<{ component?: React.ElementType }>(
     "& .MuiListItemButton-root": {
       padding: "6px 12px",
       "&:hover": {
-        color: "#09c1d1",
+        color: theme.palette.primary.light,
       },
       "&.active": {
         color: theme.palette.primary.dark,

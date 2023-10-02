@@ -14,6 +14,7 @@ import CreateDialog from "components/CreateDialog";
 import JoinDialog from "components/JoinDialog";
 import LinkDialog from "components/LinkDialog";
 import ProfileDialog from "components/ProfileDialog";
+import Footer from "components/Footer";
 
 function MainLayout() {
   const activeDialog = useAtomValue(activeDialogAtom);
@@ -31,7 +32,8 @@ function MainLayout() {
       >
         <Container
           sx={{
-            paddingTop: "8.5rem",
+            paddingTop: "8.0rem", // header height + some extra
+            paddingBottom: "5.0rem", // footer height
             display: "flex",
             justifyContent: "center",
           }}
@@ -39,6 +41,7 @@ function MainLayout() {
         >
           <Outlet />
         </Container>
+        <Footer />
         <AddDialog />
         <CancelDialog />
         <ClaimDialog />
