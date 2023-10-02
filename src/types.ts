@@ -120,6 +120,7 @@ export type PlatformStats = {
   users: {
     total: number;
     organizers: number;
+    admins: number,
   };
   events: {
     total: number;

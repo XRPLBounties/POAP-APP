@@ -149,7 +149,7 @@ export function EventTable({ rows }: EventTableProps) {
         field: "slots",
         headerName: "Slots",
         type: "number",
-        width: 60,
+        width: 80,
         valueGetter: ({ row }: GetterParamsType) => {
           if (row.slotsTaken !== undefined) {
             return `${row.slotsTaken}/${row.slotsTotal}`;

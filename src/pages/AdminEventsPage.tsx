@@ -1,19 +1,25 @@
 import React from "react";
 import axios from "axios";
+import { useAtomValue } from "jotai";
 import { dropsToXrp } from "xrpl";
 import { useSnackbar } from "notistack";
+
+import { Typography } from "@mui/material";
 
 import API from "apis";
 import { useWeb3 } from "connectors/context";
 import type { Event } from "types";
+import { activeDialogAtom } from "states/atoms";
 import EventTable, { type EventTableRow } from "components/EventTable";
 import ContentWrapper from "components/ContentWrapper";
 import { useAuth } from "components/AuthContext";
+import BackButton from "components/BackButton";
 
 function AdminEventsPage() {
   const { networkId } = useWeb3();
   const { isAuthenticated, jwt, permissions } = useAuth();
   const [data, setData] = React.useState<Event[]>();
+  const activeDialog = useAtomValue(activeDialogAtom);
   const { enqueueSnackbar } = useSnackbar();
 
   const isAuthorized = React.useMemo(() => {
@@ -48,23 +54,29 @@ function AdminEventsPage() {
             }
           );
         } else {
-          enqueueSnackbar("Failed to load events data", {
-            variant: "error",
-          });
+          enqueueSnackbar(
+            `Failed to load events data: ${(err as Error).message}`,
+            {
+              variant: "error",
+            }
+          );
         }
       }
     };
 
-    if (isAuthorized) {
-      load();
-    } else {
-      setData(undefined);
+    // only update data, if no dialog is open
+    if (!activeDialog.type) {
+      if (isAuthorized) {
+        load();
+      } else {
+        setData(undefined);
+      }
     }
 
     return () => {
       mounted = false;
     };
-  }, [isAuthorized, networkId, jwt]);
+  }, [activeDialog, isAuthorized, networkId, jwt]);
 
   const rows = React.useMemo<EventTableRow[]>(() => {
     if (data) {
@@ -92,10 +104,14 @@ function AdminEventsPage() {
 
   return (
     <ContentWrapper
-      title="Events Overview"
       isLoading={false}
       isAuthorized={isAuthorized}
+      secondary={<BackButton />}
+      offsetSecondaryTop="0rem"
     >
+      <Typography sx={{ marginBottom: "1rem" }} variant="h6">
+        Events Overview
+      </Typography>
       <EventTable rows={rows} />
     </ContentWrapper>
   );

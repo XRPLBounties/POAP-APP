@@ -1,12 +1,7 @@
 import React from "react";
 import clsx from "clsx";
 
-import {
-  GridColDef,
-  GridRowClassNameParams,
-  GridTreeNodeWithRender,
-  GridValueGetterParams,
-} from "@mui/x-data-grid";
+import { GridColDef, GridRowClassNameParams } from "@mui/x-data-grid";
 
 import DataTable from "components/DataTable";
 
@@ -15,6 +10,7 @@ export type UserTableRow = {
   walletAddress: string;
   isOrganizer: boolean;
   eventCount?: number;
+  eventActiveCount?: number;
   totalDeposit?: string;
 };
 
@@ -22,11 +18,32 @@ export type EventTableProps = {
   rows: UserTableRow[];
 };
 
-type GetterParamsType = GridValueGetterParams<
-  UserTableRow,
-  any,
-  GridTreeNodeWithRender
->;
+const columns: GridColDef<UserTableRow>[] = [
+  {
+    field: "walletAddress",
+    headerName: "Wallet Address",
+    type: "string",
+    width: 320,
+  },
+  {
+    field: "eventCount",
+    headerName: "# Total Events",
+    type: "number",
+    width: 150,
+  },
+  {
+    field: "eventActiveCount",
+    headerName: "# Active Events",
+    type: "number",
+    width: 150,
+  },
+  {
+    field: "totalDeposit",
+    headerName: "Total XRP Deposit",
+    type: "number",
+    width: 170,
+  },
+];
 
 export function UserTable({ rows }: EventTableProps) {
   const rowClassName = (params: GridRowClassNameParams<UserTableRow>) => {
@@ -34,39 +51,6 @@ export function UserTable({ rows }: EventTableProps) {
       isOrganizer: params.row.isOrganizer,
     });
   };
-
-  const columns = React.useMemo<GridColDef<UserTableRow>[]>(
-    () => [
-      {
-        field: "walletAddress",
-        headerName: "Wallet Address",
-        type: "string",
-        width: 320,
-      },
-      {
-        field: "eventCount",
-        headerName: "# Events",
-        type: "number",
-        width: 110,
-      },
-      {
-        field: "totalDeposit",
-        headerName: "Total XRP Deposit",
-        type: "number",
-        width: 170,
-      },
-      {
-        field: "actions",
-        type: "actions",
-        width: 45,
-        minWidth: 45,
-        getActions: (params) => {
-          return [];
-        },
-      },
-    ],
-    []
-  );
 
   return (
     <DataTable

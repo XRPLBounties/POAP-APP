@@ -3,11 +3,14 @@ import axios from "axios";
 import { dropsToXrp } from "xrpl";
 import { useSnackbar } from "notistack";
 
+import { Typography } from "@mui/material";
+
 import API from "apis";
 import ContentWrapper from "components/ContentWrapper";
 import { useAuth } from "components/AuthContext";
-import type { User } from "types";
+import { EventStatus, type User } from "types";
 import UserTable, { UserTableRow } from "components/UserTable";
+import BackButton from "components/BackButton";
 
 function AdminUsersPage() {
   const { isAuthenticated, jwt, permissions } = useAuth();
@@ -25,7 +28,6 @@ function AdminUsersPage() {
       try {
         if (jwt) {
           const users = await API.users.getOrganizers(jwt);
-          console.log(users); // TODO
 
           if (mounted) {
             setData(users);
@@ -44,9 +46,12 @@ function AdminUsersPage() {
             }
           );
         } else {
-          enqueueSnackbar("Failed to load users data", {
-            variant: "error",
-          });
+          enqueueSnackbar(
+            `Failed to load users data: ${(err as Error).message}`,
+            {
+              variant: "error",
+            }
+          );
         }
       }
     };
@@ -64,19 +69,29 @@ function AdminUsersPage() {
 
   const rows = React.useMemo<UserTableRow[]>(() => {
     if (data) {
-      return data.map((user, index) => ({
-        id: index,
-        walletAddress: user.walletAddress,
-        isOrganizer: user.isOrganizer,
-        eventCount: user.events?.length,
-        totalDeposit: dropsToXrp(
-          user.events?.reduce<number>(
-            (accumulator, event) =>
-              accumulator + (event.accounting?.depositValue ?? 0),
-            0
-          ) ?? 0
-        ),
-      }));
+      return data.map((user, index) => {
+        const activeEvents = user.events?.filter((x) =>
+          [EventStatus.PAID, EventStatus.ACTIVE].includes(x.status)
+        );
+        return {
+          id: index,
+          walletAddress: user.walletAddress,
+          isOrganizer: user.isOrganizer,
+          eventCount: user.events?.length,
+          eventActiveCount: activeEvents?.length,
+          totalDeposit: dropsToXrp(
+            (
+              activeEvents?.reduce<bigint>(
+                (accumulator, event) =>
+                  accumulator +
+                  BigInt(event.accounting?.depositReserveValue || "0") +
+                  BigInt(event.accounting?.depositFeeValue || "0"),
+                BigInt(0)
+              ) || BigInt(0)
+            ).toString()
+          ),
+        };
+      });
     } else {
       return [];
     }
@@ -84,10 +99,14 @@ function AdminUsersPage() {
 
   return (
     <ContentWrapper
-      title="Organizers Overview"
       isLoading={!Boolean(data)}
       isAuthorized={isAuthorized}
+      secondary={<BackButton />}
+      offsetSecondaryTop="0rem"
     >
+      <Typography sx={{ marginBottom: "1rem" }} variant="h6">
+        Organizers Overview
+      </Typography>
       <UserTable rows={rows} />
     </ContentWrapper>
   );
