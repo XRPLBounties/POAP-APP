@@ -18,7 +18,6 @@ import {
   GridValueGetterParams,
 } from "@mui/x-data-grid";
 
-import { useWeb3 } from "connectors/context";
 import { DialogIdentifier, EventStatus } from "types";
 import DataTable from "components/DataTable";
 import { activeDialogAtom } from "states/atoms";
@@ -192,34 +191,34 @@ export function EventTable({ rows }: EventTableProps) {
             EventStatus.ACTIVE,
           ].includes(params.row.status);
           return [
-            <GridActionsCellItem
-              icon={<GroupAddIcon />}
-              label="Add Participant"
-              onClick={() => handleAdd(params.row.id)}
-              disabled={!active}
-              showInMenu
-            />,
+            // <GridActionsCellItem
+            //   icon={<GroupAddIcon />}
+            //   label="Add Participant"
+            //   onClick={() => handleAdd(params.row.id)}
+            //   disabled={!active}
+            //   showInMenu
+            // />,
             <GridActionsCellItem
               icon={<QrCodeScannerIcon />}
               label="Create Link"
               onClick={() => handleLink(params.row.id)}
-              disabled={!active}
+              disabled={true}
               showInMenu
             />,
-            <GridActionsCellItem
-              icon={<EventAvailableIcon />}
-              label="Join Event"
-              onClick={() => handleJoin(params.row.id, params.row.title)}
-              disabled={!active}
-              showInMenu
-            />,
-            <GridActionsCellItem
-              icon={<FileCopyIcon />}
-              label="Claim NFT"
-              onClick={() => handleClaim(params.row.id)}
-              disabled={!active}
-              showInMenu
-            />,
+            // <GridActionsCellItem
+            //   icon={<EventAvailableIcon />}
+            //   label="Join Event"
+            //   onClick={() => handleJoin(params.row.id, params.row.title)}
+            //   disabled={!active}
+            //   showInMenu
+            // />,
+            // <GridActionsCellItem
+            //   icon={<FileCopyIcon />}
+            //   label="Claim NFT"
+            //   onClick={() => handleClaim(params.row.id)}
+            //   disabled={!active}
+            //   showInMenu
+            // />,
             <GridActionsCellItem
               icon={<BlockIcon />}
               label="Cancel Event"
