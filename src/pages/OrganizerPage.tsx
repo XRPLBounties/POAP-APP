@@ -3,7 +3,7 @@ import axios from "axios";
 import { useSnackbar } from "notistack";
 import { useAtom } from "jotai";
 
-import { Button, Grid, Tooltip, Typography } from "@mui/material";
+import { Box, Button, Grid, Tooltip, Typography } from "@mui/material";
 
 import API from "apis";
 import { useWeb3 } from "connectors/context";
@@ -101,7 +101,25 @@ function OrganizerPage() {
           </Tooltip>
         </Grid>
       </Grid>
-      <EventGrid events={data ?? []} />
+      {data ? (
+        data.length > 0 ? (
+          <EventGrid events={data} />
+        ) : (
+          <Box
+            sx={{
+              paddingTop: "1rem",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Typography variant="body1" fontStyle="italic">
+              No Event Data
+            </Typography>
+          </Box>
+        )
+      ) : null}
     </ContentWrapper>
   );
 }
