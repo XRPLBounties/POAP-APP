@@ -106,8 +106,14 @@ function PaymentStep({
             data.accounting.depositAddress,
             `deposit event ${eventId}`
           );
-          const txHash = await result.resolved;
+          enqueueSnackbar(
+            "Creating payload (confirm the transaction in your wallet)",
+            {
+              variant: "info",
+            }
+          );
 
+          const txHash = await result.resolved;
           if (!txHash) {
             throw Error("Transaction rejected");
           }

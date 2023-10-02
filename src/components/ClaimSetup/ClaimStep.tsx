@@ -2,6 +2,7 @@ import React from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { isMobile } from "react-device-detect";
+import { useSnackbar } from "notistack";
 
 import { Box, Button, Typography } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -25,6 +26,7 @@ function SummaryStep({
   const [data, setData] = React.useState<Claim | null>();
   const [uuid, setUuid] = React.useState<string>();
   const [count, setCount] = React.useState<number>(0);
+  const { enqueueSnackbar } = useSnackbar();
 
   const { id } = useParams();
 
@@ -107,6 +109,13 @@ function SummaryStep({
             // open app
             if (isMobile) {
               window.location.href = `xumm://xumm.app/sign/${result.uuid}/deeplink`;
+            } else {
+              enqueueSnackbar(
+                "Creating payload (confirm the transaction in your wallet)",
+                {
+                  variant: "info",
+                }
+              );
             }
 
             const txHash = await result.resolved;

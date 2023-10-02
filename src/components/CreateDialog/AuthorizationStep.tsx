@@ -94,8 +94,14 @@ function AuthorizationStep({
       try {
         if (provider && data?.walletAddress) {
           const result = await provider.setAccount(data.walletAddress);
-          const txHash = await result.resolved;
+          enqueueSnackbar(
+            "Creating payload (confirm the transaction in your wallet)",
+            {
+              variant: "info",
+            }
+          );
 
+          const txHash = await result.resolved;
           if (!txHash) {
             throw Error("Transaction rejected");
           }
