@@ -9,6 +9,7 @@ export type ContentWrapperProps = {
   children?: ReactNode;
   tooltip?: ReactNode;
   secondary?: ReactNode;
+  offsetSecondaryTop?: string;
   isLoading?: boolean;
   isAuthorized?: boolean;
 };
@@ -17,12 +18,19 @@ export function ContentWrapper({
   children,
   tooltip,
   secondary,
+  offsetSecondaryTop,
   isLoading,
   isAuthorized,
 }: ContentWrapperProps) {
   return (
     <Box sx={{ width: "100%", position: "relative" }}>
-      <Box sx={{ position: "absolute", top: "1rem", right: "1rem" }}>
+      <Box
+        sx={{
+          position: "absolute",
+          top: offsetSecondaryTop ?? "0.75rem",
+          right: "0.75rem",
+        }}
+      >
         <Stack direction="row" spacing={2}>
           {secondary}
           {tooltip && (
