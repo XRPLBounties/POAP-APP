@@ -1,5 +1,5 @@
 import React from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import axios from "axios";
 import { useSnackbar } from "notistack";
 
@@ -10,10 +10,8 @@ import {
   CardHeader,
   CardMedia,
   Container,
-  IconButton,
   Typography,
 } from "@mui/material";
-import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 
 import API from "apis";
 import type { Event } from "types";
@@ -21,6 +19,7 @@ import type { Event } from "types";
 import { useAuth } from "components/AuthContext";
 import AttendanceTable, { AttendanceTableRow } from "components/AttendeeTable";
 import ContentWrapper from "components/ContentWrapper";
+import BackButton from "components/BackButton";
 
 function EventInfoPage() {
   const { jwt } = useAuth();
@@ -28,7 +27,6 @@ function EventInfoPage() {
   const { enqueueSnackbar } = useSnackbar();
 
   const { id } = useParams();
-  const navigate = useNavigate();
 
   React.useEffect(() => {
     let mounted = true;
@@ -97,15 +95,7 @@ function EventInfoPage() {
       <ContentWrapper
         isLoading={data === undefined}
         isAuthorized={true}
-        secondary={
-          <IconButton
-            title="Return to previous page"
-            color="primary"
-            onClick={() => navigate(-1)}
-          >
-            <ArrowBackRoundedIcon />
-          </IconButton>
-        }
+        secondary={<BackButton />}
       >
         {data ? (
           <Card>
