@@ -8,12 +8,12 @@ The web app for Proof of Attendance Protocol
 - Running POAP API 2.0 server (backend), for details see [here](https://github.com/rikublock/POAP-API2)
 
 ## Getting Started
-- install dependencies with `yarn install`
-- rename `.env.example` to `.env` (change values as needed)
+- Install dependencies with `yarn install`
+- Rename `.env.example` to `.env` (change values as needed)
   - `REACT_APP_URL_POAP_API` (backend server URL)
   - `REACT_APP_KEY_XUMM_API` (Xumm App API key, needs to match the key configured in the backend)
-- ensure the backend service is running
-- run the app with `yarn start`
+- Ensure the backend service is running
+- Run the app with `yarn start`
 
 ## Available Scripts
 
