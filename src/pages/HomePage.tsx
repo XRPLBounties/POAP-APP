@@ -1,6 +1,7 @@
 import React from "react";
 
-import { Card, CardContent, Grid, Typography } from "@mui/material";
+import { Box, Card, CardContent, Grid, Typography } from "@mui/material";
+import ConnectedSvg from "assets/connected.svg";
 
 import ContentWrapper from "components/ContentWrapper";
 import Web3Status from "components/Web3Status";
@@ -21,23 +22,9 @@ const features: Feature[] = [
     description: "POAP is designed from the ground up to be easy to use.",
   },
   {
-    title: "Trust and Transparency",
-    description:
-      "Build trust with your attendees by offering a verifiable Proof of Attendance, enhancing the credibility of your events.",
-  },
-  {
-    title: "Non-Fungible Token (NFT)",
-    description:
-      "These tokens serve as evidence that an individual attended a particular event.",
-  },
-  {
     title: "Effortless Verification",
     description:
       "Our PoA system automates the attendance tracking process, making it quick and hassle-free.",
-  },
-  {
-    title: "TODO",
-    description: "any ideas?",
   },
 ];
 
@@ -65,7 +52,13 @@ function HomePage() {
           <Web3Status />
         </Grid>
         <Grid item xs={12} md={6}>
-          <Typography variant="h6">TODO Image?</Typography>
+          <Box sx={{ padding: "2rem" }}>
+            <ConnectedSvg
+              width="100%"
+              height="100%"
+              viewBox="0 0 1176.60617 873.97852"
+            />
+          </Box>
         </Grid>
 
         <Grid item xs={12}>
