@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { useAtom } from "jotai";
 import { useSnackbar } from "notistack";
 
@@ -51,6 +52,7 @@ function Web3Status() {
   const [status, setStatus] = React.useState<string>(DEFAULT_STATUS);
   const [menuAnchor, setMenuAnchor] = React.useState<null | HTMLElement>(null);
   const { enqueueSnackbar } = useSnackbar();
+  const navigate = useNavigate();
 
   // eagerly connect
   let selectedConnector: Connector | undefined;
@@ -102,6 +104,7 @@ function Web3Status() {
             await connector?.reset();
           }
           setSelectedWallet(ConnectorType.EMPTY);
+          navigate("/");
         } catch (error) {
           enqueueSnackbar(
             `Failed to disconnect wallet: ${(error as Error).message}`,
@@ -113,6 +116,7 @@ function Web3Status() {
         try {
           await xumm.activate();
           setSelectedWallet(ConnectorType.XUMM);
+          navigate("/organizer");
         } catch (error) {
           enqueueSnackbar(
             `Failed to connect wallet: ${(error as Error).message}`,
@@ -124,6 +128,7 @@ function Web3Status() {
         try {
           await gem.activate();
           setSelectedWallet(ConnectorType.GEM);
+          navigate("/organizer");
         } catch (error) {
           enqueueSnackbar(
             `Failed to connect wallet: ${(error as Error).message}`,
