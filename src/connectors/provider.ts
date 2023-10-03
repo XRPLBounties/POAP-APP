@@ -13,7 +13,7 @@ export abstract class Provider {
     isMobile?: boolean
   ): Promise<ProviderRequestResult>;
   public abstract setAccount(
-    minterAddress: string,
+    minterAddress: string | null,
     isMobile?: boolean
   ): Promise<ProviderRequestResult>;
   public abstract sendPayment(

@@ -96,15 +96,20 @@ export class XummWalletProvider extends Provider {
   }
 
   public async setAccount(
-    minterAddress: string,
+    minterAddress: string | null,
     isMobile?: boolean
   ): Promise<ProviderRequestResult> {
     const subscription = await this.submitPayload(
-      {
-        TransactionType: "AccountSet",
-        NFTokenMinter: minterAddress,
-        SetFlag: AccountSetAsfFlags.asfAuthorizedNFTokenMinter,
-      },
+      minterAddress
+        ? {
+            TransactionType: "AccountSet",
+            NFTokenMinter: minterAddress,
+            SetFlag: AccountSetAsfFlags.asfAuthorizedNFTokenMinter,
+          }
+        : {
+            TransactionType: "AccountSet",
+            ClearFlag: AccountSetAsfFlags.asfAuthorizedNFTokenMinter,
+          },
       isMobile
     );
 

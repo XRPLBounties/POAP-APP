@@ -47,13 +47,19 @@ export class GemWalletProvider extends Provider {
   }
 
   public async setAccount(
-    minterAddress: string,
+    minterAddress: string | null,
     isMobile?: boolean
   ): Promise<ProviderRequestResult> {
-    const response = await Gem.setAccount({
-      NFTokenMinter: minterAddress,
-      setFlag: AccountSetAsfFlags.asfAuthorizedNFTokenMinter,
-    });
+    const response = await Gem.setAccount(
+      minterAddress
+        ? {
+            NFTokenMinter: minterAddress,
+            setFlag: AccountSetAsfFlags.asfAuthorizedNFTokenMinter,
+          }
+        : {
+            clearFlag: AccountSetAsfFlags.asfAuthorizedNFTokenMinter,
+          }
+    );
     if (response.type === "reject") {
       throw Error("User refused to sign AccountSet transaction");
     }
