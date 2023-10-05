@@ -18,7 +18,8 @@ type Config = {
     discordUrl: string;
     githubUrl: string;
     twitterUrl: string;
-  }
+  };
+  defaultEventImageUrls: string[];
 };
 
 const DEFAULT: Config = {
@@ -40,7 +41,15 @@ const DEFAULT: Config = {
     discordUrl: "https://discord.gg/xrpl",
     githubUrl: "https://github.com/XRPLBounties/POAP-APP",
     twitterUrl: "https://twitter.com/",
-  }
+  },
+  defaultEventImageUrls: [
+    "https://images.unsplash.com/photo-1458682625221-3a45f8a844c7?&auto=format&fit=crop&w=1200&q=100",
+    "https://images.unsplash.com/photo-1531315630201-bb15abeb1653?&auto=format&fit=crop&w=1200&q=100",
+    "https://images.unsplash.com/photo-1517707711963-adf9078bdf01?&auto=format&fit=crop&w=1200&q=100",
+    "https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?&auto=format&fit=crop&w=1200&q=100",
+    "https://images.unsplash.com/photo-1588097281266-310cead47879?&auto=format&fit=crop&w=1200&q=100",
+    "https://images.unsplash.com/photo-1606767041004-6b918abe92be?&auto=format&fit=crop&w=1200&q=100",
+  ],
 };
 
 const config = DEFAULT;

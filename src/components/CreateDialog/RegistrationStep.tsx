@@ -8,12 +8,13 @@ import {
   DefaultValues,
 } from "react-hook-form";
 import {
-  object,
   boolean,
-  string,
-  number,
   date,
   intersection,
+  literal,
+  number,
+  object,
+  string,
   TypeOf,
 } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -27,6 +28,7 @@ import { useWeb3 } from "connectors/context";
 import { useAuth } from "components/AuthContext";
 import InfoBox from "components/InfoBox";
 import { StepProps } from "./types";
+import config from "config";
 
 const schemaCommon = object({
   title: string()
@@ -39,7 +41,7 @@ const schemaCommon = object({
   location: string()
     .nonempty("Location is required")
     .max(256, "Location must be less than 256 characters"),
-  url: string().nonempty("URL is required").url("URL is invalid").trim(),
+  url: string().url("URL is invalid").trim().optional().or(literal("")),
   tokenCount: number()
     .int()
     .positive()
@@ -144,13 +146,18 @@ function RegistrationStep({
       setLoading(true);
       try {
         if (networkId && isAuthorized && jwt) {
+          const randomIndex = Math.floor(
+            Math.random() * config.defaultEventImageUrls.length
+          );
+          const randomUrl = config.defaultEventImageUrls[randomIndex];
+
           const result = await API.event.create(jwt, {
             networkId: networkId,
             tokenCount: values.tokenCount,
             title: values.title,
             description: values.description,
             location: values.location,
-            imageUrl: values.url,
+            imageUrl: values.url ? values.url : randomUrl,
             dateStart: values.dateStart!,
             dateEnd: values.dateEnd!,
             isManaged: !values.isPublic,
@@ -252,7 +259,6 @@ function RegistrationStep({
           label="Image URL"
           type="url"
           disabled={loading}
-          required
           error={!!errors["url"]}
           helperText={errors["url"]?.message}
           {...register("url")}
