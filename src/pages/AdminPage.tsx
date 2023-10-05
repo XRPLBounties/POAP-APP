@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { dropsToXrp } from "xrpl";
+import { dropsToXrp, xrpToDrops } from "xrpl";
 import { useSnackbar } from "notistack";
 
 import {
@@ -12,7 +12,10 @@ import {
   Card,
   CardContent,
   CardActions,
+  Tooltip,
+  IconButton,
 } from "@mui/material";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 
 import API from "apis";
 import { useWeb3 } from "connectors/context";
@@ -20,6 +23,8 @@ import type { PlatformStats } from "types";
 import ContentWrapper from "components/ContentWrapper";
 import { useAuth } from "components/AuthContext";
 import PieChart from "components/PieChart";
+
+const SPENDABLE_THRESHOLD = BigInt(xrpToDrops(20));
 
 type Info = {
   id: string;
@@ -126,6 +131,14 @@ function AdminPage() {
     }
   }, [data]);
 
+  const spendable = React.useMemo(() => {
+    if (data?.account) {
+      return BigInt(data.account.balance) - BigInt(data.account.reserve);
+    } else {
+      return BigInt(0);
+    }
+  }, [data?.account]);
+
   return (
     <ContentWrapper isLoading={!Boolean(data)} isAuthorized={isAuthorized}>
       <Grid container rowSpacing={4.5} columnSpacing={2.75}>
@@ -187,7 +200,7 @@ function AdminPage() {
               </Grid>
               <Card variant="outlined" sx={{ marginTop: "12px" }}>
                 <CardContent>
-                  <Box sx={{ paddingTop: "8px", paddingRight: "16px" }}>
+                  <Box sx={{ paddingTop: "8px", paddingRight: "24px" }}>
                     <PieChart
                       series={[
                         data.events.pending,
@@ -212,14 +225,34 @@ function AdminPage() {
                 <Grid item />
               </Grid>
               <Card variant="outlined" sx={{ marginTop: "12px" }}>
-                <CardContent>
-                  <Box sx={{ paddingTop: "8px", paddingRight: "16px" }}>
+                <CardContent sx={{ position: "relative" }}>
+                  {spendable < SPENDABLE_THRESHOLD && (
+                    <Tooltip
+                      sx={{
+                        position: "absolute",
+                        top: "10px",
+                        right: "10px",
+                      }}
+                      title="Low vault account balance!"
+                    >
+                      <IconButton disableRipple>
+                        <WarningAmberIcon color="warning" />
+                      </IconButton>
+                    </Tooltip>
+                  )}
+
+                  <Box
+                    sx={{
+                      paddingTop: "8px",
+                      paddingRight: "24px",
+                    }}
+                  >
                     <PieChart
                       series={[
-                        Number(dropsToXrp(data.account.balance)),
+                        Number(dropsToXrp(spendable.toString())),
                         Number(dropsToXrp(data.account.reserve)),
                       ]}
-                      labels={["Balance", "Reserve"]}
+                      labels={["Spendable", "Reserve"]}
                     />
                   </Box>
                 </CardContent>

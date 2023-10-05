@@ -13,6 +13,9 @@ function PieChart({ height, series, labels }: PieChartProps) {
       height: height,
       type: "pie",
     },
+    legend: {
+      width: 110,
+    },
     labels: labels,
     responsive: [
       {
