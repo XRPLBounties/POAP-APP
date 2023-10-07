@@ -88,7 +88,7 @@ function ConnectStep({
         variant="body1"
         color="text.secondary"
       >
-        Connect your Xumm wallet to start the NFT claiming process.
+        Connect your Xaman (Xumm) wallet to start the NFT claiming process.
       </Typography>
       
       <Button
@@ -98,9 +98,9 @@ function ConnectStep({
         startIcon={loading && <CircularProgress size={20} />}
         disabled={loading || isActive}
         color="primary"
-        title="Connect Xumm wallet"
+        title="Connect Xaman (Xumm) wallet"
       >
-        Connect Xumm
+        Connect Wallet
       </Button>
 
       <Debug

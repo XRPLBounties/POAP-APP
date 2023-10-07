@@ -156,7 +156,7 @@ function Web3Status() {
         open={Boolean(menuAnchor) && !isActive}
         onClose={handleMenuClose}
       >
-        <MenuItem onClick={() => handleAction("xumm")}>Xumm Wallet</MenuItem>
+        <MenuItem onClick={() => handleAction("xumm")}>Xaman (Xumm)</MenuItem>
         <MenuItem onClick={() => handleAction("gem")}>Gem Wallet</MenuItem>
       </StyledMenu>
       <StyledMenu
