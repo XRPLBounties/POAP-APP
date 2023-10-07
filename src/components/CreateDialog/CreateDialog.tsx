@@ -252,7 +252,7 @@ function CreateDialog() {
         </Grid>
       </DialogContent>
       <DialogActions>
-        <Button color="primary" onClick={handleClose}>
+        <Button color="primary" onClick={handleClose} disabled={state.loading}>
           {state.activeStep === Steps.SUMMARY ? "Close" : "Cancel"}
         </Button>
         {state.dialogActions[state.activeStep].map((button, index) => (

@@ -70,9 +70,11 @@ function EventCard({ event }: EventCardProps) {
         );
       case EventStatus.PAID:
         return (
-          <Tooltip title="Event will be ready soon">
+          <Tooltip title="Event will be ready soon (minting NFTs)">
             <IconButton disableRipple>
-              <CheckCircleOutlineIcon color="success" />
+              <CheckCircleOutlineIcon
+                sx={{ color: (theme) => theme.palette.secondary.light }}
+              />
             </IconButton>
           </Tooltip>
         );
@@ -80,7 +82,9 @@ function EventCard({ event }: EventCardProps) {
         return (
           <Tooltip title="Event is active">
             <IconButton disableRipple>
-              <CheckCircleOutlineIcon color="success" />
+              <CheckCircleOutlineIcon
+                sx={{ color: (theme) => theme.palette.success.light }}
+              />
             </IconButton>
           </Tooltip>
         );
