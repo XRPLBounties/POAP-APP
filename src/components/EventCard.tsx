@@ -1,4 +1,5 @@
 import * as React from "react";
+import { dropsToXrp } from "xrpl";
 import { Link } from "react-router-dom";
 import { useSetAtom } from "jotai";
 
@@ -126,12 +127,15 @@ function EventCard({ event }: EventCardProps) {
     <Card>
       <CardActionArea disableRipple component={Link} to={`/event/${event.id}`}>
         <CardMedia
-          sx={
-            {
-              // TODO for closed events ?
-              // filter: "grayscale(1) opacity(60%)",
-            }
-          }
+          sx={{
+            filter: [
+              EventStatus.CANCELED,
+              EventStatus.CLOSED,
+              EventStatus.REFUNDED,
+            ].includes(event.status)
+              ? "grayscale(1.0) opacity(60%)"
+              : undefined,
+          }}
           component="img"
           height="140"
           image={event.imageUrl}
@@ -153,8 +157,13 @@ function EventCard({ event }: EventCardProps) {
             {new Date(event.dateEnd).toLocaleDateString(undefined, options)}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            <strong>Taken Slots:</strong> {event.attendees?.length}/
+            <strong>Reserved Slots:</strong> {event.attendees?.length}/
             {event.tokenCount}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            <strong>Deposit:</strong>{" "}
+            {dropsToXrp(event.accounting?.depositReserveValue || 0)} (+
+            {dropsToXrp(event.accounting?.depositFeeValue || 0)}) XRP
           </Typography>
         </CardContent>
       </CardActionArea>
