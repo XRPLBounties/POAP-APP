@@ -1,5 +1,6 @@
 import React from "react";
 import { useParams } from "react-router-dom";
+import { dropsToXrp } from "xrpl";
 import axios from "axios";
 import { useSnackbar } from "notistack";
 
@@ -14,12 +15,18 @@ import {
 } from "@mui/material";
 
 import API from "apis";
-import type { Event } from "types";
+import type { Claim, Event } from "types";
 
 import { useAuth } from "components/AuthContext";
 import AttendanceTable, { AttendanceTableRow } from "components/AttendeeTable";
 import ContentWrapper from "components/ContentWrapper";
 import BackButton from "components/BackButton";
+
+const options: Intl.DateTimeFormatOptions = {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+};
 
 function EventInfoPage() {
   const { jwt } = useAuth();
@@ -58,11 +65,7 @@ function EventInfoPage() {
     };
 
     if (id) {
-      if (parseInt(id)) {
-        load();
-      } else {
-        setData(null); // invalid, event not found
-      }
+      load();
     } else {
       setData(undefined);
     }
@@ -74,6 +77,14 @@ function EventInfoPage() {
 
   const rows = React.useMemo<AttendanceTableRow[]>(() => {
     if (data && data.attendees) {
+      const offers = data.nfts?.reduce<Record<string, Claim>>((obj, nft) => {
+        if (nft.claim) {
+          return { ...obj, [nft.claim.ownerWalletAddress]: nft.claim };
+        } else {
+          return obj;
+        }
+      }, {});
+
       return data.attendees.map((a, i) => ({
         id: i,
         index: i + 1,
@@ -81,9 +92,14 @@ function EventInfoPage() {
         firstName: a.firstName,
         lastName: a.lastName,
         email: a.email,
-        // TODO
-        // tokenId:
-        // claimed:
+        tokenId:
+          offers && a.walletAddress in offers
+            ? offers[a.walletAddress].tokenId
+            : undefined,
+        claimed:
+          offers && a.walletAddress in offers
+            ? offers[a.walletAddress].claimed
+            : false,
       }));
     } else {
       return [];
@@ -112,47 +128,72 @@ function EventInfoPage() {
                   marginBottom: "0.75rem",
                 }}
               >
-                <Typography sx={{ marginBottom: "0.5rem" }} variant="h6">
-                  Description:
-                </Typography>
-                <Typography variant="body1">{data.description}</Typography>
-              </Box>
-
-              <Box
-                sx={{
-                  marginBottom: "0.75rem",
-                }}
-              >
-                <Typography sx={{ marginBottom: "0.5rem" }} variant="h6">
-                  Information:
-                </Typography>
-                <Typography variant="body1">
-                  <strong>Date Start:</strong>{" "}
-                  {new Date(data.dateStart).toString()}
-                </Typography>
-                <Typography variant="body1">
-                  <strong>Date End:</strong> {new Date(data.dateEnd).toString()}
-                </Typography>
-                <Typography variant="body1">
-                  <strong>Location:</strong> {data.location}
-                </Typography>
-                <Typography variant="body1">
-                  <strong>Reserved slots:</strong> {data.attendees?.length}/
-                  {data.tokenCount}
+                <Typography variant="body1" color="text.secondary">
+                  {data.description}
                 </Typography>
               </Box>
 
               <Box>
-                <Typography sx={{ marginBottom: "0.75rem" }} variant="h6">
-                  Attendees:
+                <Typography variant="body1" color="text.secondary">
+                  <strong>Date Start:</strong>{" "}
+                  {new Date(data.dateStart).toLocaleDateString(
+                    undefined,
+                    options
+                  )}
                 </Typography>
-                <AttendanceTable rows={rows} />
+                <Typography variant="body1" color="text.secondary">
+                  <strong>Date End:</strong>{" "}
+                  {new Date(data.dateEnd).toLocaleDateString(
+                    undefined,
+                    options
+                  )}
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  <strong>Location:</strong> {data.location}
+                </Typography>
+                {data.attendees && (
+                  <Typography variant="body1" color="text.secondary">
+                    <strong>Reserved Slots:</strong> {data.attendees.length}/
+                    {data.tokenCount}
+                  </Typography>
+                )}
+                {data.accounting && (
+                  <Typography variant="body1" color="text.secondary">
+                    <strong>Deposit:</strong>{" "}
+                    {dropsToXrp(data.accounting?.depositReserveValue || 0)} (+
+                    {dropsToXrp(data.accounting?.depositFeeValue || 0)}) XRP
+                  </Typography>
+                )}
               </Box>
+
+              {data.attendees && (
+                <Box sx={{ marginTop: "0.75rem" }}>
+                  <Typography
+                    sx={{ marginBottom: "0.75rem", fontWeight: "bold" }}
+                    variant="body1"
+                  >
+                    Attendees:
+                  </Typography>
+                  <AttendanceTable rows={rows} />
+                </Box>
+              )}
             </CardContent>
           </Card>
         ) : (
           // data === null
-          <Typography variant="h6">Event not found!</Typography>
+          <Box
+            sx={{
+              paddingTop: "1rem",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Typography variant="body1" fontStyle="italic">
+              Event not found!
+            </Typography>
+          </Box>
         )}
       </ContentWrapper>
     </Container>

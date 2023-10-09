@@ -17,6 +17,8 @@ export type AttendanceTableRow = {
   firstName?: string;
   lastName?: string;
   email?: string;
+  tokenId?: string;
+  claimed?: boolean;
 };
 
 export type AttendanceTableProps = {
@@ -45,39 +47,52 @@ export function AttendanceTable(props: AttendanceTableProps) {
         field: "walletAddress",
         headerName: "Wallet Address",
         type: "string",
-        width: 320,
+        width: 300,
       },
       {
-        field: "name",
-        headerName: "Name",
+        field: "tokenId",
+        headerName: "NFToken ID",
         type: "string",
         flex: 1,
-        valueGetter: ({ row }: GetterParamsType) => {
-          let name = "";
-          if (row.firstName) {
-            name += row.firstName;
-          }
-          if (row.lastName) {
-            name += ` ${row.lastName}`;
-          }
-          return name.trim();
-        },
+        // width: 320,
       },
       {
-        field: "actions",
-        type: "actions",
-        width: 50,
-        getActions: (params) => [
-          <GridActionsCellItem
-            icon={<EmailOutlinedIcon />}
-            label="Send Email"
-            disabled={!params.row.email}
-            onClick={() =>
-              (window.location.href = `mailto:${params.row.email}`)
-            }
-          />,
-        ],
+        field: "claimed",
+        headerName: "Claimed",
+        type: "boolean",
+        width: 80,
       },
+      // {
+      //   field: "name",
+      //   headerName: "Name",
+      //   type: "string",
+      //   flex: 1,
+      //   valueGetter: ({ row }: GetterParamsType) => {
+      //     let name = "";
+      //     if (row.firstName) {
+      //       name += row.firstName;
+      //     }
+      //     if (row.lastName) {
+      //       name += ` ${row.lastName}`;
+      //     }
+      //     return name.trim();
+      //   },
+      // },
+      // {
+      //   field: "actions",
+      //   type: "actions",
+      //   width: 50,
+      //   getActions: (params) => [
+      //     <GridActionsCellItem
+      //       icon={<EmailOutlinedIcon />}
+      //       label="Send Email"
+      //       disabled={!params.row.email}
+      //       onClick={() =>
+      //         (window.location.href = `mailto:${params.row.email}`)
+      //       }
+      //     />,
+      //   ],
+      // },
     ],
     []
   );
