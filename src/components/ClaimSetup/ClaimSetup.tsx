@@ -210,8 +210,10 @@ function ClaimSetup() {
         Steps.CONNECT,
         `Failed to disconnect wallet: ${(err as Error).message}`
       );
+    } finally {
+      setOpenDialog(false);
     }
-  }, [connector, setSelectedWallet, state.reset]);
+  }, [connector, state.reset, setSelectedWallet, setOpenDialog]);
 
   // update active step
   React.useEffect(() => {
