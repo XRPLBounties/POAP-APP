@@ -14,7 +14,6 @@ import CloseIcon from "@mui/icons-material/Close";
 import CircularProgress from "@mui/material/CircularProgress";
 
 import API from "apis";
-import { useWeb3 } from "connectors/context";
 import { activeDialogAtom } from "states/atoms";
 import { DialogIdentifier } from "types";
 import { useAuth } from "components/AuthContext";
@@ -22,7 +21,6 @@ import { useAuth } from "components/AuthContext";
 type CancelDialogData = Record<string, any>;
 
 function CancelDialog() {
-  const { provider, account } = useWeb3();
   const { isAuthenticated, jwt, permissions } = useAuth();
   const [open, setOpen] = React.useState<boolean>(false);
   const [data, setData] = React.useState<CancelDialogData | undefined>();
@@ -119,7 +117,7 @@ function CancelDialog() {
       </IconButton>
       <DialogContent>
         <DialogContentText sx={{ paddingBottom: "0.5rem" }}>
-          Are you sure you want to cancel event #{data?.eventId}?
+          Are you sure you want to close event #{data?.eventId}?
         </DialogContentText>
       </DialogContent>
 

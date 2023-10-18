@@ -2,6 +2,7 @@ import React from "react";
 import { useParams } from "react-router-dom";
 import { dropsToXrp } from "xrpl";
 import axios from "axios";
+import { useAtom } from "jotai";
 import { useSnackbar } from "notistack";
 
 import {
@@ -11,12 +12,17 @@ import {
   CardHeader,
   CardMedia,
   Container,
+  IconButton,
+  Tooltip,
   Typography,
 } from "@mui/material";
+import ShareIcon from "@mui/icons-material/Share";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 
 import API from "apis";
-import type { Claim, Event } from "types";
+import { EventStatus, type Claim, type Event, DialogIdentifier } from "types";
 
+import { activeDialogAtom } from "states/atoms";
 import { useAuth } from "components/AuthContext";
 import AttendanceTable, { AttendanceTableRow } from "components/AttendeeTable";
 import ContentWrapper from "components/ContentWrapper";
@@ -30,6 +36,7 @@ const options: Intl.DateTimeFormatOptions = {
 
 function EventInfoPage() {
   const { jwt } = useAuth();
+  const [activeDialog, setActiveDialog] = useAtom(activeDialogAtom);
   const [data, setData] = React.useState<Event | null | undefined>();
   const { enqueueSnackbar } = useSnackbar();
 
@@ -64,16 +71,19 @@ function EventInfoPage() {
       }
     };
 
-    if (id) {
-      load();
-    } else {
-      setData(undefined);
+    // only update data, if no dialog is open
+    if (!activeDialog.type) {
+      if (id) {
+        load();
+      } else {
+        setData(undefined);
+      }
     }
 
     return () => {
       mounted = false;
     };
-  }, [id, jwt]);
+  }, [activeDialog, id, jwt]);
 
   const rows = React.useMemo<AttendanceTableRow[]>(() => {
     if (data && data.attendees) {
@@ -106,16 +116,68 @@ function EventInfoPage() {
     }
   }, [data]);
 
+  const handleShare = React.useCallback(
+    (id: number) => {
+      setActiveDialog({
+        type: DialogIdentifier.DIALOG_LINK,
+        data: { eventId: id },
+      });
+    },
+    [setActiveDialog]
+  );
+
+  const handleCancel = React.useCallback(
+    (id: number) => {
+      setActiveDialog({
+        type: DialogIdentifier.DIALOG_CANCEL,
+        data: { eventId: id },
+      });
+    },
+    [setActiveDialog]
+  );
+
   return (
     <Container maxWidth="md">
-      <ContentWrapper
-        isLoading={data === undefined}
-        isAuthorized={true}
-        secondary={<BackButton />}
-      >
+      <ContentWrapper isLoading={data === undefined} isAuthorized={true}>
         {data ? (
-          <Card>
-            <CardHeader title={data.title} subheader={`Event #${data.id}`} />
+          <Card variant="outlined">
+            <CardHeader
+              title={data.title}
+              subheader={`Event #${data.id} (${EventStatus[
+                data.status
+              ].toLowerCase()})`}
+              action={
+                <React.Fragment>
+                  {data.attendees && (
+                    <React.Fragment>
+                      <Tooltip title="Generate an invite link">
+                        <IconButton
+                          onClick={() => handleShare(data.id)}
+                          disabled={data.status !== EventStatus.ACTIVE}
+                        >
+                          <ShareIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Close down the event">
+                        <IconButton
+                          onClick={() => handleCancel(data.id)}
+                          disabled={
+                            ![
+                              EventStatus.PENDING,
+                              EventStatus.PAID,
+                              EventStatus.ACTIVE,
+                            ].includes(data.status)
+                          }
+                        >
+                          <DeleteForeverIcon />
+                        </IconButton>
+                      </Tooltip>
+                    </React.Fragment>
+                  )}
+                  <BackButton />
+                </React.Fragment>
+              }
+            />
             <CardMedia
               component="img"
               height="350"

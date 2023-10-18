@@ -124,7 +124,7 @@ function EventCard({ event }: EventCardProps) {
   };
 
   return (
-    <Card>
+    <Card variant="outlined">
       <CardActionArea disableRipple component={Link} to={`/event/${event.id}`}>
         <CardMedia
           sx={{
@@ -182,7 +182,7 @@ function EventCard({ event }: EventCardProps) {
           </Button>
         )}
         <Button
-          title="Generate an invitation link"
+          title="Generate an invite link"
           onClick={() => handleShare(event.id)}
           size="small"
           color="primary"
