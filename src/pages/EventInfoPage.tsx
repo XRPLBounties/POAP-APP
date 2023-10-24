@@ -148,7 +148,7 @@ function EventInfoPage() {
               ].toLowerCase()})`}
               action={
                 <React.Fragment>
-                  {data.attendees && (
+                  {data.owner && (
                     <React.Fragment>
                       <Tooltip title="Generate an invite link">
                         <IconButton
@@ -228,7 +228,7 @@ function EventInfoPage() {
                 )}
               </Box>
 
-              {data.attendees && (
+              {data.owner && data.attendees && (
                 <Box sx={{ marginTop: "0.75rem" }}>
                   <Typography
                     sx={{ marginBottom: "0.75rem", fontWeight: "bold" }}
