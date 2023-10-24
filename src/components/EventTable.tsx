@@ -18,12 +18,12 @@ import {
   GridValueGetterParams,
 } from "@mui/x-data-grid";
 
-import { DialogIdentifier, EventStatus } from "types";
+import { DialogIdentifier, Event, EventStatus } from "types";
 import DataTable from "components/DataTable";
 import { activeDialogAtom } from "states/atoms";
 
 export type EventTableRow = {
-  id: number;
+  id: Event["id"];
   status: EventStatus;
   title: string;
   dateStart: Date;
@@ -48,7 +48,7 @@ export function EventTable({ rows }: EventTableProps) {
   const navigate = useNavigate();
 
   const handleAdd = React.useCallback(
-    (id: number) => {
+    (id: Event["id"]) => {
       setActiveDialog({
         type: DialogIdentifier.DIALOG_ADD,
         data: { eventId: id },
@@ -58,7 +58,7 @@ export function EventTable({ rows }: EventTableProps) {
   );
 
   const handleLink = React.useCallback(
-    (id: number) => {
+    (id: Event["id"]) => {
       setActiveDialog({
         type: DialogIdentifier.DIALOG_LINK,
         data: { eventId: id },
@@ -68,7 +68,7 @@ export function EventTable({ rows }: EventTableProps) {
   );
 
   const handleJoin = React.useCallback(
-    (id: number, title: string) => {
+    (id: Event["id"], title: string) => {
       setActiveDialog({
         type: DialogIdentifier.DIALOG_JOIN,
         data: { eventId: id, title: title },
@@ -78,7 +78,7 @@ export function EventTable({ rows }: EventTableProps) {
   );
 
   const handleClaim = React.useCallback(
-    (id: number) => {
+    (id: Event["id"]) => {
       setActiveDialog({
         type: DialogIdentifier.DIALOG_CLAIM,
         data: { eventId: id },
@@ -88,7 +88,7 @@ export function EventTable({ rows }: EventTableProps) {
   );
 
   const handleCancel = React.useCallback(
-    (id: number) => {
+    (id: Event["id"]) => {
       setActiveDialog({
         type: DialogIdentifier.DIALOG_CANCEL,
         data: { eventId: id },

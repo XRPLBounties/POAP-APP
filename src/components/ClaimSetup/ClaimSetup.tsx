@@ -1,8 +1,8 @@
 import React from "react";
-import { useParams } from "react-router-dom";
+import { useParams, NavLink } from "react-router-dom";
+import axios from "axios";
 import { useAtom } from "jotai";
 import { create } from "zustand";
-import { isMobile } from "react-device-detect";
 
 import {
   Alert,
@@ -15,6 +15,7 @@ import {
   DialogContentText,
   DialogTitle,
   IconButton,
+  Link,
   Step,
   StepLabel,
   Stepper,
@@ -24,13 +25,14 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import ChangeCircleIcon from "@mui/icons-material/ChangeCircle";
 
+import API from "apis";
 import { useAuth } from "components/AuthContext";
 import { useWeb3 } from "connectors/context";
 import { selectedWalletAtom } from "states/atoms";
 import { xumm } from "connectors/xumm";
 import { getConnector } from "connectors";
 import type { Connector } from "connectors/connector";
-import { ConnectorType } from "types";
+import { ConnectorType, Event } from "types";
 
 import ClaimStep from "./ClaimStep";
 import SummaryStep from "./SummaryStep";
@@ -128,9 +130,10 @@ const stepInfo: StepInfo[] = [
 
 function ClaimSetup() {
   const state = useStore();
-  const { connector, isActive } = useWeb3();
-  const { isAuto, toggleAuto } = useAuth();
+  const { connector } = useWeb3();
+  const { isAuto, toggleAuto, jwt } = useAuth();
   const [selectedWallet, setSelectedWallet] = useAtom(selectedWalletAtom);
+  const [data, setData] = React.useState<Event | null>();
   const [openDialog, setOpenDialog] = React.useState<boolean>(false);
 
   const { id } = useParams();
@@ -190,6 +193,42 @@ function ClaimSetup() {
       mounted = false;
     };
   }, []);
+
+  // load event data
+  React.useEffect(() => {
+    let mounted = true;
+
+    const load = async () => {
+      try {
+        const event = await API.event.getInfo(id!, jwt);
+        if (mounted) {
+          setData(event || null);
+        }
+      } catch (err) {
+        console.debug(err);
+        const msg = "Failed to load event data";
+        if (mounted) {
+          setData(undefined);
+        }
+        if (axios.isAxiosError(err)) {
+          state.setError(Steps.CONNECT, `${msg}: ${err.response?.data.error}`);
+        } else {
+          state.setError(Steps.CONNECT, `${msg}: ${(err as Error).message}`);
+        }
+      }
+    };
+
+    // only update data, if no dialog is open
+    if (id) {
+      load();
+    } else {
+      setData(undefined);
+    }
+
+    return () => {
+      mounted = false;
+    };
+  }, [id, jwt]);
 
   const handleCloseDialog = React.useCallback(
     (event: {}, reason?: string) => {
@@ -286,20 +325,39 @@ function ClaimSetup() {
         >
           Claim Your Event NFT
         </Typography>
-        <Typography
-          sx={{
-            marginBottom: "1rem",
-          }}
-          align="center"
-          variant="body2"
-          color="grey.400"
-        >
+        <Typography align="center" variant="body2" color="grey.500">
           Event ID: {id}
         </Typography>
+        <Box
+          sx={{
+            marginBottom: "1.5rem",
+          }}
+        >
+          {data?.attendees && (
+            <React.Fragment>
+              <Typography align="center" variant="body2" color="grey.500">
+                Available Slots: {data.tokenCount - data.attendees.length}
+              </Typography>
+              <Link component={NavLink} to={`/eventm/${id}`}>
+                <Typography
+                  align="center"
+                  variant="body1"
+                  color="text.secondary"
+                >
+                  See details
+                </Typography>
+              </Link>
+            </React.Fragment>
+          )}
+        </Box>
 
-        <ConnectStep {...createStepFields(state, Steps.CONNECT)} />
-        <ClaimStep {...createStepFields(state, Steps.CLAIM)} />
-        <SummaryStep {...createStepFields(state, Steps.SUMMARY)} />
+        {data && (
+          <React.Fragment>
+            <ConnectStep {...createStepFields(state, Steps.CONNECT)} />
+            <ClaimStep {...createStepFields(state, Steps.CLAIM)} />
+            <SummaryStep {...createStepFields(state, Steps.SUMMARY)} />
+          </React.Fragment>
+        )}
       </Box>
       <Stepper
         sx={{

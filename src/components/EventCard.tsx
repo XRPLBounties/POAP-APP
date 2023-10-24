@@ -30,7 +30,7 @@ function EventCard({ event }: EventCardProps) {
   const setActiveDialog = useSetAtom(activeDialogAtom);
 
   const handleShare = React.useCallback(
-    (id: number) => {
+    (id: Event["id"]) => {
       setActiveDialog({
         type: DialogIdentifier.DIALOG_LINK,
         data: { eventId: id },
@@ -40,7 +40,7 @@ function EventCard({ event }: EventCardProps) {
   );
 
   const handleCancel = React.useCallback(
-    (id: number) => {
+    (id: Event["id"]) => {
       setActiveDialog({
         type: DialogIdentifier.DIALOG_CANCEL,
         data: { eventId: id },
@@ -50,7 +50,7 @@ function EventCard({ event }: EventCardProps) {
   );
 
   const handlePay = React.useCallback(
-    (id: number) => {
+    (id: Event["id"]) => {
       setActiveDialog({
         type: DialogIdentifier.DIALOG_CREATE,
         data: { eventId: id },
