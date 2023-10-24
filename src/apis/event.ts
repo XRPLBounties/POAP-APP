@@ -55,7 +55,7 @@ export const create = async (
         Authorization: `Bearer ${jwt}`,
       },
       responseType: "json",
-      timeout: 600000,
+      timeout: 180000,
     }
   );
 
@@ -99,7 +99,7 @@ export const join = async (jwt: string, data: joinData): Promise<Claim> => {
         Authorization: `Bearer ${jwt}`,
       },
       responseType: "json",
-      timeout: 10000,
+      timeout: 180000,
     }
   );
 
@@ -122,7 +122,7 @@ export const claim = async (
         Authorization: `Bearer ${jwt}`,
       },
       responseType: "json",
-      timeout: 10000,
+      timeout: 180000,
     }
   );
 
