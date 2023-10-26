@@ -14,7 +14,7 @@ import { useAuth } from "components/AuthContext";
 import Loader from "components/Loader";
 import Debug from "components/Debug";
 import { StepProps } from "./types";
-import ContentBox from "./ContentBox";
+import ContentBox from "../ContentBox";
 import InfoBox from "components/InfoBox";
 
 function AuthorizationStep({

@@ -14,7 +14,7 @@ import Loader from "components/Loader";
 import { StepProps } from "./types";
 import { Event } from "types";
 import InfoBox from "components/InfoBox";
-import ContentBox from "./ContentBox";
+import ContentBox from "../ContentBox";
 import Debug from "components/Debug";
 import { dropsToXrp } from "xrpl";
 
