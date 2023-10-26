@@ -47,6 +47,7 @@ type State = {
   loading: boolean;
   activeStep: Steps;
   maskedEventId?: string;
+  tokenId?: string;
   error: { [key in Steps]: string | null };
   complete: { [key in Steps]: boolean };
 };
@@ -55,6 +56,7 @@ type Actions = {
   setLoading: (value: boolean) => void;
   setActiveStep: (step: Steps) => void;
   setMaskedEventId: (value?: string) => void;
+  setTokenId: (value?: string) => void;
   setError: (step: Steps, text: string | null) => void;
   setComplete: (step: Steps, value: boolean) => void;
   reset: () => void;
@@ -64,6 +66,7 @@ const initialState: State = {
   loading: false,
   activeStep: Steps.UNKNOWN,
   maskedEventId: undefined,
+  tokenId: undefined,
   error: {
     [Steps.UNKNOWN]: null,
     [Steps.CONNECT]: null,
@@ -91,6 +94,9 @@ const useStore = create<State & Actions>()((set, get) => ({
   },
   setMaskedEventId: (value?: string) => {
     set({ maskedEventId: value });
+  },
+  setTokenId: (value?: string) => {
+    set({ tokenId: value });
   },
   setActiveStep: (step: Steps) => {
     set({ activeStep: step });
@@ -228,7 +234,9 @@ function ClaimSetup() {
   const createStepFields = (state: State & Actions, step: Steps) => ({
     active: state.activeStep === step,
     loading: state.loading,
+    tokenId: state.tokenId,
     setLoading: state.setLoading,
+    setTokenId: state.setTokenId,
     setError: (text: string | null) => state.setError(step, text),
     setComplete: (value: boolean) => state.setComplete(step, value),
   });

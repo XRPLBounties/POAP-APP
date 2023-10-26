@@ -18,6 +18,7 @@ function SummaryStep({
   active,
   loading,
   setError,
+  setTokenId,
   setComplete,
   setLoading,
 }: StepProps) {
@@ -37,6 +38,7 @@ function SummaryStep({
   // update parent state
   React.useEffect(() => {
     if (active) {
+      setTokenId(data?.tokenId);
       setComplete(Boolean(data?.claimed));
     }
   }, [active, data]);
