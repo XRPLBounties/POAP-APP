@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { decodeToken, isExpired } from "react-jwt";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
@@ -82,6 +83,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isAuthenticated, setIsAuthenticated] = React.useState<boolean>(false);
   const [jwt, setJwt] = React.useState<string>();
   const [permissions, setPermissions] = React.useState<string[]>([]);
+  const navigate = useNavigate();
 
   const checkStore = React.useCallback(() => {
     if (account) {
@@ -133,9 +135,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (token) {
         console.debug("Using cached jwt");
         const payload = decodeToken(token);
+        const p = (payload as JwtPayload)?.permissions ?? [];
         setJwt(token);
-        setPermissions((payload as JwtPayload)?.permissions ?? []);
+        setPermissions(p);
         setIsAuthenticated(true);
+        if (!isClaimFlow) {
+          if (p.includes("admin")) {
+            navigate("/admin");
+          } else if (p.includes("organizer")) {
+            navigate("/organizer");
+          }
+        }
         return;
       }
 
@@ -143,20 +153,29 @@ export function AuthProvider({ children }: AuthProviderProps) {
       token = await acquireToken();
       if (token) {
         const payload = decodeToken(token);
+        const p = (payload as JwtPayload)?.permissions ?? [];
         setJwt(token);
-        setPermissions((payload as JwtPayload)?.permissions ?? []);
+        setPermissions(p);
         addToken(account, token);
         setIsAuthenticated(true);
+        if (!isClaimFlow) {
+          if (p.includes("admin")) {
+            navigate("/admin");
+          } else if (p.includes("organizer")) {
+            navigate("/organizer");
+          }
+        }
         return;
       }
     }
-  }, [account, checkStore, acquireToken, addToken]);
+  }, [account, isClaimFlow, checkStore, acquireToken, addToken]);
 
   const logout = React.useCallback(() => {
     if (account) {
       removeToken(account);
     }
     reset();
+    navigate("/");
   }, [account, removeToken, reset]);
 
   // check backend service availability

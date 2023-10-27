@@ -16,10 +16,10 @@ function App() {
   const theme = createTheme();
 
   return (
-    <JotaiProvider>
-      <Web3Provider>
-        <AuthProvider>
-          <BrowserRouter>
+    <BrowserRouter>
+      <JotaiProvider>
+        <Web3Provider>
+          <AuthProvider>
             <ThemeProvider theme={theme}>
               <SnackbarProvider
                 autoHideDuration={10000}
@@ -33,10 +33,10 @@ function App() {
                 </LocalizationProvider>
               </SnackbarProvider>
             </ThemeProvider>
-          </BrowserRouter>
-        </AuthProvider>
-      </Web3Provider>
-    </JotaiProvider>
+          </AuthProvider>
+        </Web3Provider>
+      </JotaiProvider>
+    </BrowserRouter>
   );
 }
 

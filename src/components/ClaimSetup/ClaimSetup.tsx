@@ -131,7 +131,7 @@ const stepInfo: StepInfo[] = [
 function ClaimSetup() {
   const state = useStore();
   const { connector } = useWeb3();
-  const { isAuto, toggleAuto, jwt } = useAuth();
+  const { isAuto, toggleAuto, jwt, setClaimFlow } = useAuth();
   const [selectedWallet, setSelectedWallet] = useAtom(selectedWalletAtom);
   const [data, setData] = React.useState<Event | null>();
   const [openDialog, setOpenDialog] = React.useState<boolean>(false);
@@ -140,6 +140,7 @@ function ClaimSetup() {
 
   // force enable auto login
   React.useEffect(() => {
+    setClaimFlow(true);
     if (!isAuto) {
       toggleAuto();
     }

@@ -116,7 +116,6 @@ function Web3Status() {
         try {
           await xumm.activate();
           setSelectedWallet(ConnectorType.XUMM);
-          navigate("/organizer");
         } catch (error) {
           enqueueSnackbar(
             `Failed to connect wallet: ${(error as Error).message}`,
@@ -128,7 +127,6 @@ function Web3Status() {
         try {
           await gem.activate();
           setSelectedWallet(ConnectorType.GEM);
-          navigate("/organizer");
         } catch (error) {
           enqueueSnackbar(
             `Failed to connect wallet: ${(error as Error).message}`,
