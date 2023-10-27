@@ -83,6 +83,7 @@ function AdminEventsPage() {
       return data.map((event) => ({
         id: event.id,
         status: event.status,
+        ownerWalletAddress: event.ownerWalletAddress,
         title: event.title,
         dateStart: new Date(event.dateStart),
         dateEnd: new Date(event.dateEnd),

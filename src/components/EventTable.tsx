@@ -25,6 +25,7 @@ import { activeDialogAtom } from "states/atoms";
 export type EventTableRow = {
   id: Event["id"];
   status: EventStatus;
+  ownerWalletAddress: string;
   title: string;
   dateStart: Date;
   dateEnd: Date;
@@ -113,25 +114,31 @@ export function EventTable({ rows }: EventTableProps) {
         minWidth: 45,
       },
       {
+        field: "ownerWalletAddress",
+        headerName: "Wallet Address",
+        type: "string",
+        width: 300,
+      },
+      {
         field: "title",
         headerName: "Title",
         type: "string",
         flex: 1,
-        renderCell: (params) => {
-          if (params.row.status === EventStatus.ACTIVE) {
-            return (
-              <Link
-                sx={{ textDecoration: "none" }}
-                component={NavLink}
-                to={`/event/${params.row.id}`}
-              >
-                {params.value}
-              </Link>
-            );
-          } else {
-            return <div>{params.value}</div>;
-          }
-        },
+        // renderCell: (params) => {
+        //   if (params.row.status === EventStatus.ACTIVE) {
+        //     return (
+        //       <Link
+        //         sx={{ textDecoration: "none" }}
+        //         component={NavLink}
+        //         to={`/event/${params.row.id}`}
+        //       >
+        //         {params.value}
+        //       </Link>
+        //     );
+        //   } else {
+        //     return <div>{params.value}</div>;
+        //   }
+        // },
       },
       {
         field: "dateStart",
@@ -162,7 +169,7 @@ export function EventTable({ rows }: EventTableProps) {
         field: "depositAmount",
         headerName: "Deposit",
         type: "number",
-        width: 110,
+        width: 100,
         valueGetter: ({ row }: GetterParamsType) => {
           if (row.depositAmount) {
             return `${row.depositAmount} XRP`;
