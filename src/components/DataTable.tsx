@@ -33,13 +33,13 @@ function DataTable(props: DataTableProps) {
         rows={rows}
         initialState={{
           pagination: {
-            paginationModel: { page: 0, pageSize: 10 },
+            paginationModel: { page: 0, pageSize: 20 },
           },
         }}
         autoHeight
         density="compact"
-        pageSizeOptions={[10, 20, 50, 100]}
-        disableColumnMenu
+        pageSizeOptions={[20, 50, 100]}
+        disableColumnMenu={false}
         disableColumnSelector
         disableDensitySelector
         disableRowSelectionOnClick
