@@ -64,7 +64,7 @@ const schemaDates = object({
       return value;
     }),
   dateEnd: date()
-    .min(new Date("1900-01-01"), "Date is too far back")
+    .min(new Date(Date.now()), "Date must be in the future")
     .nullable()
     .transform((value, ctx) => {
       if (value == null)
