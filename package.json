@@ -1,6 +1,6 @@
 {
   "name": "poap-app",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "description": "Dashboard for the Proof of Attendance Protocol",
   "author": "Riku Block",
   "private": true,
