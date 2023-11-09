@@ -5,8 +5,11 @@ import TaskAltIcon from "@mui/icons-material/TaskAlt";
 
 import { StepProps } from "./types";
 import ContentBox from "components/ContentBox";
+import { useWeb3 } from "connectors/context";
 
 function SummaryStep({ active, tokenId, setComplete }: StepProps) {
+  const { account } = useWeb3();
+
   // update parent state
   React.useEffect(() => {
     if (active) {
@@ -23,16 +26,24 @@ function SummaryStep({ active, tokenId, setComplete }: StepProps) {
       }}
     >
       <Stack
-        sx={{ marginBottom: "1.5rem" }}
+        sx={{ marginBottom: "2rem" }}
         direction="row"
         alignItems="center"
         gap={1}
       >
-        <TaskAltIcon color="success" />
-        <Typography align="center" variant="body1" color="text.secondary">
+        <TaskAltIcon fontSize="large" color="success" />
+        <Typography align="center" variant="h6" color="text.secondary">
           Claim Successful!
         </Typography>
       </Stack>
+      <ContentBox
+        sx={{
+          marginBottom: "0.75rem",
+          wordBreak: "break-all",
+        }}
+      >
+        {account}
+      </ContentBox>
       <ContentBox
         sx={{
           wordBreak: "break-all",
