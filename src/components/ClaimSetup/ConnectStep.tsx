@@ -12,9 +12,6 @@ import { xumm } from "connectors/xumm";
 import { ConnectorType } from "types";
 import { StepProps } from "./types";
 
-// TODO need a way to change/disconnect a wallet
-// TODO need to check isAuthenticated somewhere and display error if needed
-
 function ConnectStep({
   active,
   loading,

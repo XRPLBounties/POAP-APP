@@ -219,7 +219,6 @@ function ClaimSetup() {
       }
     };
 
-    // only update data, if no dialog is open
     if (id) {
       load();
     } else {
