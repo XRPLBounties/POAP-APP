@@ -7,6 +7,7 @@ import BasicLayout from "layouts/BasicLayout";
 const ClaimPage = Loadable(React.lazy(() => import("pages/ClaimPage")));
 const ErrorPage = Loadable(React.lazy(() => import("pages/ErrorPage")));
 const EventInfoPage = Loadable(React.lazy(() => import("pages/EventInfoPage")));
+const OwnershipPage = Loadable(React.lazy(() => import("pages/OwnershipPage")));
 
 const MainRoutes: RouteObject = {
   path: "/",
@@ -16,6 +17,10 @@ const MainRoutes: RouteObject = {
     {
       path: "/claim/:id",
       element: <ClaimPage />,
+    },
+    {
+      path: "/verify/:id",
+      element: <OwnershipPage />,
     },
     {
       path: "/eventm/:id",
