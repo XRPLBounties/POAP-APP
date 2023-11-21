@@ -139,13 +139,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setJwt(token);
         setPermissions(p);
         setIsAuthenticated(true);
-        if (!isClaimFlow) {
-          if (p.includes("admin")) {
-            navigate("/admin");
-          } else if (p.includes("organizer")) {
-            navigate("/organizer");
-          }
-        }
         return;
       }
 
