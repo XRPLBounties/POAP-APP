@@ -9,9 +9,9 @@ import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import API from "apis";
 import { StepProps } from "./types";
 import { useAuth } from "components/AuthContext";
-import ContentBox from "components/ContentBox";
 import { useWeb3 } from "connectors/context";
 import Loader from "components/Loader";
+import LabeledContentBox from "components/LabeledContentBox";
 
 function SummaryStep({
   active,
@@ -105,14 +105,15 @@ function SummaryStep({
               </React.Fragment>
             )}
           </Stack>
-          <ContentBox
+          <LabeledContentBox
+            title="Wallet Address:"
             sx={{
               marginBottom: "0.75rem",
               wordBreak: "break-all",
             }}
           >
             {account}
-          </ContentBox>
+          </LabeledContentBox>
         </React.Fragment>
       ) : (
         <Loader />

@@ -2,7 +2,7 @@ import React from "react";
 
 import { Box, SxProps, Theme } from "@mui/material";
 
-type ContentBoxProps = {
+export type ContentBoxProps = {
   sx?: SxProps<Theme>;
   children?: React.ReactNode;
 };

@@ -4,8 +4,8 @@ import { Box, Stack, Typography } from "@mui/material";
 import TaskAltIcon from "@mui/icons-material/TaskAlt";
 
 import { StepProps } from "./types";
-import ContentBox from "components/ContentBox";
 import { useWeb3 } from "connectors/context";
+import LabeledContentBox from "components/LabeledContentBox";
 
 function SummaryStep({ active, tokenId, setComplete }: StepProps) {
   const { account } = useWeb3();
@@ -36,21 +36,23 @@ function SummaryStep({ active, tokenId, setComplete }: StepProps) {
           Claim Successful!
         </Typography>
       </Stack>
-      <ContentBox
+      <LabeledContentBox
+        title="Wallet Address:"
         sx={{
           marginBottom: "0.75rem",
           wordBreak: "break-all",
         }}
       >
         {account}
-      </ContentBox>
-      <ContentBox
+      </LabeledContentBox>
+      <LabeledContentBox
+        title="Token ID:"
         sx={{
           wordBreak: "break-all",
         }}
       >
         {tokenId}
-      </ContentBox>
+      </LabeledContentBox>
     </Box>
   ) : null;
 }
