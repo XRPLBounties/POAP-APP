@@ -42,7 +42,7 @@ function MainLayout() {
           <Outlet />
         </Container>
         <Footer />
-        <AddDialog />
+        {activeDialog.type === DialogIdentifier.DIALOG_ADD && <AddDialog />}
         <CancelDialog />
         <ClaimDialog />
         <CreateDialog />
