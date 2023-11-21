@@ -16,6 +16,7 @@ function EventInfoPage() {
   const { jwt } = useAuth();
   const [activeDialog, setActiveDialog] = useAtom(activeDialogAtom);
   const [data, setData] = React.useState<Event | null>();
+  const [maskedId, setMaskedId] = React.useState<string>();
 
   const { id } = useParams();
   const isMasked = isNaN(Number(id));
@@ -26,13 +27,20 @@ function EventInfoPage() {
     const load = async () => {
       try {
         const event = await API.event.getInfo(id!, jwt);
+        let masked = id;
+        if (jwt && !isMasked && event) {
+          masked = await API.event.getLink(jwt, id!);
+          console.log("masked", masked);
+        }
         if (mounted) {
           setData(event || null);
+          setMaskedId(masked);
         }
       } catch (err) {
         console.debug(err);
         if (mounted) {
           setData(null);
+          setMaskedId(undefined);
         }
       }
     };
@@ -43,6 +51,7 @@ function EventInfoPage() {
         load();
       } else {
         setData(undefined);
+        setMaskedId(undefined);
       }
     }
 
@@ -54,8 +63,8 @@ function EventInfoPage() {
   return (
     <Container maxWidth="md" disableGutters>
       <ContentWrapper isLoading={data === undefined} isAuthorized={true}>
-        {data ? (
-          <EventInfoCard isBasic={isMasked} event={data} />
+        {data && maskedId ? (
+          <EventInfoCard isBasic={isMasked} event={data} maskedId={maskedId} />
         ) : (
           // data === null
           <Box

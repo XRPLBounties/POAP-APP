@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { dropsToXrp } from "xrpl";
 import { useAtom } from "jotai";
 
@@ -14,6 +15,7 @@ import {
 } from "@mui/material";
 import ShareIcon from "@mui/icons-material/Share";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import VerifiedIcon from "@mui/icons-material/Verified";
 
 import { EventStatus, type Claim, type Event, DialogIdentifier } from "types";
 
@@ -30,10 +32,12 @@ const options: Intl.DateTimeFormatOptions = {
 type EventInfoCardProps = {
   isBasic: boolean;
   event: Event;
+  maskedId: string;
 };
 
-function EventInfoCard({ isBasic, event }: EventInfoCardProps) {
+function EventInfoCard({ isBasic, event, maskedId }: EventInfoCardProps) {
   const [activeDialog, setActiveDialog] = useAtom(activeDialogAtom);
+  const navigate = useNavigate();
 
   const rows = React.useMemo<AttendanceTableRow[]>(() => {
     if (event.owner && event.attendees) {
@@ -95,29 +99,43 @@ function EventInfoCard({ isBasic, event }: EventInfoCardProps) {
         ].toLowerCase()})`}
         action={
           <React.Fragment>
+            <Tooltip title="Verify NFT ownership">
+              <span>
+                <IconButton
+                  onClick={() => navigate(`/verify/${maskedId}`)}
+                  disabled={event.status === EventStatus.PENDING}
+                >
+                  <VerifiedIcon />
+                </IconButton>
+              </span>
+            </Tooltip>
             {event.owner && !isBasic && (
               <React.Fragment>
                 <Tooltip title="Generate an invite link">
-                  <IconButton
-                    onClick={() => handleShare(event.id)}
-                    disabled={event.status !== EventStatus.ACTIVE}
-                  >
-                    <ShareIcon />
-                  </IconButton>
+                  <span>
+                    <IconButton
+                      onClick={() => handleShare(event.id)}
+                      disabled={event.status !== EventStatus.ACTIVE}
+                    >
+                      <ShareIcon />
+                    </IconButton>
+                  </span>
                 </Tooltip>
                 <Tooltip title="Close down the event">
-                  <IconButton
-                    onClick={() => handleCancel(event.id)}
-                    disabled={
-                      ![
-                        EventStatus.PENDING,
-                        EventStatus.PAID,
-                        EventStatus.ACTIVE,
-                      ].includes(event.status)
-                    }
-                  >
-                    <DeleteForeverIcon />
-                  </IconButton>
+                  <span>
+                    <IconButton
+                      onClick={() => handleCancel(event.id)}
+                      disabled={
+                        ![
+                          EventStatus.PENDING,
+                          EventStatus.PAID,
+                          EventStatus.ACTIVE,
+                        ].includes(event.status)
+                      }
+                    >
+                      <DeleteForeverIcon />
+                    </IconButton>
+                  </span>
                 </Tooltip>
               </React.Fragment>
             )}
