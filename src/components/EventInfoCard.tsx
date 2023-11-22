@@ -5,7 +5,9 @@ import { useAtom } from "jotai";
 
 import {
   Box,
+  Button,
   Card,
+  CardActions,
   CardContent,
   CardHeader,
   CardMedia,
@@ -99,7 +101,7 @@ function EventInfoCard({ isBasic, event, maskedId }: EventInfoCardProps) {
         ].toLowerCase()})`}
         action={
           <React.Fragment>
-            <Tooltip title="Verify NFT ownership">
+            <Tooltip title="Verify your NFT ownership">
               <span>
                 <IconButton
                   onClick={() => navigate(`/verify/${maskedId}`)}
@@ -199,6 +201,25 @@ function EventInfoCard({ isBasic, event, maskedId }: EventInfoCardProps) {
           </Box>
         )}
       </CardContent>
+      <CardActions
+        sx={{
+          display: "flex",
+          justifyContent: "flex-end",
+          alignItems: "flex-start",
+        }}
+      >
+        <Tooltip title="Verify your NFT ownership">
+          <span>
+            <Button
+              onClick={() => navigate(`/verify/${maskedId}`)}
+              disabled={event.status === EventStatus.PENDING}
+              size="small"
+            >
+              Verify ownership
+            </Button>
+          </span>
+        </Tooltip>
+      </CardActions>
     </Card>
   );
 }
