@@ -30,7 +30,6 @@ function EventInfoPage() {
         let masked = id;
         if (jwt && !isMasked && event) {
           masked = await API.event.getLink(jwt, id!);
-          console.log("masked", masked);
         }
         if (mounted) {
           setData(event || null);
